@@ -14,6 +14,9 @@ export const USDT_CONTRACT_ADDRESS = IS_MAINNET
 
 export const USDT_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
 ];
 
 /** Gas Price & Limits */
