@@ -90,7 +90,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
           )}
         >
           {/* Account Title */}
-          <Dialog.Title className="text-2xl text-center">
+          <Dialog.Title className="text-2xl text-center text-yellow-500">
             {account.title}
           </Dialog.Title>
 
