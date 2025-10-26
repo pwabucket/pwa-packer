@@ -1,0 +1,30 @@
+import { AppHeader } from "../components/AppHeader";
+import { MainContainer } from "../components/MainContainer";
+import { useNavigateBack } from "../hooks/useNavigateBack";
+import { HiOutlineArrowLeft } from "react-icons/hi2";
+
+interface InnerPageLayoutProps {
+  title: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+const InnerPageLayout = ({ title, children }: InnerPageLayoutProps) => {
+  const navigateBack = useNavigateBack();
+  return (
+    <div className="flex flex-col min-h-dvh">
+      <AppHeader
+        leftContent={
+          <AppHeader.Button onClick={() => navigateBack()}>
+            <HiOutlineArrowLeft className="size-6 text-neutral-400" />
+          </AppHeader.Button>
+        }
+        middleContent={<h1 className="text-center font-bold">{title}</h1>}
+      />
+
+      {/* Main content area */}
+      <MainContainer>{children}</MainContainer>
+    </div>
+  );
+};
+
+export { InnerPageLayout };
