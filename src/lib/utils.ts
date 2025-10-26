@@ -22,3 +22,7 @@ export function getWalletAddressFromPrivateKey(privateKey: string) {
     return "";
   }
 }
+
+export function getLocalStorageKeyForAccountPrivateKey(accountId: string) {
+  return `packer-pk:${accountId}`;
+}
