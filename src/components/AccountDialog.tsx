@@ -2,13 +2,8 @@ import type { Account } from "../types";
 
 import { Dialog } from "radix-ui";
 import { Button } from "./Button";
-import {
-  cn,
-  copyToClipboard,
-  getLocalStorageKeyForAccountPrivateKey,
-} from "../lib/utils";
+import { cn, copyToClipboard, getPrivateKey } from "../lib/utils";
 import { useState } from "react";
-import Encrypter, { type EncryptionResult } from "../lib/Encrypter";
 import { HiOutlineClipboard, HiOutlineEye } from "react-icons/hi2";
 import usePassword from "../hooks/usePassword";
 
@@ -64,26 +59,11 @@ const AccountDialog = ({ account }: { account: Account }) => {
       return;
     }
 
-    /* Get encrypted private key from localStorage */
-    const encryptedPrivateKey = localStorage.getItem(
-      getLocalStorageKeyForAccountPrivateKey(account.id)
-    );
-
-    /* If not found, alert and return */
-    if (!encryptedPrivateKey) {
-      alert("Private key not found.");
-      return;
-    }
-
-    /* Decrypt private key */
-    const dataToDecrypt = JSON.parse(encryptedPrivateKey) as EncryptionResult;
-    const decryptedPrivateKey = await Encrypter.decryptData({
-      ...dataToDecrypt,
-      password,
-    });
+    /* Get decrypted private key */
+    const decryptedPrivateKey = await getPrivateKey(account.id, password);
 
     /* Set decrypted private key to state */
-    setPrivateKey(decryptedPrivateKey as string);
+    setPrivateKey(decryptedPrivateKey);
   };
 
   /* Copy Private Key to Clipboard */
