@@ -85,12 +85,14 @@ const Dashboard = () => {
     <div className="flex flex-col min-h-dvh">
       <AppHeader
         middleContent={
-          <h1 className="text-center font-bold grow min-w-0 min-h-0">
-            <img
-              src={AppIcon}
-              alt="Packer"
-              className="size-6 inline-block mr-2"
-            />
+          <h1
+            className={cn(
+              "grow min-w-0 min-h-0",
+              "font-protest-guerrilla text-2xl",
+              "flex justify-center items-center gap-2"
+            )}
+          >
+            <img src={AppIcon} alt="Packer" className="size-6" />
             Packer
           </h1>
         }
