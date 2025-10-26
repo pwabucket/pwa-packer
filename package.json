@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
+    "@fontsource/protest-guerrilla": "^5.2.7",
     "@hookform/resolvers": "^5.2.2",
     "@noble/ciphers": "^2.0.1",
     "@noble/hashes": "^2.0.1",
