@@ -27,17 +27,18 @@ const AccountFormSchema = yup
 /** Account Form Props */
 interface AccountFormProps {
   handleFormSubmit: (data: AccountFormData) => void;
+  initialValues?: AccountFormData;
 }
 
 /** Account Form Component */
-const AccountForm = ({ handleFormSubmit }: AccountFormProps) => {
+const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
   /** Form */
   const form = useForm<AccountFormData>({
     resolver: yupResolver(AccountFormSchema),
     defaultValues: {
-      title: "",
-      depositAddress: "",
-      privateKey: "",
+      title: initialValues?.title || "",
+      depositAddress: initialValues?.depositAddress || "",
+      privateKey: initialValues?.privateKey || "",
     },
   });
 
