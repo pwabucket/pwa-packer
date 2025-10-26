@@ -14,6 +14,11 @@ import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
 
+/** Parse Amount to Smallest Unit (18 Decimals) */
+const parseToSmallUnit = (amount: number) => {
+  return parseFloat(amount.toFixed(18));
+};
+
 /** Calculate Required BNB for Gas and Transaction Fees */
 const calculateRequiredBNB = (amount: string, accountCount: number) => {
   const amountToSplit = parseFloat(amount);
@@ -26,9 +31,7 @@ const calculateRequiredBNB = (amount: string, accountCount: number) => {
     const gasAmountInEther = ethers.formatEther(requiredGasAmount);
 
     /* Total Amount */
-    return parseFloat(
-      (amountToSplit + parseFloat(gasAmountInEther)).toFixed(18)
-    );
+    return parseToSmallUnit(amountToSplit + parseFloat(gasAmountInEther));
   }
   return 0;
 };
@@ -147,7 +150,9 @@ const Gas = () => {
                   {/* Each Account's Share */}
                   <p className="text-sm px-4 text-lime-500 text-center font-mono wrap-break-word">
                     Each:{" "}
-                    {parseFloat((field.value / accounts.length).toFixed(18))}{" "}
+                    {accounts.length > 0
+                      ? parseToSmallUnit(field.value / accounts.length)
+                      : 0}{" "}
                     BNB
                   </p>
                 </div>
