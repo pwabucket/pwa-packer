@@ -25,6 +25,7 @@ const AccountEditPage = () => {
   const password = usePassword();
   const navigateBack = useNavigateBack();
   const updateAccount = useAppStore((state) => state.updateAccount);
+  const removeAccount = useAppStore((state) => state.removeAccount);
 
   const [privateKey, setPrivateKey] = useState("");
 
@@ -84,16 +85,30 @@ const AccountEditPage = () => {
   };
 
   return (
-    <InnerPageLayout title="Create Account">
+    <InnerPageLayout title={"Edit Account"}>
       {privateKey ? (
-        <AccountForm
-          initialValues={{
-            title: account.title,
-            depositAddress: account.depositAddress,
-            privateKey,
-          }}
-          handleFormSubmit={handleFormSubmit}
-        />
+        <>
+          {/* Account Form */}
+          <AccountForm
+            initialValues={{
+              title: account.title,
+              depositAddress: account.depositAddress,
+              privateKey,
+            }}
+            handleFormSubmit={handleFormSubmit}
+          />
+
+          {/* Divider */}
+          <p className="my-2 text-neutral-400 text-center">OR</p>
+
+          {/* Delete Account Button */}
+          <button
+            onClick={() => removeAccount(account.id)}
+            className="text-red-200 hover:text-red-500 cursor-pointer"
+          >
+            Delete Account
+          </button>
+        </>
       ) : (
         <p className="text-center text-neutral-400">Loading...</p>
       )}
