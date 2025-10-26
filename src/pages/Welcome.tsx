@@ -19,9 +19,9 @@ const Welcome = () => {
     <div className="flex flex-col min-h-dvh items-center justify-center gap-4 p-4">
       <div className="flex flex-col gap-4 w-full max-w-sm">
         <img src={AppIcon} alt="Packer" className="size-24 mx-auto" />
-        <h1 className="text-center text-3xl font-bold">Packer</h1>
+        <h1 className="text-center text-5xl font-protest-guerrilla">Packer</h1>
 
-        <p className="text-center px-4 text-neutral-400">
+        <p className="text-center px-4 text-sm text-neutral-400">
           Your all-in-one solution for BSC Transactions <br /> With built-in
           Hash Maker.
         </p>
