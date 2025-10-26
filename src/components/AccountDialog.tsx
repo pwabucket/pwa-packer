@@ -31,7 +31,7 @@ const AccountInfo = ({
     {/* Title & Value */}
     <div className="flex flex-col gap-1 grow min-w-0 min-h-0">
       {/* Title */}
-      <h2 className="text-neutral-400 font-bold text-xs">{title}</h2>
+      <h2 className="text-neutral-400 font-bold text-xs uppercase">{title}</h2>
 
       {/* Value */}
       <p
@@ -106,7 +106,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
               title="Wallet Address"
               value={account.walletAddress}
               icon={<>💰</>}
-              valueClassName="text-lime-500"
+              valueClassName="text-lime-300"
             />
 
             {/* Deposit Address */}
@@ -114,7 +114,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
               title="Deposit Address"
               value={account.depositAddress}
               icon={<span>🏦</span>}
-              valueClassName="text-orange-400"
+              valueClassName="text-orange-300"
             />
 
             {/* Private Key */}
@@ -122,7 +122,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
               title="Private Key"
               value={privateKey || "********"}
               icon={<span>🔑</span>}
-              valueClassName="text-red-400"
+              valueClassName="text-red-300"
               rightContent={
                 <button
                   onClick={
