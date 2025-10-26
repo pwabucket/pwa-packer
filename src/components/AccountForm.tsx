@@ -95,7 +95,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                 placeholder="Private Key"
                 rows={4}
               />
-              <p className="text-sm px-4 text-blue-500 text-center font-mono">
+              <p className="text-sm px-4 text-blue-500 text-center font-mono wrap-break-word">
                 {getWalletAddressFromPrivateKey(field.value)}
               </p>
               <FormFieldError message={fieldState.error?.message} />
@@ -104,7 +104,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
         />
 
         <Button type="submit" className="mt-4">
-          Continue
+          Save
         </Button>
       </form>
     </FormProvider>
