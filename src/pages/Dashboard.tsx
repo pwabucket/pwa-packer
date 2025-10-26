@@ -1,13 +1,17 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, type LinkProps } from "react-router";
 import useAppStore from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
 import type { Account } from "../types";
-import { MdEditNote } from "react-icons/md";
+import { MdEditNote, MdOutlineLocalGasStation } from "react-icons/md";
 
 import { Dialog } from "radix-ui";
-import { HiOutlinePlus } from "react-icons/hi2";
+import {
+  HiOutlineArrowDownLeft,
+  HiOutlineArrowUpRight,
+  HiOutlinePlus,
+} from "react-icons/hi2";
 import { AccountDialog } from "../components/AccountDialog";
 import { cn } from "../lib/utils";
 
@@ -15,7 +19,12 @@ import { cn } from "../lib/utils";
 const AccountItem = ({ account }: { account: Account }) => {
   return (
     <Dialog.Root>
-      <div className="flex items-center px-2 gap-2 bg-neutral-900 rounded-full ">
+      <div
+        className={cn(
+          "flex items-center px-2 gap-2",
+          "bg-neutral-900 hover:bg-neutral-800 rounded-full"
+        )}
+      >
         {/* Account Title / Dialog Trigger */}
         <Dialog.Trigger className="grow p-4 text-left cursor-pointer">
           <h2 className="font-bold">{account.title}</h2>
@@ -39,10 +48,39 @@ const AccountItem = ({ account }: { account: Account }) => {
   );
 };
 
+/** Action Button Props Interface */
+interface ActionButtonProps extends LinkProps {
+  icon: React.ReactNode;
+  label?: string;
+}
+
+/** Action Button Component */
+const ActionButton = ({ icon, label, ...props }: ActionButtonProps) => (
+  <Link
+    {...props}
+    className="flex flex-col justify-center items-center shrink-0 gap-1"
+  >
+    <span
+      className={cn(
+        "size-12 shrink-0 rounded-full",
+        "flex items-center justify-center gap-2",
+        "bg-neutral-800 hover:bg-neutral-700"
+      )}
+    >
+      {icon}
+    </span>
+
+    <span className="text-xs shrink-0 text-center text-neutral-400">
+      {label}
+    </span>
+  </Link>
+);
+
 /** Dashboard Page Component */
 const Dashboard = () => {
   const accounts = useAppStore((state) => state.accounts);
   const navigate = useNavigate();
+
   return (
     <div className="flex flex-col min-h-dvh">
       <AppHeader
@@ -64,10 +102,36 @@ const Dashboard = () => {
       />
 
       {/* Main content area */}
-      <MainContainer>
+      <MainContainer className="gap-4">
+        <div className="flex justify-center items-center gap-6">
+          {/* Withdraw */}
+          <ActionButton
+            to="/withdraw"
+            label="Withdraw"
+            icon={<HiOutlineArrowDownLeft className="size-5" />}
+          />
+
+          {/* Send Action Button */}
+          <ActionButton
+            to="/send"
+            label="Send"
+            icon={<HiOutlineArrowUpRight className="size-5" />}
+          />
+
+          {/* Gas */}
+          <ActionButton
+            to="/gas"
+            label="Gas"
+            icon={<MdOutlineLocalGasStation className="size-5" />}
+          />
+        </div>
+
+        {/* Account List */}
         <div className="flex flex-col gap-2">
           {accounts.length === 0 ? (
-            <p>No accounts available. Please create one.</p>
+            <p className="text-center text-neutral-400 px-4">
+              No accounts available. Please create one.
+            </p>
           ) : (
             accounts.map((account) => (
               <AccountItem key={account.id} account={account} />
