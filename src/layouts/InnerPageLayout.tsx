@@ -6,9 +6,14 @@ import { HiOutlineArrowLeft } from "react-icons/hi2";
 interface InnerPageLayoutProps {
   title: React.ReactNode;
   children?: React.ReactNode;
+  className?: string;
 }
 
-const InnerPageLayout = ({ title, children }: InnerPageLayoutProps) => {
+const InnerPageLayout = ({
+  title,
+  children,
+  className,
+}: InnerPageLayoutProps) => {
   const navigateBack = useNavigateBack();
   return (
     <div className="flex flex-col min-h-dvh">
@@ -22,7 +27,7 @@ const InnerPageLayout = ({ title, children }: InnerPageLayoutProps) => {
       />
 
       {/* Main content area */}
-      <MainContainer>{children}</MainContainer>
+      <MainContainer className={className}>{children}</MainContainer>
     </div>
   );
 };
