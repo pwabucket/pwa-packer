@@ -2,6 +2,7 @@ import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import copy from "copy-to-clipboard";
 import { Wallet } from "ethers/wallet";
+import Encrypter, { type EncryptionResult } from "./Encrypter";
 
 export { v4 as uuid } from "uuid";
 
@@ -25,4 +26,28 @@ export function getWalletAddressFromPrivateKey(privateKey: string) {
 
 export function getLocalStorageKeyForAccountPrivateKey(accountId: string) {
   return `packer-pk:${accountId}`;
+}
+
+export async function getPrivateKey(accountId: string, password: string) {
+  /* Get encrypted private key from localStorage */
+  const encryptedPrivateKeyString = localStorage.getItem(
+    getLocalStorageKeyForAccountPrivateKey(accountId)
+  );
+
+  if (!encryptedPrivateKeyString) {
+    throw new Error("Encrypted private key not found in localStorage.");
+  }
+
+  /* Parse encrypted data */
+  const encryptedData = JSON.parse(
+    encryptedPrivateKeyString
+  ) as EncryptionResult;
+
+  /* Decrypt private key */
+  const decryptedPrivateKey = await Encrypter.decryptData({
+    ...encryptedData,
+    password,
+  });
+
+  return decryptedPrivateKey as string;
 }
