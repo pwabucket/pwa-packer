@@ -5,9 +5,11 @@ import type { Account } from "../types";
 import { getLocalStorageKeyForAccountPrivateKey } from "../lib/utils";
 
 export type AppStore = {
+  /** Accounts */
   accounts: Account[];
-
   addAccount: (account: Account) => void;
+  updateAccount: (account: Account) => void;
+  removeAccount: (accountId: string) => void;
 
   /** Passwords */
   password: string | null; // in-memory only
@@ -26,12 +28,29 @@ const EXCLUDED_KEYS: (keyof AppStore)[] = ["password"];
 const useAppStore = create(
   persist<AppStore>(
     (set, get) => ({
+      /** Accounts */
       accounts: [],
 
       /** Add Account */
       addAccount: (account: Account) => {
         set((state) => ({
           accounts: [...state.accounts, account],
+        }));
+      },
+
+      /** Update Account */
+      updateAccount: (account: Account) => {
+        set((state) => ({
+          accounts: state.accounts.map((acc) =>
+            acc.id === account.id ? account : acc
+          ),
+        }));
+      },
+
+      /** Remove Account */
+      removeAccount: (accountId: string) => {
+        set((state) => ({
+          accounts: state.accounts.filter((acc) => acc.id !== accountId),
         }));
       },
 
