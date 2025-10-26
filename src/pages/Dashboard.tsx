@@ -22,11 +22,11 @@ const AccountItem = ({ account }: { account: Account }) => {
       <div
         className={cn(
           "flex items-center px-2 gap-2",
-          "bg-neutral-900 hover:bg-neutral-800 rounded-full"
+          "bg-neutral-900 rounded-full"
         )}
       >
         {/* Account Title / Dialog Trigger */}
-        <Dialog.Trigger className="grow p-4 text-left cursor-pointer">
+        <Dialog.Trigger className="grow p-4 text-left cursor-pointer hover:text-yellow-500">
           <h2 className="font-bold">{account.title}</h2>
         </Dialog.Trigger>
 
