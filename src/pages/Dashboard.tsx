@@ -1,45 +1,45 @@
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAppStore from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
 import type { Account } from "../types";
+import { MdEditNote } from "react-icons/md";
 
 import { Dialog } from "radix-ui";
 import { HiOutlinePlus } from "react-icons/hi2";
+import { AccountDialog } from "../components/AccountDialog";
+import { cn } from "../lib/utils";
+
+/** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
   return (
     <Dialog.Root>
-      <Dialog.Trigger className="p-4 bg-neutral-900 rounded-full text-left cursor-pointer">
-        <h2 className="font-bold">{account.title}</h2>
-      </Dialog.Trigger>
+      <div className="flex items-center px-2 gap-2 bg-neutral-900 rounded-full ">
+        {/* Account Title / Dialog Trigger */}
+        <Dialog.Trigger className="grow p-4 text-left cursor-pointer">
+          <h2 className="font-bold">{account.title}</h2>
+        </Dialog.Trigger>
 
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 grid place-items-center">
-          <Dialog.Content className="bg-neutral-900 p-6 rounded-md max-w-sm w-full">
-            <Dialog.Title className="text-xl font-bold mb-4">
-              {account.title} Details
-            </Dialog.Title>
-            <div className="flex flex-col gap-4">
-              <div>
-                <p className="text-sm text-lime-500 truncate">
-                  Wallet Address: {account.walletAddress}
-                </p>
-                <p className="text-sm text-blue-500 truncate">
-                  Deposit Address: {account.depositAddress}
-                </p>
-              </div>
-              <Dialog.Close className="mt-4 px-4 py-2 bg-neutral-800 rounded-md hover:bg-neutral-700">
-                Close
-              </Dialog.Close>
-            </div>
-          </Dialog.Content>
-        </Dialog.Overlay>
-      </Dialog.Portal>
+        {/* Edit Account Button */}
+        <Link
+          to={`/accounts/edit/${account.id}`}
+          className={cn(
+            "size-10 flex items-center justify-center cursor-pointer",
+            "hover:bg-neutral-800 rounded-full shrink-0"
+          )}
+        >
+          <span className="sr-only">Edit {account.title}</span>
+          <MdEditNote className="size-6 text-neutral-400" />
+        </Link>
+      </div>
+
+      <AccountDialog account={account} />
     </Dialog.Root>
   );
 };
 
+/** Dashboard Page Component */
 const Dashboard = () => {
   const accounts = useAppStore((state) => state.accounts);
   const navigate = useNavigate();
