@@ -24,7 +24,7 @@ const AccountInfo = ({
   valueClassName,
   rightContent,
 }: AccountInfoProps) => (
-  <div className="flex gap-4 p-4 bg-neutral-800 rounded-xl">
+  <div className="flex gap-4 p-4 bg-neutral-800 rounded-xl font-mono">
     {/* Icon */}
     <span className="shrink-0">{icon}</span>
 
@@ -34,12 +34,7 @@ const AccountInfo = ({
       <h2 className="text-neutral-400 font-bold text-xs uppercase">{title}</h2>
 
       {/* Value */}
-      <p
-        className={cn(
-          "font-bold font-mono wrap-break-word text-sm",
-          valueClassName
-        )}
-      >
+      <p className={cn("font-bold wrap-break-word text-sm", valueClassName)}>
         {value}
       </p>
     </div>

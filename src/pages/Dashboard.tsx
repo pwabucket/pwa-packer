@@ -3,50 +3,12 @@ import useAppStore from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
-import type { Account } from "../types";
-import { MdEditNote, MdOutlineLocalGasStation } from "react-icons/md";
+import { MdOutlineLocalGasStation } from "react-icons/md";
 
-import { Dialog } from "radix-ui";
-import {
-  HiOutlineArrowDownLeft,
-  HiOutlineArrowUpRight,
-  HiOutlinePlus,
-} from "react-icons/hi2";
-import { AccountDialog } from "../components/AccountDialog";
+import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
 import { cn } from "../lib/utils";
-
-/** Single Account Item Component */
-const AccountItem = ({ account }: { account: Account }) => {
-  return (
-    <Dialog.Root>
-      <div
-        className={cn(
-          "flex items-center px-2 gap-2",
-          "bg-neutral-900 rounded-full"
-        )}
-      >
-        {/* Account Title / Dialog Trigger */}
-        <Dialog.Trigger className="grow p-4 text-left cursor-pointer hover:text-yellow-500">
-          <h2 className="font-bold">{account.title}</h2>
-        </Dialog.Trigger>
-
-        {/* Edit Account Button */}
-        <Link
-          to={`/accounts/edit/${account.id}`}
-          className={cn(
-            "size-10 flex items-center justify-center cursor-pointer",
-            "hover:bg-neutral-800 rounded-full shrink-0"
-          )}
-        >
-          <span className="sr-only">Edit {account.title}</span>
-          <MdEditNote className="size-6 text-neutral-400" />
-        </Link>
-      </div>
-
-      <AccountDialog account={account} />
-    </Dialog.Root>
-  );
-};
+import { AccountItem } from "../components/AccountItem";
+import { Button } from "../components/Button";
 
 /** Action Button Props Interface */
 interface ActionButtonProps extends LinkProps {
@@ -62,9 +24,9 @@ const ActionButton = ({ icon, label, ...props }: ActionButtonProps) => (
   >
     <span
       className={cn(
-        "size-12 shrink-0 rounded-full",
+        "size-14 shrink-0 rounded-full",
         "flex items-center justify-center gap-2",
-        "bg-neutral-800 hover:bg-neutral-700"
+        "border border-neutral-700 hover:bg-neutral-800"
       )}
     >
       {icon}
@@ -96,11 +58,6 @@ const Dashboard = () => {
             Packer
           </h1>
         }
-        rightContent={
-          <AppHeader.Button onClick={() => navigate("/accounts/new")}>
-            <HiOutlinePlus className="size-6 text-neutral-400" />
-          </AppHeader.Button>
-        }
       />
 
       {/* Main content area */}
@@ -128,10 +85,18 @@ const Dashboard = () => {
           />
         </div>
 
+        {/* Account List Heading */}
+        <h4 className="font-protest-guerrilla px-4 text-center text-lg">
+          Your Accounts ({accounts.length})
+        </h4>
+
+        {/* New Account Button */}
+        <Button onClick={() => navigate("/accounts/new")}>New Account</Button>
+
         {/* Account List */}
         <div className="flex flex-col gap-2">
           {accounts.length === 0 ? (
-            <p className="text-center text-neutral-400 px-4">
+            <p className="text-center text-sm text-neutral-400 px-4">
               No accounts available. Please create one.
             </p>
           ) : (
