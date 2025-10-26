@@ -1,18 +1,18 @@
+import BNBIcon from "../assets/bnb-bnb-logo.svg";
+import useAppStore from "../store/useAppStore";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../components/Input";
-import * as yup from "yup";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { TextArea } from "../components/TextArea";
 import { getWalletAddressFromPrivateKey } from "../lib/utils";
-import BNBIcon from "../assets/bnb-bnb-logo.svg";
-import useAppStore from "../store/useAppStore";
 import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE, RPC } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
+import * as yup from "yup";
 
 /** Calculate Required BNB for Gas and Transaction Fees */
 const calculateRequiredBNB = (amount: string, accountCount: number) => {
@@ -26,7 +26,9 @@ const calculateRequiredBNB = (amount: string, accountCount: number) => {
     const gasAmountInEther = ethers.formatEther(requiredGasAmount);
 
     /* Total Amount */
-    return amountToSplit + parseFloat(gasAmountInEther);
+    return parseFloat(
+      (amountToSplit + parseFloat(gasAmountInEther)).toFixed(18)
+    );
   }
   return 0;
 };
@@ -45,6 +47,7 @@ interface GasFormData {
   privateKey: string;
 }
 
+/** Gas Page Component */
 const Gas = () => {
   const accounts = useAppStore((state) => state.accounts);
 
@@ -57,6 +60,7 @@ const Gas = () => {
     },
   });
 
+  /** Mutation */
   const mutation = useMutation({
     mutationKey: ["gasSplit"],
     mutationFn: async (data: GasFormData) => {
@@ -67,8 +71,11 @@ const Gas = () => {
       const wallet = new ethers.Wallet(data.privateKey, provider);
       await wallet.getAddress();
 
+      /* Get Chain ID and Starting Nonce */
       const { chainId } = await provider.getNetwork();
       let nonce = await provider.getTransactionCount(wallet.address, "pending");
+
+      /* Send Transactions to Each Account */
       const results = [];
       let successfulTxCount = 0;
 
@@ -101,6 +108,7 @@ const Gas = () => {
     },
   });
 
+  /** Handle Form Submit */
   const handleFormSubmit = async (data: GasFormData) => {
     await mutation.mutateAsync(data);
   };
@@ -138,7 +146,9 @@ const Gas = () => {
 
                   {/* Each Account's Share */}
                   <p className="text-sm px-4 text-lime-500 text-center font-mono wrap-break-word">
-                    Each: {field.value / accounts.length}
+                    Each:{" "}
+                    {parseFloat((field.value / accounts.length).toFixed(18))}{" "}
+                    BNB
                   </p>
                 </div>
                 <FormFieldError message={fieldState.error?.message} />
@@ -162,6 +172,9 @@ const Gas = () => {
                 />
                 <p className="text-sm px-4 text-blue-500 text-center font-mono wrap-break-word">
                   {getWalletAddressFromPrivateKey(field.value)}
+                </p>
+                <p className="text-center text-xs text-neutral-400">
+                  BNB will be sent from this address.
                 </p>
                 <FormFieldError message={fieldState.error?.message} />
               </>
