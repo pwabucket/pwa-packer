@@ -37,15 +37,15 @@ const AccountItem = ({ account }: { account: Account }) => {
           {/* Account Info - Dialog Trigger */}
           <Dialog.Trigger className="grow text-left cursor-pointer group">
             <div className="flex flex-col gap-1">
-              <h2 className="font-bold text-sm text-neutral-400 group-hover:text-yellow-500 transition-colors">
+              <h2 className="font-bold text-sm group-hover:text-yellow-500 transition-colors">
                 {account.title}
               </h2>
               <div className="flex flex-col gap-0.5">
-                <p className="text-xs text-neutral-400 font-mono truncate">
+                <p className="text-xs text-lime-300 font-mono truncate">
                   Wallet: {account.walletAddress.slice(0, 6)}...
                   {account.walletAddress.slice(-4)}
                 </p>
-                <p className="text-xs text-neutral-400 font-mono truncate">
+                <p className="text-xs text-orange-300 font-mono truncate">
                   Deposit: {account.depositAddress.slice(0, 6)}...
                   {account.depositAddress.slice(-4)}
                 </p>

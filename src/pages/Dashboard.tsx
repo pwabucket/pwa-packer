@@ -20,19 +20,25 @@ interface ActionButtonProps extends LinkProps {
 const ActionButton = ({ icon, label, ...props }: ActionButtonProps) => (
   <Link
     {...props}
-    className="flex flex-col justify-center items-center shrink-0 gap-1"
+    className="flex flex-col justify-center items-center shrink-0 gap-1 group"
   >
     <span
       className={cn(
         "size-14 shrink-0 rounded-full",
         "flex items-center justify-center gap-2",
-        "border border-neutral-700 hover:bg-neutral-800"
+        "border border-neutral-700",
+        "hover:bg-yellow-500 hover:text-black transition-colors"
       )}
     >
       {icon}
     </span>
 
-    <span className="text-xs shrink-0 text-center text-neutral-400">
+    <span
+      className={cn(
+        "text-xs shrink-0 text-center transition-colors",
+        "text-neutral-400 group-hover:text-yellow-500"
+      )}
+    >
       {label}
     </span>
   </Link>
