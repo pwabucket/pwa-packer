@@ -11,10 +11,12 @@ import { RPC, USDT_ABI, USDT_CONTRACT_ADDRESS } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { getPrivateKey } from "../lib/utils";
+import USDTIcon from "../assets/tether-usdt-logo.svg";
 
 /** Withdraw Form Schema */
 const WithdrawFormSchema = yup
   .object({
+    amount: yup.string().label("Amount"),
     address: yup.string().required().label("Address"),
   })
   .required();
@@ -22,6 +24,7 @@ const WithdrawFormSchema = yup
 /** Withdraw Form Data */
 interface WithdrawFormData {
   address: string;
+  amount?: string;
 }
 
 const Withdraw = () => {
@@ -29,10 +32,11 @@ const Withdraw = () => {
   const accounts = useAppStore((state) => state.accounts);
 
   /** Form */
-  const form = useForm<WithdrawFormData>({
+  const form = useForm({
     resolver: yupResolver(WithdrawFormSchema),
     defaultValues: {
       address: "",
+      amount: "",
     },
   });
 
@@ -90,25 +94,32 @@ const Withdraw = () => {
             const privateKey = await getPrivateKey(account.id, password);
             const wallet = new ethers.Wallet(privateKey, provider);
 
-            /* Check Balance */
-            const rawBal = await token.balanceOf(account.walletAddress);
+            let amountToSend = data.amount;
 
-            /* Format Balance */
-            const formatted = ethers.formatUnits(rawBal, decimals);
+            if (!amountToSend || amountToSend.trim() === "") {
+              /* If amount is not specified, send the entire balance */
+              const rawBal = await token.balanceOf(account.walletAddress);
+              amountToSend = ethers.formatUnits(rawBal, decimals);
 
-            /* Log Balance */
-            console.log(
-              `Balance of ${account.walletAddress}: ${formatted} ${symbol}`
-            );
+              /* Log Balance */
+              console.log(
+                `Balance of ${account.walletAddress}: ${amountToSend} ${symbol}`
+              );
+            }
 
             /* Receiver Address */
             const receiver = data.address;
+
+            /* Log Sending Info */
+            console.log(
+              `Sending ${amountToSend} ${symbol} from ${account.walletAddress} to ${receiver}`
+            );
 
             /* Perform Transfer */
             const connectedToken = token.connect(wallet) as typeof token;
             const tx = await connectedToken.transfer(
               receiver,
-              ethers.parseUnits(formatted, decimals)
+              ethers.parseUnits(amountToSend, decimals)
             );
 
             /* Wait for Transaction to be Mined */
@@ -124,7 +135,7 @@ const Withdraw = () => {
               result,
             });
 
-            totalSentValue += parseFloat(formatted);
+            totalSentValue += parseFloat(amountToSend);
             successfulSends++;
           } catch (error) {
             /* Log Error */
@@ -160,6 +171,30 @@ const Withdraw = () => {
           onSubmit={form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-2"
         >
+          {/* Amount */}
+          <Controller
+            name="amount"
+            render={({ field, fieldState }) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="amount">
+                  <img src={USDTIcon} className="size-4 inline-block" /> Amount
+                  to Send
+                </Label>
+                <Input
+                  {...field}
+                  disabled={mutation.isPending}
+                  id="amount"
+                  autoComplete="off"
+                  placeholder="Amount"
+                />
+                <p className="text-center text-xs text-blue-400">
+                  Leave blank to send all available funds
+                </p>
+                <FormFieldError message={fieldState.error?.message} />
+              </div>
+            )}
+          />
+
           {/* Address */}
           <Controller
             name="address"
