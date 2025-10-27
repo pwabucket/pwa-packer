@@ -12,7 +12,7 @@ const AppHeader = ({
   rightContent,
 }: AppHeaderProps) => {
   return (
-    <header className="sticky top-0 bg-neutral-900 px-4 py-1">
+    <header className="sticky top-0 bg-neutral-900 px-4 py-1 z-30">
       <div className="w-full max-w-sm mx-auto flex items-center gap-4">
         {/* Left Content */}
         <div className="size-10">{leftContent}</div>
