@@ -28,3 +28,20 @@ export const GAS_LIMITS_TRANSFER = {
   fast: 65_000n,
   instant: 75_000n,
 };
+
+export const provider = new ethers.JsonRpcProvider(RPC);
+
+/* Create USDT Contract Instance */
+export const usdtToken = new ethers.Contract(
+  USDT_CONTRACT_ADDRESS,
+  USDT_ABI,
+  provider
+) as ethers.Contract & {
+  decimals: () => Promise<number>;
+  symbol: () => Promise<string>;
+  balanceOf: (address: string) => Promise<bigint>;
+  transfer: (
+    to: string,
+    amount: bigint
+  ) => Promise<ethers.ContractTransactionResponse>;
+};

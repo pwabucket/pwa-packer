@@ -5,22 +5,30 @@ import { MdEditNote } from "react-icons/md";
 import { Dialog } from "radix-ui";
 import { HiOutlineEye } from "react-icons/hi2";
 import { AccountDialog } from "../components/AccountDialog";
-import { cn } from "../lib/utils";
+import { cn, fetchBalance } from "../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import BNBIcon from "../assets/bnb-bnb-logo.svg";
+import USDTIcon from "../assets/tether-usdt-logo.svg";
 
 /** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
+  const query = useQuery({
+    queryKey: ["balance", account.walletAddress],
+    queryFn: async () => fetchBalance(account.walletAddress),
+  });
+
   return (
     <Dialog.Root>
       <div
         className={cn(
           "group relative",
           "bg-neutral-900",
-          "rounded-full overflow-hidden",
+          "rounded-4xl overflow-hidden",
           "transition-all duration-200 ease-in-out"
         )}
       >
         {/* Main Content Area */}
-        <div className="flex items-center px-3 py-2 gap-4">
+        <div className="flex items-center p-3 gap-4">
           {/* Account Avatar */}
           <div
             className={cn(
@@ -36,10 +44,12 @@ const AccountItem = ({ account }: { account: Account }) => {
 
           {/* Account Info - Dialog Trigger */}
           <Dialog.Trigger className="grow text-left cursor-pointer group">
-            <div className="flex flex-col gap-1">
-              <h2 className="font-bold text-sm group-hover:text-yellow-500 transition-colors">
-                {account.title}
-              </h2>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between">
+                <h2 className="font-bold text-sm group-hover:text-yellow-500 transition-colors grow min-w-0 min-h-0">
+                  {account.title}
+                </h2>
+              </div>
               <div className="flex flex-col gap-0.5">
                 <p className="text-xs text-lime-300 font-mono truncate">
                   Wallet: {account.walletAddress.slice(0, 6)}...
@@ -50,6 +60,31 @@ const AccountItem = ({ account }: { account: Account }) => {
                   {account.depositAddress.slice(-4)}
                 </p>
               </div>
+
+              {/* Balance Info */}
+              {query.isSuccess ? (
+                <p className="shrink-0 text-xs gap-2 flex">
+                  {/* USDT Balance */}
+                  <span>
+                    <img
+                      src={USDTIcon}
+                      alt="USDT"
+                      className="inline-block size-4 mr-1"
+                    />
+                    {query.data.usdtBalance.toFixed(2)}
+                  </span>
+
+                  {/* BNB Balance */}
+                  <span>
+                    <img
+                      src={BNBIcon}
+                      alt="BNB"
+                      className="inline-block size-4 mr-1"
+                    />
+                    {query.data.bnbBalance.toFixed(8)}
+                  </span>
+                </p>
+              ) : null}
             </div>
           </Dialog.Trigger>
 

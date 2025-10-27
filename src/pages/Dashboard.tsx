@@ -9,6 +9,7 @@ import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
 import { cn } from "../lib/utils";
 import { AccountItem } from "../components/AccountItem";
 import { Button } from "../components/Button";
+import { TotalBalanceCard } from "../components/TotalBalanceCard";
 
 /** Action Button Props Interface */
 interface ActionButtonProps extends LinkProps {
@@ -68,6 +69,8 @@ const Dashboard = () => {
 
       {/* Main content area */}
       <MainContainer className="gap-4">
+        <TotalBalanceCard />
+
         <div className="flex justify-center items-center gap-6">
           {/* Withdraw */}
           <ActionButton

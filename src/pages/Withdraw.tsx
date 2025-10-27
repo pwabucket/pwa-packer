@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { useAppStore } from "../store/useAppStore";
-import { RPC, USDT_ABI, USDT_CONTRACT_ADDRESS } from "../lib/transaction";
+import { RPC, usdtToken } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { getPrivateKey } from "../lib/utils";
@@ -52,25 +52,10 @@ const Withdraw = () => {
       /* Create Provider */
       const provider = new ethers.JsonRpcProvider(RPC);
 
-      /* Create USDT Contract Instance */
-      const token = new ethers.Contract(
-        USDT_CONTRACT_ADDRESS,
-        USDT_ABI,
-        provider
-      ) as ethers.Contract & {
-        decimals: () => Promise<number>;
-        symbol: () => Promise<string>;
-        balanceOf: (address: string) => Promise<bigint>;
-        transfer: (
-          to: string,
-          amount: bigint
-        ) => Promise<ethers.ContractTransactionResponse>;
-      };
-
       /* Fetch Token Decimals and Symbol */
       const [decimals, symbol] = await Promise.all([
-        token.decimals(),
-        token.symbol(),
+        usdtToken.decimals(),
+        usdtToken.symbol(),
       ]);
 
       /* Results Array */
@@ -98,7 +83,7 @@ const Withdraw = () => {
 
             if (!amountToSend || amountToSend.trim() === "") {
               /* If amount is not specified, send the entire balance */
-              const rawBal = await token.balanceOf(account.walletAddress);
+              const rawBal = await usdtToken.balanceOf(account.walletAddress);
               amountToSend = ethers.formatUnits(rawBal, decimals);
 
               /* Log Balance */
@@ -116,7 +101,9 @@ const Withdraw = () => {
             );
 
             /* Perform Transfer */
-            const connectedToken = token.connect(wallet) as typeof token;
+            const connectedToken = usdtToken.connect(
+              wallet
+            ) as typeof usdtToken;
             const tx = await connectedToken.transfer(
               receiver,
               ethers.parseUnits(amountToSend, decimals)
