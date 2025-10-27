@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import usePassword from "../hooks/usePassword";
+import { usePassword } from "../hooks/usePassword";
 
 const ProtectedRoutes = () => {
   const isAuthenticated = usePassword() !== null;

@@ -1,14 +1,14 @@
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
 
 import { AccountForm, type AccountFormData } from "../components/AccountForm";
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 import {
   getLocalStorageKeyForAccountPrivateKey,
   getWalletAddressFromPrivateKey,
   uuid,
 } from "../lib/utils";
 import type { Account } from "../types";
-import usePassword from "../hooks/usePassword";
+import { usePassword } from "../hooks/usePassword";
 import Encrypter from "../lib/Encrypter";
 import { useNavigateBack } from "../hooks/useNavigateBack";
 

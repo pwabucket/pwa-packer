@@ -1,5 +1,5 @@
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";

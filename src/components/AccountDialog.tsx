@@ -5,7 +5,7 @@ import { Button } from "./Button";
 import { cn, copyToClipboard, getPrivateKey } from "../lib/utils";
 import { useState } from "react";
 import { HiOutlineClipboard, HiOutlineEye } from "react-icons/hi2";
-import usePassword from "../hooks/usePassword";
+import { usePassword } from "../hooks/usePassword";
 
 /** Account Information Props */
 interface AccountInfoProps {

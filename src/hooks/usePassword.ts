@@ -1,5 +1,7 @@
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 
-export default function usePassword() {
+const usePassword = () => {
   return useAppStore((state) => state.password);
-}
+};
+
+export { usePassword };

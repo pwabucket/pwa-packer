@@ -6,7 +6,7 @@ import { Input } from "../components/Input";
 import * as yup from "yup";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 import { RPC, USDT_ABI, USDT_CONTRACT_ADDRESS } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";

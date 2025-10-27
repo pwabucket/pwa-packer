@@ -5,7 +5,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { PasswordInput } from "../components/Input";
 import * as yup from "yup";
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 import { useNavigate } from "react-router";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";

@@ -113,4 +113,4 @@ const useAppStore = create(
   )
 );
 
-export default useAppStore;
+export { useAppStore };

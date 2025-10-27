@@ -1,5 +1,5 @@
 import { Link, useNavigate, type LinkProps } from "react-router";
-import useAppStore from "../store/useAppStore";
+import { useAppStore } from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
