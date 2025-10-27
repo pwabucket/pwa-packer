@@ -123,6 +123,11 @@ const Send = () => {
         /* Initialize Hash Maker */
         await hashMaker.initialize();
 
+        /* Log Sending Info */
+        console.log(
+          `Sending $${data.amount} from account ${account.title} (${account.walletAddress}) to ${receiver} with targeting character ${targetCharacter}`
+        );
+
         /* Generate Transaction */
         const result = await hashMaker.generateTransaction({
           amount: data.amount,

@@ -72,7 +72,7 @@ const Gas = () => {
 
       const provider = new ethers.JsonRpcProvider(RPC);
       const wallet = new ethers.Wallet(data.privateKey, provider);
-      await wallet.getAddress();
+      const senderAddress = await wallet.getAddress();
 
       /* Get Chain ID and Starting Nonce */
       const { chainId } = await provider.getNetwork();
@@ -83,6 +83,11 @@ const Gas = () => {
       let successfulTxCount = 0;
 
       for (const account of accounts) {
+        /* Log Sending Info */
+        console.log(
+          `Sending ${perAccountAmount} BNB to account ${account.title} (${account.walletAddress}) from ${senderAddress}...`
+        );
+
         const tx = {
           to: account.walletAddress,
           gasLimit: GAS_LIMIT_NATIVE,

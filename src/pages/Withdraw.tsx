@@ -110,9 +110,9 @@ const Withdraw = () => {
             /* Receiver Address */
             const receiver = data.address;
 
-            /* Log Sending Info */
+            /* Log Withdrawal Info */
             console.log(
-              `Sending ${amountToSend} ${symbol} from ${account.walletAddress} to ${receiver}`
+              `Withdrawing ${amountToSend} ${symbol} from ${account.title} (${account.walletAddress}) to ${receiver}`
             );
 
             /* Perform Transfer */
