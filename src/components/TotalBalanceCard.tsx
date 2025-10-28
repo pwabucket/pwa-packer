@@ -23,7 +23,7 @@ const TotalBalanceCard = () => {
   }, [queries]);
 
   return queries.isSuccess ? (
-    <div className="flex flex-col gap-2 py-4">
+    <div className="flex flex-col gap-2 pt-4">
       <p className="text-5xl font-bold font-protest-guerrilla text-center">
         {Intl.NumberFormat("en-US", {
           style: "currency",
