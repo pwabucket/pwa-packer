@@ -3,7 +3,6 @@ import { Input } from "../components/Input";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Button } from "../components/Button";
 import { usePassword } from "../hooks/usePassword";
-import { useAppStore } from "../store/useAppStore";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { cn, getPrivateKey } from "../lib/utils";
 import HashMaker from "../lib/HashMaker";
@@ -18,6 +17,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormFieldError } from "../components/FormFieldError";
 import { Select } from "../components/Select";
 import { useMutation } from "@tanstack/react-query";
+import { useAccountsChooser } from "../hooks/useAccountsChooser";
+import { AccountsChooser } from "../components/AccountsChooser";
 
 const HEXADECIMAL_CHARS = "0123456789abcdef";
 
@@ -51,8 +52,10 @@ const SendFormSchema = yup
 
 /** Send Page Component */
 const Send = () => {
-  const accounts = useAppStore((state) => state.accounts);
   const password = usePassword();
+
+  const accountsChooser = useAccountsChooser();
+  const { selectedAccounts } = accountsChooser;
 
   /** Form */
   const form = useForm({
@@ -79,7 +82,7 @@ const Send = () => {
   /** Send Funds Function */
   const sendFunds = async (data: SendFormData) => {
     /* Validate Accounts */
-    if (accounts.length === 0) {
+    if (selectedAccounts.length === 0) {
       alert("No accounts available to send funds from.");
       return;
     }
@@ -106,7 +109,7 @@ const Send = () => {
     let successfulSends = 0;
 
     /* Iterate Over Accounts and Send Funds */
-    for (const account of accounts) {
+    for (const account of selectedAccounts) {
       try {
         const privateKey = await getPrivateKey(account.id, password);
         const hashMaker = new HashMaker({ privateKey, provider });
@@ -164,7 +167,7 @@ const Send = () => {
 
     /* Show Summary Alert */
     alert(
-      `Successfully sent from ${successfulSends}/${accounts.length} accounts.`
+      `Successfully sent from ${successfulSends}/${selectedAccounts.length} accounts.`
     );
 
     return results;
@@ -267,6 +270,9 @@ const Send = () => {
           <Button type="submit" className="mt-4" disabled={mutation.isPending}>
             {mutation.isPending ? "Sending..." : "Send Funds"}
           </Button>
+
+          {/* Accounts Chooser */}
+          <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
         </form>
       </FormProvider>
     </InnerPageLayout>

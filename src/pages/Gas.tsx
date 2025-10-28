@@ -1,5 +1,4 @@
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
-import { useAppStore } from "../store/useAppStore";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -13,6 +12,8 @@ import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE, RPC } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
+import { AccountsChooser } from "../components/AccountsChooser";
+import { useAccountsChooser } from "../hooks/useAccountsChooser";
 
 /** Parse Amount to Smallest Unit (18 Decimals) */
 const parseToSmallUnit = (amount: number) => {
@@ -52,7 +53,8 @@ interface GasFormData {
 
 /** Gas Page Component */
 const Gas = () => {
-  const accounts = useAppStore((state) => state.accounts);
+  const accountsChooser = useAccountsChooser();
+  const { selectedAccounts } = accountsChooser;
 
   /** Form */
   const form = useForm<GasFormData>({
@@ -67,7 +69,13 @@ const Gas = () => {
   const mutation = useMutation({
     mutationKey: ["gasSplit"],
     mutationFn: async (data: GasFormData) => {
-      const perAccountAmount = parseFloat(data.amount) / accounts.length;
+      if (selectedAccounts.length === 0) {
+        alert("No accounts selected for gas sending.");
+        return;
+      }
+
+      const perAccountAmount =
+        parseFloat(data.amount) / selectedAccounts.length;
       const value = ethers.parseEther(perAccountAmount.toFixed(18));
 
       const provider = new ethers.JsonRpcProvider(RPC);
@@ -82,7 +90,7 @@ const Gas = () => {
       const results = [];
       let successfulTxCount = 0;
 
-      for (const account of accounts) {
+      for (const account of selectedAccounts) {
         /* Log Sending Info */
         console.log(
           `Sending ${perAccountAmount} BNB to account ${account.title} (${account.walletAddress}) from ${senderAddress}...`
@@ -149,14 +157,14 @@ const Gas = () => {
                   {/* Total Required BNB */}
                   <p className="text-sm px-4 text-yellow-500 text-center font-mono wrap-break-word">
                     Total BNB Required:{" "}
-                    {calculateRequiredBNB(field.value, accounts.length)}
+                    {calculateRequiredBNB(field.value, selectedAccounts.length)}
                   </p>
 
                   {/* Each Account's Share */}
                   <p className="text-sm px-4 text-lime-500 text-center font-mono wrap-break-word">
                     Each:{" "}
-                    {accounts.length > 0
-                      ? parseToSmallUnit(field.value / accounts.length)
+                    {selectedAccounts.length > 0
+                      ? parseToSmallUnit(field.value / selectedAccounts.length)
                       : 0}{" "}
                     BNB
                   </p>
@@ -191,9 +199,13 @@ const Gas = () => {
             )}
           />
 
+          {/* Submit Button */}
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? "Processing..." : "Send Gas to All Accounts"}
           </Button>
+
+          {/* Accounts Chooser */}
+          <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
         </form>
       </FormProvider>
     </InnerPageLayout>

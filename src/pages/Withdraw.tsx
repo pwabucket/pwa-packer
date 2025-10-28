@@ -12,6 +12,8 @@ import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { getPrivateKey } from "../lib/utils";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
+import { AccountsChooser } from "../components/AccountsChooser";
+import { useAccountsChooser } from "../hooks/useAccountsChooser";
 
 /** Withdraw Form Schema */
 const WithdrawFormSchema = yup
@@ -29,7 +31,9 @@ interface WithdrawFormData {
 
 const Withdraw = () => {
   const password = useAppStore((state) => state.password);
-  const accounts = useAppStore((state) => state.accounts);
+
+  const accountsChooser = useAccountsChooser();
+  const { selectedAccounts } = accountsChooser;
 
   /** Form */
   const form = useForm({
@@ -43,6 +47,11 @@ const Withdraw = () => {
   const mutation = useMutation({
     mutationKey: ["gasSplit"],
     mutationFn: async (data: WithdrawFormData) => {
+      if (selectedAccounts.length === 0) {
+        alert("No accounts selected for withdrawal.");
+        return;
+      }
+
       /* Validate Password */
       if (!password) {
         alert("Password is not set in memory.");
@@ -61,7 +70,7 @@ const Withdraw = () => {
       /* Results Array */
       const results: {
         status: boolean;
-        account: (typeof accounts)[number];
+        account: (typeof selectedAccounts)[number];
         result?: ethers.ContractTransactionReceipt | null;
         error?: unknown;
       }[] = [];
@@ -74,7 +83,7 @@ const Withdraw = () => {
 
       /* Iterate Over Accounts and Send Funds */
       await Promise.all(
-        accounts.map(async (account) => {
+        selectedAccounts.map(async (account) => {
           try {
             const privateKey = await getPrivateKey(account.id, password);
             const wallet = new ethers.Wallet(privateKey, provider);
@@ -140,7 +149,7 @@ const Withdraw = () => {
 
       /* Show Summary Alert */
       alert(
-        `Successfully sent $${totalSentValue} from ${successfulSends}/${accounts.length} accounts.`
+        `Successfully sent $${totalSentValue} from ${successfulSends}/${selectedAccounts.length} accounts.`
       );
 
       return results;
@@ -165,7 +174,7 @@ const Withdraw = () => {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="amount">
                   <img src={USDTIcon} className="size-4 inline-block" /> Amount
-                  to Send
+                  to Withdraw
                 </Label>
                 <Input
                   {...field}
@@ -200,9 +209,13 @@ const Withdraw = () => {
             )}
           />
 
+          {/* Submit Button */}
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? "Processing..." : "Withdraw"}
           </Button>
+
+          {/* Accounts Chooser */}
+          <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
         </form>
       </FormProvider>
     </InnerPageLayout>
