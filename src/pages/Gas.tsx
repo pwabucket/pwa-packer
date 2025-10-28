@@ -201,7 +201,7 @@ const Gas = () => {
 
           {/* Submit Button */}
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Processing..." : "Send Gas to All Accounts"}
+            {mutation.isPending ? "Processing..." : "Send Gas to Accounts"}
           </Button>
 
           {/* Accounts Chooser */}
