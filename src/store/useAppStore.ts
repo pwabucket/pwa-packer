@@ -10,6 +10,7 @@ export type AppStore = {
   addAccount: (account: Account) => void;
   updateAccount: (account: Account) => void;
   removeAccount: (accountId: string) => void;
+  setAccounts: (accounts: Account[]) => void;
 
   /** Passwords */
   password: string | null; // in-memory only
@@ -52,6 +53,11 @@ const useAppStore = create(
         set((state) => ({
           accounts: state.accounts.filter((acc) => acc.id !== accountId),
         }));
+      },
+
+      /** Set Accounts */
+      setAccounts: (accounts: Account[]) => {
+        set({ accounts });
       },
 
       /** Passwords */

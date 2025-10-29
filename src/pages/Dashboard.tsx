@@ -10,6 +10,7 @@ import { cn } from "../lib/utils";
 import { AccountItem } from "../components/AccountItem";
 import { Button } from "../components/Button";
 import { TotalBalanceCard } from "../components/TotalBalanceCard";
+import { Reorder } from "motion/react";
 
 /** Action Button Props Interface */
 interface ActionButtonProps extends LinkProps {
@@ -48,6 +49,7 @@ const ActionButton = ({ icon, label, ...props }: ActionButtonProps) => (
 /** Dashboard Page Component */
 const Dashboard = () => {
   const accounts = useAppStore((state) => state.accounts);
+  const setAccounts = useAppStore((state) => state.setAccounts);
   const navigate = useNavigate();
 
   return (
@@ -109,9 +111,15 @@ const Dashboard = () => {
               No accounts available. Please create one.
             </p>
           ) : (
-            accounts.map((account) => (
-              <AccountItem key={account.id} account={account} />
-            ))
+            <Reorder.Group
+              values={accounts}
+              onReorder={(newOrder) => setAccounts(newOrder)}
+              className="flex flex-col gap-2"
+            >
+              {accounts.map((account) => (
+                <AccountItem key={account.id} account={account} />
+              ))}
+            </Reorder.Group>
           )}
         </div>
       </MainContainer>
