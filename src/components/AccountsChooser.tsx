@@ -36,9 +36,11 @@ const AccountItem = ({
     >
       {/* Title and balance */}
       <span className="flex flex-col">
-        <span className="text-xs font-bold">{account.title}</span>
+        <span className="text-xs font-bold text-yellow-500">
+          {account.title}
+        </span>
         {query.isSuccess ? (
-          <AccountBalance balance={query.data} className="text-neutral-400" />
+          <AccountBalance balance={query.data} />
         ) : (
           <AccountBalance.Placeholder />
         )}
