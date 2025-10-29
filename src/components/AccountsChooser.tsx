@@ -1,5 +1,7 @@
+import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
 import { useAppStore } from "../store/useAppStore";
 import type { Account } from "../types";
+import { AccountBalance } from "./AccountBalance";
 import { LabelToggle } from "./LabelToggle";
 
 interface AccountsChooserProps {
@@ -9,6 +11,58 @@ interface AccountsChooserProps {
   toggleAccount: (account: Account, checked: boolean) => void;
   toggleAllAccounts: (checked: boolean) => void;
 }
+
+interface AccountItemProps {
+  account: Account;
+  checked: boolean;
+  disabled?: boolean;
+  toggleAccount: (account: Account, checked: boolean) => void;
+}
+
+const AccountItem = ({
+  account,
+  checked,
+  disabled,
+  toggleAccount,
+}: AccountItemProps) => {
+  const query = useAccountBalanceQuery(account.walletAddress);
+  return (
+    <LabelToggle
+      key={account.id}
+      className="flex justify-between items-center gap-2"
+      checked={checked}
+      onChange={(ev) => toggleAccount(account, ev.target.checked)}
+      disabled={disabled}
+    >
+      {/* Title and balance */}
+      <span className="flex flex-col">
+        <span className="text-xs font-bold">{account.title}</span>
+        {query.isSuccess ? (
+          <AccountBalance balance={query.data} className="text-neutral-400" />
+        ) : (
+          <AccountBalance.Placeholder />
+        )}
+      </span>
+
+      {/* Addresses */}
+      <span className="flex flex-col">
+        {/* Wallet Address */}
+        <span className="text-lime-300 text-xs">
+          <span className="font-bold">W:</span>{" "}
+          {account.walletAddress.slice(0, 6)}...
+          {account.walletAddress.slice(-4)}
+        </span>
+
+        {/* Deposit Address */}
+        <span className="text-orange-300 text-xs">
+          <span className="font-bold">D:</span>{" "}
+          {account.depositAddress.slice(0, 6)}...
+          {account.depositAddress.slice(-4)}
+        </span>
+      </span>
+    </LabelToggle>
+  );
+};
 
 const AccountsChooser = ({
   disabled,
@@ -31,20 +85,13 @@ const AccountsChooser = ({
 
       <div className="flex flex-col gap-2">
         {accounts.map((account) => (
-          <LabelToggle
+          <AccountItem
             key={account.id}
-            className="justify-between items-center gap-2"
+            account={account}
             checked={selectedAccounts.some((item) => item.id === account.id)}
-            onChange={(ev) => toggleAccount(account, ev.target.checked)}
+            toggleAccount={toggleAccount}
             disabled={disabled}
-          >
-            {account.title}
-
-            <span className="text-yellow-500 text-xs">
-              {account.walletAddress.slice(0, 6)}...
-              {account.walletAddress.slice(-4)}
-            </span>
-          </LabelToggle>
+          />
         ))}
       </div>
     </div>
