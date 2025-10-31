@@ -1,10 +1,11 @@
 import type { SendResult } from "../types";
 import { PopupDialog } from "../components/PopupDialog";
-import { Collapsible, Dialog } from "radix-ui";
+import { Accordion, Dialog } from "radix-ui";
 import { Button } from "../components/Button";
 import { AccountAddresses } from "../components/AccountAddresses";
-import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
+import { HiCheckCircle, HiXCircle } from "react-icons/hi2";
 import { cn } from "../lib/utils";
+import { AccountBalance } from "../components/AccountBalance";
 
 interface ResultInfoProps {
   title: React.ReactNode;
@@ -53,29 +54,40 @@ const SendResults = ({ results }: SendResultsProps) => {
         Summary of send operations:
       </Dialog.Description>
 
-      <div className="flex flex-col gap-2">
-        {results.map((res, index) => (
-          <Collapsible.Root
-            key={index}
-            className="flex flex-col gap-2 p-4 bg-neutral-800 rounded-xl font-mono break-all text-sm"
+      <Accordion.Root type="single" className="flex flex-col gap-2">
+        {results.map((res) => (
+          <Accordion.Item
+            value={res.account.id}
+            key={res.account.id}
+            className={cn(
+              "flex flex-col",
+              "text-sm bg-neutral-800 rounded-2xl",
+              "border border-transparent",
+              "hover:border-yellow-500 transition-border"
+            )}
           >
-            <Collapsible.Trigger className="w-full text-left flex gap-2 items-center cursor-pointer">
-              {res.status ? (
-                <HiOutlineCheckCircle className="size-6 text-green-500 shrink-0" />
-              ) : (
-                <HiOutlineXCircle className="size-6 text-red-500 shrink-0" />
-              )}
+            <Accordion.Header>
+              <Accordion.Trigger className="w-full text-left p-4 flex gap-2 items-center cursor-pointer">
+                {res.status ? (
+                  <HiCheckCircle className="size-4 text-green-500 shrink-0" />
+                ) : (
+                  <HiXCircle className="size-4 text-red-500 shrink-0" />
+                )}
 
-              {/* Title */}
-              <div className="flex flex-col grow min-w-0 font-bold text-yellow-500 truncate">
-                {res.account.title}
-              </div>
+                {/* Title */}
+                <div className="flex flex-col grow min-w-0">
+                  <span className="text-xs font-bold text-yellow-500 truncate">
+                    {res.account.title}
+                  </span>
+                  <AccountBalance account={res.account} />
+                </div>
 
-              {/* Addresses */}
-              <AccountAddresses account={res.account} />
-            </Collapsible.Trigger>
+                {/* Addresses */}
+                <AccountAddresses account={res.account} />
+              </Accordion.Trigger>
+            </Accordion.Header>
 
-            <Collapsible.Content className="flex flex-col gap-2">
+            <Accordion.Content className="flex flex-col gap-2 p-4 pt-0">
               {/* Receiver */}
               <ResultInfo
                 title="Receiver"
@@ -123,10 +135,10 @@ const SendResults = ({ results }: SendResultsProps) => {
                 icon={<span>🗣️</span>}
                 valueClassName="text-pink-300"
               />
-            </Collapsible.Content>
-          </Collapsible.Root>
+            </Accordion.Content>
+          </Accordion.Item>
         ))}
-      </div>
+      </Accordion.Root>
 
       {/* Close Button */}
       <Dialog.Close asChild>

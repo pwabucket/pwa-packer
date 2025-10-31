@@ -6,13 +6,11 @@ import { Dialog } from "radix-ui";
 import { HiOutlineEye } from "react-icons/hi2";
 import { AccountDialog } from "../components/AccountDialog";
 import { cn } from "../lib/utils";
-import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
 import { AccountBalance } from "./AccountBalance";
 import { Reorder, useDragControls } from "motion/react";
 
 /** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
-  const query = useAccountBalanceQuery(account.walletAddress);
   const dragControls = useDragControls();
 
   return (
@@ -67,11 +65,8 @@ const AccountItem = ({ account }: { account: Account }) => {
                 </div>
 
                 {/* Balance Info */}
-                {query.isSuccess ? (
-                  <AccountBalance balance={query.data} />
-                ) : (
-                  <AccountBalance.Placeholder />
-                )}
+
+                <AccountBalance account={account} />
               </div>
             </Dialog.Trigger>
 

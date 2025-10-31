@@ -1,13 +1,18 @@
-import { cn, fetchBalance } from "../lib/utils";
+import { cn } from "../lib/utils";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
+import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
+import type { Account } from "../types";
 
 interface AccountBalanceProps extends React.ComponentProps<"span"> {
-  balance: Awaited<ReturnType<typeof fetchBalance>>;
+  account: Account;
 }
 
-const AccountBalance = ({ balance, ...props }: AccountBalanceProps) => {
-  return (
+const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
+  const query = useAccountBalanceQuery(account.walletAddress);
+  const balance = query.data;
+
+  return balance ? (
     <span
       {...props}
       className={cn("shrink-0 text-xs gap-2 flex", props.className)}
@@ -24,6 +29,8 @@ const AccountBalance = ({ balance, ...props }: AccountBalanceProps) => {
         {balance.bnbBalance.toFixed(8)}
       </span>
     </span>
+  ) : (
+    <AccountBalancePlaceholder />
   );
 };
 

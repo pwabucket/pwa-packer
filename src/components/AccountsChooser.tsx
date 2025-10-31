@@ -1,4 +1,3 @@
-import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
 import { useAppStore } from "../store/useAppStore";
 import type { Account } from "../types";
 import { AccountAddresses } from "./AccountAddresses";
@@ -26,7 +25,6 @@ const AccountItem = ({
   disabled,
   toggleAccount,
 }: AccountItemProps) => {
-  const query = useAccountBalanceQuery(account.walletAddress);
   return (
     <LabelToggle
       key={account.id}
@@ -40,11 +38,8 @@ const AccountItem = ({
         <span className="text-xs font-bold text-yellow-500">
           {account.title}
         </span>
-        {query.isSuccess ? (
-          <AccountBalance balance={query.data} />
-        ) : (
-          <AccountBalance.Placeholder />
-        )}
+
+        <AccountBalance account={account} />
       </span>
 
       {/* Addresses */}
