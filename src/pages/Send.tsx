@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { usePassword } from "../hooks/usePassword";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { cn, getPrivateKey } from "../lib/utils";
-import HashMaker from "../lib/HashMaker";
+import HashMaker, { type HashResult } from "../lib/HashMaker";
 import * as yup from "yup";
 import {
   Controller,
@@ -19,6 +19,9 @@ import { Select } from "../components/Select";
 import { useMutation } from "@tanstack/react-query";
 import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import { AccountsChooser } from "../components/AccountsChooser";
+import type { SendResult } from "../types";
+import { Dialog } from "radix-ui";
+import { SendResults } from "./SendResults";
 
 const HEXADECIMAL_CHARS = "0123456789abcdef";
 
@@ -102,68 +105,81 @@ const Send = () => {
     /* Create Provider */
     const provider = HashMaker.createProvider();
 
-    /* Results Array */
-    const results = [];
-
-    /* Successful Sends Counter */
-    let successfulSends = 0;
-
-    /* Iterate Over Accounts and Send Funds */
-    for (const account of selectedAccounts) {
-      try {
-        const privateKey = await getPrivateKey(account.id, password);
-        const hashMaker = new HashMaker({ privateKey, provider });
-
-        /* Receiver Address */
-        const receiver = account.depositAddress;
-
+    /* Process all accounts concurrently using Promise.all */
+    const results = await Promise.all(
+      selectedAccounts.map(async (account): Promise<SendResult> => {
+        let hashResult: HashResult | null = null;
         /* Select Random Target Character */
         const targetCharacter =
           data.targetCharacters[
             Math.floor(Math.random() * data.targetCharacters.length)
           ];
 
-        /* Initialize Hash Maker */
-        await hashMaker.initialize();
+        /* Receiver Address */
+        const receiver = account.depositAddress;
 
-        /* Log Sending Info */
-        console.log(
-          `Sending $${data.amount} from account ${account.title} (${account.walletAddress}) to ${receiver} with targeting character ${targetCharacter}`
-        );
+        try {
+          const privateKey = await getPrivateKey(account.id, password);
+          const hashMaker = new HashMaker({ privateKey, provider });
 
-        /* Generate Transaction */
-        const result = await hashMaker.generateTransaction({
-          amount: data.amount,
-          gasLimit: data.gasLimit,
-          broadcastIfFound: true,
-          targetCharacter,
-          receiver,
-        });
+          /* Initialize Hash Maker */
+          await hashMaker.initialize();
 
-        /* Log Result */
-        console.log(result);
+          /* Log Sending Info */
+          console.log(
+            `Sending $${data.amount} from account ${account.title} (${account.walletAddress}) to ${receiver} with targeting character ${targetCharacter}`
+          );
 
-        /* Push Success Result */
-        results.push({
-          status: true,
-          account,
-          targetCharacter,
-          result,
-        });
-        successfulSends++;
-      } catch (error) {
-        /* Log Error */
-        console.error(`Failed to send from account ${account.id}:`, error);
+          /* Generate Transaction */
+          hashResult = (await hashMaker.generateTransaction({
+            amount: data.amount,
+            gasLimit: data.gasLimit,
+            targetCharacter,
+            receiver,
+          })) as HashResult;
 
-        /* Push Failure Result */
-        results.push({
-          status: false,
-          account,
-          error,
-        });
-        continue;
-      }
-    }
+          /* Log Hash Result */
+          console.log(
+            `Hash Result: ${account.title} (${account.walletAddress})`,
+            hashResult
+          );
+
+          const result = await hashMaker.submitTransferTransaction(hashResult);
+
+          /* Log Submit Result */
+          console.log(
+            `Submit Result: ${account.title} (${account.walletAddress})`,
+            result
+          );
+
+          /* Return Success Result */
+          return {
+            status: true,
+            account,
+            targetCharacter,
+            hashResult,
+            receiver,
+            result,
+          };
+        } catch (error) {
+          /* Log Error */
+          console.error(`Failed to send from account ${account.id}:`, error);
+
+          /* Return Failure Result */
+          return {
+            status: false,
+            account,
+            error,
+            receiver,
+            hashResult,
+            targetCharacter,
+          };
+        }
+      })
+    );
+
+    /* Count Successful Sends */
+    const successfulSends = results.filter((result) => result.status).length;
 
     /* Show Summary Alert */
     alert(
@@ -180,6 +196,12 @@ const Send = () => {
 
   return (
     <InnerPageLayout title="Send" className="gap-2">
+      {mutation.isSuccess && mutation.data ? (
+        <Dialog.Root open onOpenChange={() => mutation.reset()}>
+          <SendResults results={mutation.data} />
+        </Dialog.Root>
+      ) : null}
+
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}

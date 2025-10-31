@@ -1,6 +1,7 @@
 import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
 import { useAppStore } from "../store/useAppStore";
 import type { Account } from "../types";
+import { AccountAddresses } from "./AccountAddresses";
 import { AccountBalance } from "./AccountBalance";
 import { LabelToggle } from "./LabelToggle";
 
@@ -47,21 +48,7 @@ const AccountItem = ({
       </span>
 
       {/* Addresses */}
-      <span className="flex flex-col">
-        {/* Wallet Address */}
-        <span className="text-lime-300 text-xs">
-          <span className="font-bold">W:</span>{" "}
-          {account.walletAddress.slice(0, 6)}...
-          {account.walletAddress.slice(-4)}
-        </span>
-
-        {/* Deposit Address */}
-        <span className="text-orange-300 text-xs">
-          <span className="font-bold">D:</span>{" "}
-          {account.depositAddress.slice(0, 6)}...
-          {account.depositAddress.slice(-4)}
-        </span>
-      </span>
+      <AccountAddresses account={account} />
     </LabelToggle>
   );
 };
