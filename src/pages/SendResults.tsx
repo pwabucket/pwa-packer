@@ -54,7 +54,7 @@ const SendResults = ({ results }: SendResultsProps) => {
         Summary of send operations:
       </Dialog.Description>
 
-      <Accordion.Root type="single" className="flex flex-col gap-2">
+      <Accordion.Root collapsible type="single" className="flex flex-col gap-2">
         {results.map((res) => (
           <Accordion.Item
             value={res.account.id}
