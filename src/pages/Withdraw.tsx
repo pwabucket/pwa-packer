@@ -14,6 +14,7 @@ import { getPrivateKey } from "../lib/utils";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { AccountsChooser } from "../components/AccountsChooser";
 import { useAccountsChooser } from "../hooks/useAccountsChooser";
+import toast from "react-hot-toast";
 
 /** Withdraw Form Schema */
 const WithdrawFormSchema = yup
@@ -48,13 +49,13 @@ const Withdraw = () => {
     mutationKey: ["gasSplit"],
     mutationFn: async (data: WithdrawFormData) => {
       if (selectedAccounts.length === 0) {
-        alert("No accounts selected for withdrawal.");
+        toast.error("No accounts selected for withdrawal.");
         return;
       }
 
       /* Validate Password */
       if (!password) {
-        alert("Password is not set in memory.");
+        toast.error("Password is not set in memory.");
         return;
       }
 
@@ -148,7 +149,7 @@ const Withdraw = () => {
       );
 
       /* Show Summary Alert */
-      alert(
+      toast.success(
         `Successfully sent $${totalSentValue} from ${successfulSends}/${selectedAccounts.length} accounts.`
       );
 

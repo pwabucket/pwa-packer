@@ -22,6 +22,7 @@ import { AccountsChooser } from "../components/AccountsChooser";
 import type { SendResult } from "../types";
 import { Dialog } from "radix-ui";
 import { SendResults } from "./SendResults";
+import toast from "react-hot-toast";
 
 const HEXADECIMAL_CHARS = "0123456789abcdef";
 
@@ -86,19 +87,19 @@ const Send = () => {
   const sendFunds = async (data: SendFormData) => {
     /* Validate Accounts */
     if (selectedAccounts.length === 0) {
-      alert("No accounts available to send funds from.");
+      toast.error("No accounts available to send funds from.");
       return;
     }
 
     /* Validate Password */
     if (!password) {
-      alert("Password is not set in memory.");
+      toast.error("Password is not set in memory.");
       return;
     }
 
     /* Validate Target Characters */
     if (data.targetCharacters.length === 0) {
-      alert("Please select at least one target character.");
+      toast.error("Please select at least one target character.");
       return;
     }
 
@@ -182,7 +183,7 @@ const Send = () => {
     const successfulSends = results.filter((result) => result.status).length;
 
     /* Show Summary Alert */
-    alert(
+    toast.success(
       `Successfully sent from ${successfulSends}/${selectedAccounts.length} accounts.`
     );
 

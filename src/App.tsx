@@ -8,7 +8,7 @@ import { Withdraw } from "./pages/Withdraw";
 import { Send } from "./pages/Send";
 import { Gas } from "./pages/Gas";
 import { useInactivity } from "./hooks/useInactivity";
-
+import { Toaster } from "react-hot-toast";
 const INACTIVITY_DURATION = 3 * 60 * 1000;
 function App() {
   useInactivity(INACTIVITY_DURATION);
@@ -29,6 +29,14 @@ function App() {
           <Route path="gas" element={<Gas />} />
         </Route>
       </Routes>
+
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          className: "font-mono text-sm",
+        }}
+      />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { Wallet } from "ethers/wallet";
 import Encrypter, { type EncryptionResult } from "./Encrypter";
 import { provider, USDT_DECIMALS, usdtToken } from "./transaction";
 import { ethers } from "ethers";
+import toast from "react-hot-toast";
 
 export { v4 as uuid } from "uuid";
 
@@ -14,6 +15,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function copyToClipboard(content: string) {
   copy(content);
+  toast.success("Copied to clipboard!");
 }
 
 export function getWalletAddressFromPrivateKey(privateKey: string) {

@@ -15,7 +15,8 @@ const PopupDialog = (props: Dialog.DialogContentProps) => {
           {...props}
           className={cn(
             "bg-neutral-900 p-6 rounded-2xl max-w-sm w-full",
-            "flex flex-col min-w-0 gap-2"
+            "flex flex-col min-w-0 gap-2",
+            props.className
           )}
         />
       </Dialog.Overlay>

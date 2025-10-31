@@ -14,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
 import { AccountsChooser } from "../components/AccountsChooser";
 import { useAccountsChooser } from "../hooks/useAccountsChooser";
+import toast from "react-hot-toast";
 
 /** Parse Amount to Smallest Unit (18 Decimals) */
 const parseToSmallUnit = (amount: number) => {
@@ -70,7 +71,7 @@ const Gas = () => {
     mutationKey: ["gasSplit"],
     mutationFn: async (data: GasFormData) => {
       if (selectedAccounts.length === 0) {
-        alert("No accounts selected for gas sending.");
+        toast.error("No accounts selected for gas sending.");
         return;
       }
 
@@ -118,7 +119,7 @@ const Gas = () => {
         nonce++;
       }
 
-      alert(`${successfulTxCount} transactions sent successfully.`);
+      toast.success(`${successfulTxCount} transactions sent successfully.`);
 
       return results;
     },

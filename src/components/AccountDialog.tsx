@@ -2,48 +2,13 @@ import type { Account } from "../types";
 
 import { Dialog } from "radix-ui";
 import { Button } from "./Button";
-import { cn, copyToClipboard, getPrivateKey } from "../lib/utils";
+import { cn, getPrivateKey } from "../lib/utils";
 import { useState } from "react";
-import { HiOutlineClipboard, HiOutlineEye } from "react-icons/hi2";
+import { HiOutlineEye } from "react-icons/hi2";
 import { usePassword } from "../hooks/usePassword";
 import { PopupDialog } from "./PopupDialog";
-
-/** Account Information Props */
-interface AccountInfoProps {
-  title: string;
-  value: string;
-  icon?: React.ReactNode;
-  valueClassName?: string;
-  rightContent?: React.ReactNode;
-}
-
-/** Account Information Component */
-const AccountInfo = ({
-  title,
-  value,
-  icon,
-  valueClassName,
-  rightContent,
-}: AccountInfoProps) => (
-  <div className="flex gap-4 p-4 bg-neutral-800 rounded-xl font-mono">
-    {/* Icon */}
-    <span className="shrink-0">{icon}</span>
-
-    {/* Title & Value */}
-    <div className="flex flex-col gap-1 grow min-w-0 min-h-0">
-      {/* Title */}
-      <h2 className="text-neutral-400 font-bold text-xs uppercase">{title}</h2>
-
-      {/* Value */}
-      <p className={cn("font-bold wrap-break-word text-sm", valueClassName)}>
-        {value}
-      </p>
-    </div>
-
-    {/* Right Content */}
-    <div className="shrink-0">{rightContent}</div>
-  </div>
-);
+import toast from "react-hot-toast";
+import { ItemInfo } from "./ItemInfo";
 
 /** Account Dialog Component */
 const AccountDialog = ({ account }: { account: Account }) => {
@@ -51,7 +16,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const revealPrivateKey = async () => {
     if (!password) {
-      alert("Password not set.");
+      toast.error("Password not set.");
       return;
     }
 
@@ -60,14 +25,6 @@ const AccountDialog = ({ account }: { account: Account }) => {
 
     /* Set decrypted private key to state */
     setPrivateKey(decryptedPrivateKey);
-  };
-
-  /* Copy Private Key to Clipboard */
-  const copyPrivateKeyToClipboard = () => {
-    if (privateKey) {
-      copyToClipboard(privateKey);
-      alert("Private key copied to clipboard.");
-    }
   };
 
   return (
@@ -85,7 +42,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
       {/* Account Information */}
       <div className="flex flex-col gap-2">
         {/* Wallet Address */}
-        <AccountInfo
+        <ItemInfo
           title="Wallet Address"
           value={account.walletAddress}
           icon={<>💰</>}
@@ -93,7 +50,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
         />
 
         {/* Deposit Address */}
-        <AccountInfo
+        <ItemInfo
           title="Deposit Address"
           value={account.depositAddress}
           icon={<span>🏦</span>}
@@ -101,27 +58,24 @@ const AccountDialog = ({ account }: { account: Account }) => {
         />
 
         {/* Private Key */}
-        <AccountInfo
+        <ItemInfo
           title="Private Key"
           value={privateKey || "********"}
           icon={<span>🔑</span>}
           valueClassName="text-red-300"
+          canCopy={!!privateKey}
           rightContent={
-            <button
-              onClick={
-                privateKey ? copyPrivateKeyToClipboard : revealPrivateKey
-              }
-              className={cn(
-                "text-sm text-neutral-400",
-                "hover:text-neutral-300 cursor-pointer"
-              )}
-            >
-              {privateKey ? (
-                <HiOutlineClipboard className="size-5" />
-              ) : (
+            !privateKey && (
+              <button
+                onClick={revealPrivateKey}
+                className={cn(
+                  "text-sm text-neutral-400",
+                  "hover:text-neutral-300 cursor-pointer"
+                )}
+              >
                 <HiOutlineEye className="size-5" />
-              )}
-            </button>
+              </button>
+            )
           }
         />
       </div>

@@ -9,6 +9,7 @@ import { useAppStore } from "../store/useAppStore";
 import { useNavigate } from "react-router";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
+import toast from "react-hot-toast";
 
 /** Welcome Page Component */
 const Welcome = () => {
@@ -47,7 +48,7 @@ const ExistingUserPasswordEntry = () => {
     const isVerified = await verifyPassword(data.password);
 
     if (!isVerified) {
-      alert("Incorrect Password. Please try again.");
+      toast.error("Incorrect Password. Please try again.");
       return;
     }
     navigate("/dashboard", { replace: true });

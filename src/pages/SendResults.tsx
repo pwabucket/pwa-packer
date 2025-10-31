@@ -6,36 +6,11 @@ import { AccountAddresses } from "../components/AccountAddresses";
 import { HiCheckCircle, HiXCircle } from "react-icons/hi2";
 import { cn } from "../lib/utils";
 import { AccountBalance } from "../components/AccountBalance";
-
-interface ResultInfoProps {
-  title: React.ReactNode;
-  value: React.ReactNode;
-  icon?: React.ReactNode;
-  valueClassName?: string;
-}
+import { ItemInfo, type ItemInfoProps } from "../components/ItemInfo";
 
 /** Result Information Component */
-const ResultInfo = ({
-  title,
-  value,
-  icon,
-  valueClassName,
-}: ResultInfoProps) => (
-  <div className="flex gap-4 p-4 bg-neutral-700 rounded-xl font-mono">
-    {/* Icon */}
-    <span className="shrink-0">{icon}</span>
-
-    {/* Title & Value */}
-    <div className="flex flex-col gap-1 grow min-w-0 min-h-0">
-      {/* Title */}
-      <h2 className="text-neutral-400 font-bold text-xs uppercase">{title}</h2>
-
-      {/* Value */}
-      <p className={cn("font-bold wrap-break-word text-sm", valueClassName)}>
-        {value}
-      </p>
-    </div>
-  </div>
+const ResultInfo = (props: ItemInfoProps) => (
+  <ItemInfo {...props} containerClassName="bg-neutral-700/50" />
 );
 
 /** Send Results Props Interface */
