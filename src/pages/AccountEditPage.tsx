@@ -57,6 +57,7 @@ const AccountEditPage = () => {
     const updatedAccount: Account = {
       id: account.id,
       title: data.title,
+      url: data.url,
       depositAddress: data.depositAddress,
       walletAddress: getWalletAddressFromPrivateKey(data.privateKey),
     };
@@ -92,6 +93,7 @@ const AccountEditPage = () => {
           <AccountForm
             initialValues={{
               title: account.title,
+              url: account.url,
               depositAddress: account.depositAddress,
               privateKey,
             }}

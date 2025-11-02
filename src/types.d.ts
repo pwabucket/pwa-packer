@@ -5,6 +5,7 @@ export interface Account {
   title: string;
   depositAddress: string;
   walletAddress: string;
+  url?: string;
 }
 
 export interface SendResult {

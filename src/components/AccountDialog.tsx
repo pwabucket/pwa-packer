@@ -10,8 +10,12 @@ import { PopupDialog } from "./PopupDialog";
 import toast from "react-hot-toast";
 import { ItemInfo } from "./ItemInfo";
 
+interface AccountDialogProps {
+  account: Account;
+}
+
 /** Account Dialog Component */
-const AccountDialog = ({ account }: { account: Account }) => {
+const AccountDialog = ({ account }: AccountDialogProps) => {
   const password = usePassword();
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const revealPrivateKey = async () => {
@@ -30,7 +34,7 @@ const AccountDialog = ({ account }: { account: Account }) => {
   return (
     <PopupDialog>
       {/* Account Title */}
-      <Dialog.Title className="text-2xl text-center text-yellow-500">
+      <Dialog.Title className="text-xl font-bold text-center text-yellow-500 grow min-w-0 min-h-0">
         {account.title}
       </Dialog.Title>
 

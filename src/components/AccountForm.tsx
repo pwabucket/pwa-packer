@@ -12,6 +12,7 @@ import { getWalletAddressFromPrivateKey } from "../lib/utils";
 interface AccountFormData {
   title: string;
   depositAddress: string;
+  url?: string;
   privateKey: string;
 }
 
@@ -20,6 +21,7 @@ const AccountFormSchema = yup
   .object({
     title: yup.string().required().label("Title"),
     depositAddress: yup.string().required().label("Deposit Address"),
+    url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
   })
   .required();
@@ -33,11 +35,12 @@ interface AccountFormProps {
 /** Account Form Component */
 const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
   /** Form */
-  const form = useForm<AccountFormData>({
+  const form = useForm({
     resolver: yupResolver(AccountFormSchema),
     defaultValues: {
       title: initialValues?.title || "",
       depositAddress: initialValues?.depositAddress || "",
+      url: initialValues?.url || "",
       privateKey: initialValues?.privateKey || "",
     },
   });
@@ -77,6 +80,18 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                 autoComplete="off"
                 placeholder="Deposit Address"
               />
+              <FormFieldError message={fieldState.error?.message} />
+            </>
+          )}
+        />
+
+        {/* URL */}
+        <Controller
+          name="url"
+          render={({ field, fieldState }) => (
+            <>
+              <Label htmlFor="url">URL</Label>
+              <Input {...field} id="url" autoComplete="off" placeholder="URL" />
               <FormFieldError message={fieldState.error?.message} />
             </>
           )}

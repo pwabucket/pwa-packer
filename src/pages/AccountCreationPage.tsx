@@ -24,6 +24,7 @@ const AccountCreationPage = () => {
     const newAccount: Account = {
       id: uuid(),
       title: data.title,
+      url: data.url,
       depositAddress: data.depositAddress,
       walletAddress: getWalletAddressFromPrivateKey(data.privateKey),
     };
