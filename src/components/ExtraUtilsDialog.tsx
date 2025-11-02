@@ -1,12 +1,17 @@
 import { Dialog } from "radix-ui";
 import { PopupDialog } from "./PopupDialog";
 import { ActionButton } from "./ActionButton";
-import { MdOutlineBackup, MdOutlineRestore } from "react-icons/md";
+import {
+  MdOutlineBackup,
+  MdOutlinePassword,
+  MdOutlineRestore,
+} from "react-icons/md";
 import toast from "react-hot-toast";
-import { createAndDownloadBackup } from "../lib/utils";
+import { cn, createAndDownloadBackup } from "../lib/utils";
 import { Link } from "react-router";
 
 const ExtraUtilsDialog = () => {
+  /* Handle Backup Action */
   const backup = () => {
     toast.promise(createAndDownloadBackup(), {
       loading: "Creating backup...",
@@ -17,28 +22,47 @@ const ExtraUtilsDialog = () => {
 
   return (
     <PopupDialog>
-      <Dialog.Title className="text-xl font-bold text-center text-yellow-500 grow min-w-0 min-h-0">
-        Utilities
+      <Dialog.Title
+        className={cn(
+          "text-2xl text-center text-yellow-400 grow min-w-0",
+          "font-protest-guerrilla"
+        )}
+      >
+        Extra Tools
       </Dialog.Title>
       {/* Utilities Description */}
-      <Dialog.Description className="text-sm text-center text-neutral-400">
-        Here you can find additional utilities and tools you can use.
+      <Dialog.Description className="sr-only">
+        Additional utilities and tools you can use.
       </Dialog.Description>
 
       {/* Utilities Content */}
       <div className="flex justify-center items-center gap-6">
+        {/* Backup */}
         <ActionButton
           label="Backup"
+          title="Create a backup"
           icon={<MdOutlineBackup className="size-5" />}
           onClick={backup}
         />
 
+        {/* Restore */}
         <ActionButton
-          label="Restore"
-          icon={<MdOutlineRestore className="size-5" />}
           asChild
+          label="Restore"
+          title="Restore a backup"
+          icon={<MdOutlineRestore className="size-5" />}
         >
           <Link to="/restore" />
+        </ActionButton>
+
+        {/* Password Change */}
+        <ActionButton
+          asChild
+          title="Change your password"
+          label="Password"
+          icon={<MdOutlinePassword className="size-5" />}
+        >
+          <Link to="/password" />
         </ActionButton>
       </div>
     </PopupDialog>

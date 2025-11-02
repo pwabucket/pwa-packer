@@ -10,6 +10,7 @@ import { Gas } from "./pages/Gas";
 import { useInactivity } from "./hooks/useInactivity";
 import { Toaster } from "react-hot-toast";
 import { Restore } from "./pages/Restore";
+import { Password } from "./pages/Password";
 const INACTIVITY_DURATION = 3 * 60 * 1000;
 function App() {
   useInactivity(INACTIVITY_DURATION);
@@ -29,6 +30,7 @@ function App() {
           <Route path="withdraw" element={<Withdraw />} />
           <Route path="send" element={<Send />} />
           <Route path="gas" element={<Gas />} />
+          <Route path="password" element={<Password />} />
         </Route>
       </Routes>
 
