@@ -7,6 +7,7 @@ interface AccountAvatarProps extends React.ComponentProps<"div"> {
 
 const AccountAvatar = ({ account, ...props }: AccountAvatarProps) => (
   <div
+    {...props}
     className={cn(
       "size-12 rounded-full flex items-center justify-center shrink-0",
       "group-hover:scale-105 transition-transform duration-200",
