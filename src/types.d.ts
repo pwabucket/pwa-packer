@@ -21,3 +21,16 @@ export interface SendResult {
   };
   error?: unknown;
 }
+
+export interface BackupData {
+  version: string;
+  timestamp: string;
+  data: {
+    accounts: Account[];
+    passwordHash: string | null;
+    privateKeys: {
+      accountId: string;
+      privateKey: string | null;
+    }[];
+  };
+}

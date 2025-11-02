@@ -1,9 +1,9 @@
-import { Link, useNavigate, type LinkProps } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAppStore } from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
-import { MdOutlineLocalGasStation } from "react-icons/md";
+import { MdOutlineLocalGasStation, MdOutlineMenu } from "react-icons/md";
 
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
 import { cn } from "../lib/utils";
@@ -11,40 +11,9 @@ import { AccountItem } from "../components/AccountItem";
 import { Button } from "../components/Button";
 import { TotalBalanceCard } from "../components/TotalBalanceCard";
 import { Reorder } from "motion/react";
-
-/** Action Button Props Interface */
-interface ActionButtonProps extends LinkProps {
-  icon: React.ReactNode;
-  label?: string;
-}
-
-/** Action Button Component */
-const ActionButton = ({ icon, label, ...props }: ActionButtonProps) => (
-  <Link
-    {...props}
-    className="flex flex-col justify-center items-center shrink-0 gap-1 group"
-  >
-    <span
-      className={cn(
-        "size-14 shrink-0 rounded-full",
-        "flex items-center justify-center gap-2",
-        "border border-neutral-700",
-        "hover:bg-yellow-500 hover:text-black transition-colors"
-      )}
-    >
-      {icon}
-    </span>
-
-    <span
-      className={cn(
-        "text-xs shrink-0 text-center transition-colors",
-        "text-neutral-400 group-hover:text-yellow-500"
-      )}
-    >
-      {label}
-    </span>
-  </Link>
-);
+import { Dialog } from "radix-ui";
+import { ActionButton } from "../components/ActionButton";
+import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -76,24 +45,41 @@ const Dashboard = () => {
         <div className="flex justify-center items-center gap-6">
           {/* Withdraw */}
           <ActionButton
-            to="/withdraw"
+            asChild
             label="Withdraw"
             icon={<HiOutlineArrowDownLeft className="size-5" />}
-          />
+          >
+            <Link to="/withdraw" />
+          </ActionButton>
 
           {/* Send Action Button */}
           <ActionButton
-            to="/send"
+            asChild
             label="Send"
             icon={<HiOutlineArrowUpRight className="size-5" />}
-          />
+          >
+            <Link to="/send" />
+          </ActionButton>
 
           {/* Gas */}
           <ActionButton
-            to="/gas"
+            asChild
             label="Gas"
             icon={<MdOutlineLocalGasStation className="size-5" />}
-          />
+          >
+            <Link to="/gas" />
+          </ActionButton>
+
+          <Dialog.Root>
+            <ActionButton
+              icon={<MdOutlineMenu className="size-5" />}
+              label="More"
+              asChild
+            >
+              <Dialog.Trigger />
+            </ActionButton>
+            <ExtraUtilsDialog />
+          </Dialog.Root>
         </div>
 
         {/* Account List Heading */}

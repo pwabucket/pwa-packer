@@ -6,10 +6,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { PasswordInput } from "../components/Input";
 import * as yup from "yup";
 import { useAppStore } from "../store/useAppStore";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import toast from "react-hot-toast";
+import { MdOutlineRestore } from "react-icons/md";
 
 /** Welcome Page Component */
 const Welcome = () => {
@@ -95,9 +96,19 @@ const NewUserPasswordCreation = () => {
           handleFormSubmit={handleFormSubmit}
         />
       ) : (
-        <Button onClick={() => setShowPasswordForm((prev) => !prev)}>
-          Get Started
-        </Button>
+        <>
+          <Button onClick={() => setShowPasswordForm((prev) => !prev)}>
+            Get Started
+          </Button>
+
+          <Link
+            to="/restore"
+            className="text-yellow-400 hover:underline text-center"
+          >
+            <MdOutlineRestore className="size-4 inline-block" /> Restore from
+            Backup
+          </Link>
+        </>
       )}
     </>
   );

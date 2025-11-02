@@ -16,6 +16,7 @@ export type AppStore = {
   password: string | null; // in-memory only
   passwordHash: string | null; // persisted
   setPassword: (plain: string) => Promise<void>;
+  setPasswordHash: (hash: string | null) => void;
   verifyPassword: (input: string) => Promise<boolean>;
   clearPassword: () => void;
   resetPassword: () => void;
@@ -71,6 +72,11 @@ const useAppStore = create(
           passwordHash: hash, // persist hash
           password: plain, // keep in memory
         });
+      },
+
+      /** Set Password Hash */
+      setPasswordHash: (hash: string | null) => {
+        set({ passwordHash: hash });
       },
 
       /** Verify Password */

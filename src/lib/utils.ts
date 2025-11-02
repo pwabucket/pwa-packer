@@ -6,6 +6,8 @@ import Encrypter, { type EncryptionResult } from "./Encrypter";
 import { provider, USDT_DECIMALS, usdtToken } from "./transaction";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
+import { useAppStore } from "../store/useAppStore";
+import type { BackupData } from "../types";
 
 export { v4 as uuid } from "uuid";
 
@@ -108,4 +110,64 @@ export function getInitDataUnsafe(initData: string) {
   }
 
   return data;
+}
+
+export function getBackupData() {
+  const { accounts, passwordHash } = useAppStore.getState();
+
+  const backupData: BackupData = {
+    version: import.meta.env.PACKAGE_VERSION || "unknown",
+    timestamp: new Date().toISOString(),
+    data: {
+      accounts,
+      passwordHash,
+      privateKeys: accounts.map((account) => ({
+        accountId: account.id,
+        privateKey: localStorage.getItem(
+          getLocalStorageKeyForAccountPrivateKey(account.id)
+        ),
+      })),
+    },
+  };
+  return backupData;
+}
+
+export async function createAndDownloadBackup() {
+  const backupData = getBackupData();
+  const backupBlob = new Blob([JSON.stringify(backupData, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(backupBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `packer_backup_${new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function restoreBackupData(data: BackupData["data"]) {
+  const { accounts, passwordHash, privateKeys } = data;
+  const { resetApp, setAccounts, setPasswordHash } = useAppStore.getState();
+
+  /* Reset current app data */
+  resetApp();
+
+  /* Set accounts */
+  setAccounts(accounts);
+
+  /* Set password hash */
+  setPasswordHash(passwordHash);
+
+  /* Store private keys in localStorage */
+  privateKeys.forEach(({ accountId, privateKey }) => {
+    if (privateKey) {
+      localStorage.setItem(
+        getLocalStorageKeyForAccountPrivateKey(accountId),
+        privateKey
+      );
+    }
+  });
 }

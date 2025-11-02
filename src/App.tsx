@@ -9,6 +9,7 @@ import { Send } from "./pages/Send";
 import { Gas } from "./pages/Gas";
 import { useInactivity } from "./hooks/useInactivity";
 import { Toaster } from "react-hot-toast";
+import { Restore } from "./pages/Restore";
 const INACTIVITY_DURATION = 3 * 60 * 1000;
 function App() {
   useInactivity(INACTIVITY_DURATION);
@@ -17,6 +18,7 @@ function App() {
     <>
       <Routes>
         <Route index element={<Welcome />} />
+        <Route path="restore" element={<Restore />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="accounts/new" element={<AccountCreationPage />} />
