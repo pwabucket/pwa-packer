@@ -20,6 +20,8 @@ function App() {
       <Routes>
         <Route index element={<Welcome />} />
         <Route path="restore" element={<Restore />} />
+
+        {/* Protected Routes */}
         <Route element={<ProtectedRoutes />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="accounts/new" element={<AccountCreationPage />} />
