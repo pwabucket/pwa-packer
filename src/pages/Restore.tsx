@@ -30,7 +30,7 @@ const Restore = () => {
             }
           );
         } catch {
-          toast.error("Invalid JSON file!");
+          toast.error("Invalid backup file!");
         }
       });
       reader.readAsText(file);
