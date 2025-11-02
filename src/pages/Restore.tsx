@@ -142,8 +142,6 @@ const Restore = () => {
           const json = JSON.parse(e.target!.result as string) as BackupData;
           const { data } = json;
 
-          console.log(e.target!.result);
-
           toast.promise(
             restoreBackupData(data).then(() =>
               navigate("/", { replace: true })
