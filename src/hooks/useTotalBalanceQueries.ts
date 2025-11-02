@@ -18,8 +18,7 @@ const useTotalBalanceQueries = () => {
         data: results.map((result) => result.data),
         isPending: results.some((result) => result.isPending),
         isError: results.some((result) => result.isError),
-        isSuccess:
-          results.length > 0 && results.every((result) => result.isSuccess),
+        isSuccess: results.every((result) => result.isSuccess),
       };
     },
     []
