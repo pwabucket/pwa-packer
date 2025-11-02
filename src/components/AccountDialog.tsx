@@ -9,6 +9,7 @@ import { usePassword } from "../hooks/usePassword";
 import { PopupDialog } from "./PopupDialog";
 import toast from "react-hot-toast";
 import { ItemInfo } from "./ItemInfo";
+import { AccountProfile } from "./AccountProfile";
 
 interface AccountDialogProps {
   account: Account;
@@ -37,6 +38,8 @@ const AccountDialog = ({ account }: AccountDialogProps) => {
       <Dialog.Title className="text-xl font-bold text-center text-yellow-500 grow min-w-0 min-h-0">
         {account.title}
       </Dialog.Title>
+
+      {account.url ? <AccountProfile url={account.url} /> : null}
 
       {/* Account Description */}
       <Dialog.Description className="text-center text-sm text-neutral-400">
