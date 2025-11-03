@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useAppStore } from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
@@ -14,12 +14,15 @@ import { Reorder } from "motion/react";
 import { Dialog } from "radix-ui";
 import { ActionButton } from "../components/ActionButton";
 import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
+import { useState } from "react";
+import { NewAccountDialog } from "../components/NewAccountDialog";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
-  const navigate = useNavigate();
+
+  const [showNewAccountDialog, setShowNewAccountDialog] = useState(false);
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -88,7 +91,13 @@ const Dashboard = () => {
         </h4>
 
         {/* New Account Button */}
-        <Button onClick={() => navigate("/accounts/new")}>New Account</Button>
+        <Button onClick={() => setShowNewAccountDialog(true)}>
+          New Account
+        </Button>
+
+        {showNewAccountDialog && (
+          <NewAccountDialog onClose={() => setShowNewAccountDialog(false)} />
+        )}
 
         {/* Account List */}
         <div className="flex flex-col gap-2">

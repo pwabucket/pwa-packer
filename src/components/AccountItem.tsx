@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import type { Account } from "../types";
 import { MdEditNote } from "react-icons/md";
 
@@ -12,11 +11,13 @@ import { useCallback, useState } from "react";
 import { AccountWebview } from "./AccountWebview";
 import { AccountAvatar } from "./AccountAvatar";
 import toast from "react-hot-toast";
+import { AccountEditDialog } from "./AccountEditDialog";
 
 /** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
   const dragControls = useDragControls();
   const [openURL, setOpenURL] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   const launchURL = useCallback(() => {
     if (!account.url) {
@@ -97,8 +98,8 @@ const AccountItem = ({ account }: { account: Account }) => {
                 </button>
 
                 {/* Edit Account Button */}
-                <Link
-                  to={`/accounts/edit/${account.id}`}
+                <button
+                  onClick={() => setShowEditForm(true)}
                   className={cn(
                     "size-10 flex items-center justify-center cursor-pointer",
                     "hover:bg-neutral-700 rounded-full",
@@ -108,7 +109,7 @@ const AccountItem = ({ account }: { account: Account }) => {
                 >
                   <span className="sr-only">Edit {account.title}</span>
                   <MdEditNote className="size-5" />
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -127,6 +128,12 @@ const AccountItem = ({ account }: { account: Account }) => {
       </Reorder.Item>
 
       {openURL && <AccountWebview account={account} close={closeURL} />}
+      {showEditForm && (
+        <AccountEditDialog
+          account={account}
+          onClose={() => setShowEditForm(false)}
+        />
+      )}
     </>
   );
 };
