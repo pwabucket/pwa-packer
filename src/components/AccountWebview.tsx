@@ -23,7 +23,7 @@ const AccountWebview = ({ account, close }: AccountWebviewProps) => {
             <Dialog.Title className="font-bold text-sm text-center text-yellow-500 ">
               {account.title}
             </Dialog.Title>
-            <AccountAddresses account={account} />
+            <AccountAddresses account={account} canCopy />
             <AccountBalance account={account} />
           </div>
 
