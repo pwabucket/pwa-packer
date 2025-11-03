@@ -8,6 +8,7 @@ import {
 import type { Account } from "../types";
 import { usePassword } from "../hooks/usePassword";
 import Encrypter from "../lib/Encrypter";
+import toast from "react-hot-toast";
 
 interface NewAccountFormProps {
   onCreated?: (account: Account) => void;
@@ -47,6 +48,9 @@ const NewAccountForm = ({ onCreated }: NewAccountFormProps) => {
 
     /* Add Account to Store */
     addAccount(newAccount);
+
+    /* Show Success Toast */
+    toast.success("Account created successfully!");
 
     /* Invoke onCreated callback if provided */
     if (onCreated) {

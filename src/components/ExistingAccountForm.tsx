@@ -9,6 +9,7 @@ import type { Account } from "../types";
 import { usePassword } from "../hooks/usePassword";
 import Encrypter from "../lib/Encrypter";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface ExistingAccountFormProps {
   account: Account;
@@ -75,6 +76,9 @@ const ExistingAccountForm = ({
 
     /* Update Account in Store */
     updateAccount(updatedAccount);
+
+    /* Show Success Toast */
+    toast.success("Account updated successfully!");
 
     /* Invoke onUpdated callback if provided */
     if (onUpdated) {
