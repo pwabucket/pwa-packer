@@ -29,6 +29,7 @@ const useTotalBalanceQueries = () => {
     queries: accounts.map((account) => ({
       queryKey: ["balance", account.walletAddress],
       queryFn: async () => fetchBalance(account.walletAddress),
+      refetchInterval: 30_000, // Refetch every 30 seconds
     })),
   });
 

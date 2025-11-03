@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { useTotalBalanceQueries } from "../hooks/useTotalBalanceQueries";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
+import { MdOutlineRefresh } from "react-icons/md";
+import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "../lib/utils";
 const TotalBalanceCard = () => {
+  const queryClient = useQueryClient();
   const queries = useTotalBalanceQueries();
   const totalBalance = useMemo(() => {
     if (!queries.isSuccess) return { usdt: 0, bnb: 0 };
@@ -22,14 +26,35 @@ const TotalBalanceCard = () => {
     );
   }, [queries]);
 
+  const refetchAllBalances = () => {
+    queryClient.resetQueries({ queryKey: ["balance"] });
+  };
+
   return queries.isSuccess ? (
     <div className="flex flex-col gap-2 pt-4">
-      <p className="text-5xl font-bold font-protest-guerrilla text-center">
-        {Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 2,
-        }).format(totalBalance.usdt)}
+      <p className="text-center flex items-center justify-center gap-2">
+        {/* Spacer */}
+        <span className="size-6 shrink-0" />
+
+        {/* USDT Balance */}
+        <span className="min-w-0 text-5xl font-bold font-protest-guerrilla">
+          {Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 2,
+          }).format(totalBalance.usdt)}
+        </span>
+
+        {/* Refresh Button */}
+        <button
+          onClick={refetchAllBalances}
+          className={cn(
+            "size-6 shrink-0 flex justify-center items-center",
+            "rounded-full bg-sky-500 cursor-pointer"
+          )}
+        >
+          <MdOutlineRefresh className="size-4" />
+        </button>
       </p>
       <p className="text-center text-sm">
         <img
