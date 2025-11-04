@@ -11,6 +11,7 @@ import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import toast from "react-hot-toast";
 import { MdOutlineRestore } from "react-icons/md";
+import { SiGithub } from "react-icons/si";
 
 /** Welcome Page Component */
 const Welcome = () => {
@@ -33,6 +34,22 @@ const Welcome = () => {
         ) : (
           <ExistingUserPasswordEntry />
         )}
+
+        <div className="flex flex-col items-center justify-center gap-2">
+          {/* Repository URL */}
+          <Link
+            to={import.meta.env.VITE_APP_REPOSITORY_URL || "#"}
+            target="_blank"
+            className="text-neutral-500 hover:text-yellow-500 text-sm flex justify-center items-center gap-2"
+          >
+            <SiGithub className="size-4 inline-block" /> <span>GitHub</span>
+          </Link>
+
+          {/* Version Number */}
+          <p className="text-center text-neutral-500 text-xs">
+            v{import.meta.env.PACKAGE_VERSION}
+          </p>
+        </div>
       </div>
     </div>
   );
