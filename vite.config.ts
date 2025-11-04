@@ -51,6 +51,28 @@ export default defineConfig(({ mode }) => {
               purpose: "maskable",
             },
           ],
+          screenshots: [
+            {
+              src: "screenshot-mobile-1.jpg",
+              sizes: "1080x1920",
+              type: "image/jpg",
+            },
+            {
+              src: "screenshot-mobile-2.jpg",
+              sizes: "1080x1920",
+              type: "image/jpg",
+            },
+            {
+              src: "screenshot-mobile-3.jpg",
+              sizes: "1080x1920",
+              type: "image/jpg",
+            },
+            {
+              src: "screenshot-mobile-4.jpg",
+              sizes: "1080x1920",
+              type: "image/jpg",
+            },
+          ],
         },
       }),
       ViteEjsPlugin(env),
