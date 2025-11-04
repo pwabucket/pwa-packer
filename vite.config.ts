@@ -24,8 +24,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: "Packer",
           short_name: "Packer",
-          description:
-            "Perform BSC Transactions in Batch with built-in Hash Maker.",
+          description: "Batch BSC Transactions with Built-in Hash Maker.",
           theme_color: "#0a0a0a",
           background_color: "#0a0a0a",
           icons: [

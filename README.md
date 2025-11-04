@@ -4,9 +4,10 @@
 
 > **Your all-in-one solution for BSC Transactions with built-in Hash Maker**
 
-Packer is a powerful Progressive Web Application (PWA) designed for managing BSC (Binance Smart Chain) transactions with advanced features like batch processing, multi-account support, and built-in hash generation tools.
+Packer is a powerful Progressive Web Application (PWA) designed for managing BSC (Binance Smart Chain) transactions with advanced features like batch processing, multi-account support, and built-in hash generation tool.
 
 <p align="center">
+  <img src="/public/social-preview.png" width="100%" />
   <img src="/public/screenshot-mobile-1.jpg" width="49%" />
   <img src="/public/screenshot-mobile-2.jpg" width="49%" />
   <img src="/public/screenshot-mobile-3.jpg" width="49%" />
