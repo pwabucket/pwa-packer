@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
         registerType: "autoUpdate",
         workbox: {
           globPatterns: ["**/*.*"],
+          globIgnores: ["**/screenshot-*.jpg", "**/social-preview.png"],
           maximumFileSizeToCacheInBytes: 5 * 1024 ** 2,
         },
         manifest: {
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) => {
           description: "Batch BSC Transactions with Built-in Hash Maker.",
           theme_color: "#0a0a0a",
           background_color: "#0a0a0a",
+          id: "/",
           icons: [
             {
               src: "pwa-64x64.png",
@@ -70,6 +72,12 @@ export default defineConfig(({ mode }) => {
               src: "screenshot-mobile-4.jpg",
               sizes: "1080x1920",
               type: "image/jpg",
+            },
+            {
+              src: "screenshot-desktop-wide.jpg",
+              sizes: "1920x1080",
+              type: "image/jpg",
+              form_factor: "wide",
             },
           ],
         },
