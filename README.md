@@ -19,7 +19,7 @@ Packer is a powerful Progressive Web Application (PWA) designed for managing BSC
 ### **Core Functionality**
 - **Batch Transactions** - Execute multiple transactions in a single operation
 - **Multi-Account Management** - Manage multiple BSC accounts seamlessly
-- **Built-in Hash Maker** - Generate secure hashes for your transactions
+- **Built-in Hash Maker** - Generate hashes for your transactions
 - **Gas Fee Optimization** - Smart gas splitting and optimization
 - **Send & Withdraw** - Easy token transfers and withdrawals
 
