@@ -1,75 +1,99 @@
-# React + TypeScript + Vite
+# 📦 Packer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Your all-in-one solution for BSC Transactions with built-in Hash Maker**
 
-Currently, two official plugins are available:
+Packer is a powerful Progressive Web Application (PWA) designed for managing BSC (Binance Smart Chain) transactions with advanced features like batch processing, multi-account support, and built-in hash generation tools.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### **Core Functionality**
+- **Batch Transactions** - Execute multiple transactions in a single operation
+- **Multi-Account Management** - Manage multiple BSC accounts seamlessly
+- **Built-in Hash Maker** - Generate secure hashes for your transactions
+- **Gas Fee Optimization** - Smart gas splitting and optimization
+- **Send & Withdraw** - Easy token transfers and withdrawals
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### **Security & Privacy**
+- **Local Storage** - All data stored locally on your device
+- **Password Protection** - Secure access with password authentication
+- **Backup & Restore** - Export/import your account data securely
+- **Auto-lock** - Automatic session timeout for enhanced security
 
-Note: This will impact Vite dev & build performances.
+### **Progressive Web App**
+- **Offline Support** - Works without internet connection
+- **Mobile Optimized** - Responsive design for all devices
+- **Install Anywhere** - Add to home screen on mobile/desktop
+- **Fast & Reliable** - Optimized performance and caching
 
-## Expanding the ESLint configuration
+### **Supported Assets**
+- **BNB** - Native Binance Smart Chain token
+- **USDT** - Tether on BSC network
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Usage Guide
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Getting Started
+1. **First Launch** - Create a secure password for your wallet
+2. **Add Accounts** - Import your BSC accounts using private keys
+3. **Check Balances** - View your BNB and USDT balances
+4. **Start Transacting** - Send, withdraw, or batch process transactions
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Gas Management
+- **Smart gas estimation**
+- **Gas fee splitting across accounts**
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Security
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Best Practices
+- ✅ Private keys encrypted with user password
+- ✅ Local storage only - no server transmission
+- ✅ Auto-lock after inactivity
+- ✅ Secure backup/restore functionality
+- ✅ Input validation and sanitization
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Security Recommendations
+- Use strong passwords (12+ characters)
+- Regular backups of your data
+- Keep your browser updated
+- Remove untrusted browser extensions
+- Verify transaction details before submitting
+
+## PWA Features
+
+### Installation
+- **Chrome/Edge**: Click install icon in address bar
+- **Firefox**: Add to home screen option
+- **Safari**: Share → Add to Home Screen
+- **Mobile**: Add to home screen prompt
+
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Links
+
+- **Repository**: [GitHub](https://github.com/pwabucket/pwa-packer)
+- **Issues**: [Bug Reports & Feature Requests](https://github.com/pwabucket/pwa-packer/issues)
+- **Discussions**: [Community Discussions](https://github.com/pwabucket/pwa-packer/discussions)
+
+## Disclaimer ⚠️
+
+Packer is provided "as is" without warranty. Users are responsible for:
+- Securing their private keys and passwords
+- Verifying transaction details before execution
+- Understanding BSC network fees and risks
+- Keeping backups of their data
+
+**Use at your own risk. The developers are not responsible for any loss of funds.**
+
+---
+
+<div align="center">
+  <strong>Built with ❤️ by PWABucket</strong>
+</div>
