@@ -14,15 +14,16 @@ import { Reorder } from "motion/react";
 import { Dialog } from "radix-ui";
 import { ActionButton } from "../components/ActionButton";
 import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
-import { useState } from "react";
 import { NewAccountDialog } from "../components/NewAccountDialog";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
 
-  const [showNewAccountDialog, setShowNewAccountDialog] = useState(false);
+  const [showNewAccountDialog, setShowNewAccountDialog] =
+    useLocationToggle("new-account-dialog");
 
   return (
     <div className="flex flex-col min-h-dvh">

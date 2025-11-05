@@ -6,10 +6,11 @@ import { AccountDetailsDialog } from "../components/AccountDialog";
 import { cn } from "../lib/utils";
 import { AccountBalance } from "./AccountBalance";
 import { Reorder, useDragControls } from "motion/react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { AccountWebview } from "./AccountWebview";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountEditDialog } from "./AccountEditDialog";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 const AccountActionButton = (props: React.ComponentProps<"button">) => {
   return (
@@ -29,16 +30,26 @@ const AccountActionButton = (props: React.ComponentProps<"button">) => {
 /** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
   const dragControls = useDragControls();
-  const [showAccountDetails, setShowAccountDetails] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
 
+  const [showAccountWebview, toggleShowAccountWebview] = useLocationToggle(
+    `${account.id}-webview`
+  );
+  const [showAccountDetails, toggleShowAccountDetails] = useLocationToggle(
+    `${account.id}-details`
+  );
+  const [showEditForm, toggleShowEditForm] = useLocationToggle(
+    `${account.id}-edit`
+  );
+
+  /* Launch Account Details Dialog */
   const launchAccountDetails = useCallback(() => {
-    setShowAccountDetails(true);
-  }, []);
+    toggleShowAccountDetails(true);
+  }, [toggleShowAccountDetails]);
 
+  /* Close Account Details Dialog */
   const closeAccountDetails = useCallback(() => {
-    setShowAccountDetails(false);
-  }, []);
+    toggleShowAccountDetails(false);
+  }, [toggleShowAccountDetails]);
 
   return (
     <>
@@ -47,7 +58,10 @@ const AccountItem = ({ account }: { account: Account }) => {
         dragListener={false}
         dragControls={dragControls}
       >
-        <Dialog.Root>
+        <Dialog.Root
+          open={showAccountWebview}
+          onOpenChange={toggleShowAccountWebview}
+        >
           <div
             className={cn(
               "group relative",
@@ -99,7 +113,7 @@ const AccountItem = ({ account }: { account: Account }) => {
 
                 {/* Edit Account Button */}
                 <AccountActionButton
-                  onClick={() => setShowEditForm(true)}
+                  onClick={() => toggleShowEditForm(true)}
                   className={cn("hover:text-blue-400")}
                 >
                   <span className="sr-only">Edit {account.title}</span>
@@ -133,7 +147,7 @@ const AccountItem = ({ account }: { account: Account }) => {
       {showEditForm && (
         <AccountEditDialog
           account={account}
-          onClose={() => setShowEditForm(false)}
+          onClose={() => toggleShowEditForm(false)}
         />
       )}
     </>
