@@ -11,6 +11,8 @@ import type { BackupData } from "../types";
 
 export { v4 as uuid } from "uuid";
 
+export const HEXADECIMAL_CHARS = "0123456789abcdef";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(...inputs));
 }
@@ -170,4 +172,8 @@ export async function restoreBackupData(data: BackupData["data"]) {
       );
     }
   });
+}
+
+export function truncateAddress(address: string, length = 6) {
+  return `${address.slice(0, length)}...${address.slice(-4)}`;
 }

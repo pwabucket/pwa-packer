@@ -1,30 +1,14 @@
-import { Label } from "../components/Label";
-import { Input } from "../components/Input";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { Button } from "../components/Button";
 import { usePassword } from "../hooks/usePassword";
-import USDTIcon from "../assets/tether-usdt-logo.svg";
-import { cn, getPrivateKey } from "../lib/utils";
-import HashMaker, { type HashResult } from "../lib/HashMaker";
-import * as yup from "yup";
-import {
-  Controller,
-  FormProvider,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { FormFieldError } from "../components/FormFieldError";
-import { Select } from "../components/Select";
-import { useMutation } from "@tanstack/react-query";
+import { FormProvider } from "react-hook-form";
 import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import { AccountsChooser } from "../components/AccountsChooser";
-import type { SendResult } from "../types";
 import { Dialog } from "radix-ui";
 import { SendResults } from "./SendResults";
 import toast from "react-hot-toast";
-
-const HEXADECIMAL_CHARS = "0123456789abcdef";
+import { SendFormFields } from "../components/SendFormFields";
+import { useSendForm } from "../hooks/useSendForm";
+import { useSendMutation } from "../hooks/useSendMutation";
 
 /** Send Form Data Interface */
 interface SendFormData {
@@ -32,27 +16,6 @@ interface SendFormData {
   targetCharacters: string[];
   gasLimit: "average" | "fast" | "instant";
 }
-
-/** Send Form Schema */
-const SendFormSchema = yup
-  .object({
-    amount: yup.string().required().label("Amount"),
-
-    targetCharacters: yup
-      .array()
-      .required()
-      .of(yup.string().oneOf(HEXADECIMAL_CHARS.split("")).required())
-      .default([])
-      .label("Target Characters"),
-
-    gasLimit: yup
-      .string()
-      .required()
-      .oneOf<SendFormData["gasLimit"]>(["average", "fast", "instant"])
-      .default("fast")
-      .label("Gas Fee"),
-  })
-  .required();
 
 /** Send Page Component */
 const Send = () => {
@@ -62,29 +25,13 @@ const Send = () => {
   const { selectedAccounts } = accountsChooser;
 
   /** Form */
-  const form = useForm({
-    defaultValues: {
-      amount: "",
-      gasLimit: "fast" as const,
-      targetCharacters: ["a", "b", "c", "d", "e", "f"],
-    },
-    resolver: yupResolver(SendFormSchema),
-  });
-
-  /* Field Array for Target Characters */
-  const { append, remove } = useFieldArray({
-    control: form.control,
-    name: "targetCharacters" as never,
-  });
+  const { form, append, remove } = useSendForm();
 
   /* Mutation for Sending Funds */
-  const mutation = useMutation({
-    mutationKey: ["sendFunds"],
-    mutationFn: (data: SendFormData) => sendFunds(data),
-  });
+  const mutation = useSendMutation();
 
-  /** Send Funds Function */
-  const sendFunds = async (data: SendFormData) => {
+  /** Handle Form Submit */
+  const handleFormSubmit = async (data: SendFormData) => {
     /* Validate Accounts */
     if (selectedAccounts.length === 0) {
       toast.error("No accounts available to send funds from.");
@@ -103,81 +50,12 @@ const Send = () => {
       return;
     }
 
-    /* Create Provider */
-    const provider = HashMaker.createProvider();
-
-    /* Process all accounts concurrently using Promise.all */
-    const results = await Promise.all(
-      selectedAccounts.map(async (account): Promise<SendResult> => {
-        let hashResult: HashResult | null = null;
-        /* Select Random Target Character */
-        const targetCharacter =
-          data.targetCharacters[
-            Math.floor(Math.random() * data.targetCharacters.length)
-          ];
-
-        /* Receiver Address */
-        const receiver = account.depositAddress;
-
-        try {
-          const privateKey = await getPrivateKey(account.id, password);
-          const hashMaker = new HashMaker({ privateKey, provider });
-
-          /* Initialize Hash Maker */
-          await hashMaker.initialize();
-
-          /* Log Sending Info */
-          console.log(
-            `Sending $${data.amount} from account ${account.title} (${account.walletAddress}) to ${receiver} with targeting character ${targetCharacter}`
-          );
-
-          /* Generate Transaction */
-          hashResult = (await hashMaker.generateTransaction({
-            amount: data.amount,
-            gasLimit: data.gasLimit,
-            targetCharacter,
-            receiver,
-          })) as HashResult;
-
-          /* Log Hash Result */
-          console.log(
-            `Hash Result: ${account.title} (${account.walletAddress})`,
-            hashResult
-          );
-
-          const result = await hashMaker.submitTransferTransaction(hashResult);
-
-          /* Log Submit Result */
-          console.log(
-            `Submit Result: ${account.title} (${account.walletAddress})`,
-            result
-          );
-
-          /* Return Success Result */
-          return {
-            status: true,
-            account,
-            targetCharacter,
-            hashResult,
-            receiver,
-            result,
-          };
-        } catch (error) {
-          /* Log Error */
-          console.error(`Failed to send from account ${account.id}:`, error);
-
-          /* Return Failure Result */
-          return {
-            status: false,
-            account,
-            error,
-            receiver,
-            hashResult,
-            targetCharacter,
-          };
-        }
-      })
-    );
+    const results = await mutation.mutateAsync({
+      accounts: selectedAccounts,
+      amount: data.amount,
+      targetCharacters: data.targetCharacters,
+      gasLimit: data.gasLimit,
+    });
 
     /* Count Successful Sends */
     const successfulSends = results.filter((result) => result.status).length;
@@ -188,11 +66,6 @@ const Send = () => {
     );
 
     return results;
-  };
-
-  /** Handle Form Submit */
-  const handleFormSubmit = async (data: SendFormData) => {
-    await mutation.mutateAsync(data);
   };
 
   return (
@@ -213,86 +86,12 @@ const Send = () => {
             deposit addresses.
           </p>
 
-          {/* Amount */}
-          <Controller
-            name="amount"
-            render={({ field, fieldState }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="amount">
-                  <img src={USDTIcon} className="size-4 inline-block" /> Amount
-                  to Send
-                </Label>
-                <Input
-                  {...field}
-                  disabled={mutation.isPending}
-                  id="amount"
-                  autoComplete="off"
-                  placeholder="Amount"
-                />
-                <FormFieldError message={fieldState.error?.message} />
-              </div>
-            )}
+          {/** Send Form Fields */}
+          <SendFormFields
+            append={append}
+            remove={remove}
+            disabled={mutation.isPending}
           />
-
-          {/* Gas Limit */}
-          <Controller
-            name="gasLimit"
-            render={({ field, fieldState }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="gasLimit">Gas Limit</Label>
-                <Select id="gasLimit" {...field} disabled={mutation.isPending}>
-                  <Select.Option value="average">Average</Select.Option>
-                  <Select.Option value="fast">Fast</Select.Option>
-                  <Select.Option value="instant">Instant</Select.Option>
-                </Select>
-                <FormFieldError message={fieldState.error?.message} />
-              </div>
-            )}
-          />
-
-          {/* Target Character */}
-          <Controller
-            name="targetCharacters"
-            render={({ field, fieldState }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="target-character">
-                  Target Character (HEX):
-                </Label>
-
-                <div className="grid grid-cols-4 gap-4">
-                  {HEXADECIMAL_CHARS.split("").map((char) => (
-                    <button
-                      key={char}
-                      type="button"
-                      className={cn(
-                        "disabled:opacity-50 disabled:cursor-not-allowed",
-                        "p-2 border rounded-md cursor-pointer",
-                        "font-bold font-mono",
-                        field.value.includes(char)
-                          ? "border-yellow-500"
-                          : "border-neutral-700"
-                      )}
-                      onClick={() =>
-                        field.value.includes(char)
-                          ? remove(field.value.indexOf(char))
-                          : append(char)
-                      }
-                      disabled={mutation.isPending}
-                    >
-                      {char}
-                    </button>
-                  ))}
-                </div>
-
-                <FormFieldError message={fieldState.error?.message} />
-              </div>
-            )}
-          />
-
-          {/* Submit Button */}
-          <Button type="submit" className="mt-4" disabled={mutation.isPending}>
-            {mutation.isPending ? "Sending..." : "Send Funds"}
-          </Button>
 
           {/* Accounts Chooser */}
           <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />

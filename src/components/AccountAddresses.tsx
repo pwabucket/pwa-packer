@@ -1,5 +1,5 @@
 import { MdOutlineContentCopy } from "react-icons/md";
-import { copyToClipboard } from "../lib/utils";
+import { copyToClipboard, truncateAddress } from "../lib/utils";
 import type { Account } from "../types";
 
 interface AccountAddressesProps {
@@ -25,8 +25,7 @@ const AccountAddresses = ({ account, canCopy }: AccountAddressesProps) => {
       {/* Wallet Address */}
       <span className="text-lime-300 text-xs flex items-center gap-1">
         <span className="font-bold">W:</span>{" "}
-        {account.walletAddress.slice(0, 6)}...
-        {account.walletAddress.slice(-4)}
+        {truncateAddress(account.walletAddress)}
         {canCopy && (
           <>
             {" "}
@@ -38,8 +37,7 @@ const AccountAddresses = ({ account, canCopy }: AccountAddressesProps) => {
       {/* Deposit Address */}
       <span className="text-orange-300 text-xs flex items-center gap-1">
         <span className="font-bold">D:</span>{" "}
-        {account.depositAddress.slice(0, 6)}...
-        {account.depositAddress.slice(-4)}
+        {truncateAddress(account.depositAddress)}
         {canCopy && (
           <>
             {" "}
