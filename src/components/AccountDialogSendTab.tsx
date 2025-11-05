@@ -5,6 +5,8 @@ import { useSendMutation } from "../hooks/useSendMutation";
 import toast from "react-hot-toast";
 import { FormProvider } from "react-hook-form";
 import { SendFormFields } from "./SendFormFields";
+import { SendResultsAccordion } from "./SendResultsAccordion";
+import { MdReceipt } from "react-icons/md";
 
 const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const password = usePassword();
@@ -41,7 +43,17 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      {/* Send Results Accordion */}
+      {mutation.isSuccess && mutation.data ? (
+        <div className="flex flex-col gap-2">
+          <h2 className="text-sm font-bold text-yellow-500 text-center">
+            <MdReceipt className="inline-block mr-1" /> Transfer Receipt
+          </h2>
+          <SendResultsAccordion results={mutation.data} />
+        </div>
+      ) : null}
+
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
@@ -67,7 +79,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
           />
         </form>
       </FormProvider>
-    </>
+    </div>
   );
 };
 
