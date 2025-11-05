@@ -15,6 +15,8 @@ import * as yup from "yup";
 import { AccountsChooser } from "../components/AccountsChooser";
 import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
+import { useProgress } from "../hooks/useProgress";
+import { Progress } from "../components/Progress";
 
 /** Parse Amount to Smallest Unit (18 Decimals) */
 const parseToSmallUnit = (amount: number) => {
@@ -54,6 +56,7 @@ interface GasFormData {
 
 /** Gas Page Component */
 const Gas = () => {
+  const { progress, resetProgress, incrementProgress } = useProgress();
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
@@ -70,6 +73,9 @@ const Gas = () => {
   const mutation = useMutation({
     mutationKey: ["gasSplit"],
     mutationFn: async (data: GasFormData) => {
+      /** Reset Progress */
+      resetProgress();
+
       if (selectedAccounts.length === 0) {
         toast.error("No accounts selected for gas sending.");
         return;
@@ -117,6 +123,9 @@ const Gas = () => {
         });
         successfulTxCount++;
         nonce++;
+
+        /** Increment Progress */
+        incrementProgress();
       }
 
       toast.success(`${successfulTxCount} transactions sent successfully.`);
@@ -204,6 +213,11 @@ const Gas = () => {
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? "Processing..." : "Send Gas to Accounts"}
           </Button>
+
+          {/* Progress Bar */}
+          {mutation.isPending && (
+            <Progress max={selectedAccounts.length} current={progress} />
+          )}
 
           {/* Accounts Chooser */}
           <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
