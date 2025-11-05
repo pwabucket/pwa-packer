@@ -11,8 +11,8 @@ import {
   getLocalStorageKeyForAccountPrivateKey,
   getPrivateKey,
 } from "../lib/utils";
-import Encrypter from "../lib/Encrypter";
 import toast from "react-hot-toast";
+import { encryption } from "../services/encryption";
 
 /** Password Form Schema */
 const PasswordFormSchema = yup
@@ -59,7 +59,7 @@ const Password = () => {
       const privateKey = await getPrivateKey(account.id, currentPassword);
 
       /* Encrypt Private Key */
-      const encryptedPrivateKey = await Encrypter.encryptData({
+      const encryptedPrivateKey = await encryption.encryptData({
         data: privateKey,
         password: newPassword,
       });

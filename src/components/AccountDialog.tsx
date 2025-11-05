@@ -11,12 +11,12 @@ import toast from "react-hot-toast";
 import { ItemInfo } from "./ItemInfo";
 import { AccountProfile } from "./AccountProfile";
 
-interface AccountDialogProps {
+interface AccountDetailsDialogProps {
   account: Account;
 }
 
 /** Account Dialog Component */
-const AccountDialog = ({ account }: AccountDialogProps) => {
+const AccountDetailsDialog = ({ account }: AccountDetailsDialogProps) => {
   const password = usePassword();
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const revealPrivateKey = async () => {
@@ -95,4 +95,4 @@ const AccountDialog = ({ account }: AccountDialogProps) => {
   );
 };
 
-export { AccountDialog };
+export { AccountDetailsDialog };

@@ -15,7 +15,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const { form, append, remove } = useSendForm();
 
   /* Mutation for Sending Funds */
-  const mutation = useSendMutation();
+  const { mutation } = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {

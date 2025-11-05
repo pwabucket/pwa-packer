@@ -7,9 +7,9 @@ import {
 } from "../lib/utils";
 import type { Account } from "../types";
 import { usePassword } from "../hooks/usePassword";
-import Encrypter from "../lib/Encrypter";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { encryption } from "../services/encryption";
 
 interface ExistingAccountFormProps {
   account: Account;
@@ -63,7 +63,7 @@ const ExistingAccountForm = ({
     }
 
     /* Encrypt Private Key */
-    const encryptedPrivateKey = await Encrypter.encryptData({
+    const encryptedPrivateKey = await encryption.encryptData({
       data: data.privateKey,
       password,
     });

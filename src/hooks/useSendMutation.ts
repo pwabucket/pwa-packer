@@ -3,6 +3,7 @@ import { getPrivateKey } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type { Account, SendResult } from "../types";
+import { useProgress } from "./useProgress";
 
 interface SendMutationData {
   accounts: Account[];
@@ -12,12 +13,16 @@ interface SendMutationData {
 }
 
 const useSendMutation = () => {
+  const { progress, resetProgress, incrementProgress } = useProgress();
   const password = usePassword()!;
 
   /* Mutation for Sending Funds */
   const mutation = useMutation({
     mutationKey: ["sendFunds"],
     mutationFn: async (data: SendMutationData) => {
+      /* Reset Progress */
+      resetProgress();
+
       /* Create Provider */
       const provider = HashMaker.createProvider();
 
@@ -70,6 +75,9 @@ const useSendMutation = () => {
               result
             );
 
+            /* Increment Progress */
+            incrementProgress();
+
             /* Return Success Result */
             return {
               status: true,
@@ -80,6 +88,9 @@ const useSendMutation = () => {
               result,
             };
           } catch (error) {
+            /* Increment Progress */
+            incrementProgress();
+
             /* Log Error */
             console.error(`Failed to send from account ${account.id}:`, error);
 
@@ -100,7 +111,7 @@ const useSendMutation = () => {
     },
   });
 
-  return mutation;
+  return { mutation, progress };
 };
 
 export { useSendMutation };

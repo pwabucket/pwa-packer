@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { SendFormFields } from "../components/SendFormFields";
 import { useSendForm } from "../hooks/useSendForm";
 import { useSendMutation } from "../hooks/useSendMutation";
+import { Progress } from "../components/Progress";
 
 /** Send Form Data Interface */
 interface SendFormData {
@@ -28,7 +29,7 @@ const Send = () => {
   const { form, append, remove } = useSendForm();
 
   /* Mutation for Sending Funds */
-  const mutation = useSendMutation();
+  const { mutation, progress } = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
@@ -70,6 +71,7 @@ const Send = () => {
 
   return (
     <InnerPageLayout title="Send" className="gap-2">
+      {/* Send Results Dialog */}
       {mutation.isSuccess && mutation.data ? (
         <Dialog.Root open onOpenChange={() => mutation.reset()}>
           <SendResults results={mutation.data} />
@@ -92,6 +94,11 @@ const Send = () => {
             remove={remove}
             disabled={mutation.isPending}
           />
+
+          {/* Progress Bar */}
+          {mutation.isPending && (
+            <Progress max={selectedAccounts.length} current={progress} />
+          )}
 
           {/* Accounts Chooser */}
           <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />

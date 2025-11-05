@@ -144,34 +144,35 @@ const AccountHeader = ({
   );
 };
 
-const AccountWebview = ({ account, close }: AccountWebviewProps) => {
+const AccountWebview = ({ account }: AccountWebviewProps) => {
   const [showAside, setShowAside] = useState(false);
   const toggleAside = useCallback(() => {
     setShowAside((prev) => !prev);
   }, []);
 
   return (
-    <Dialog.Root open onOpenChange={close}>
-      <PopupDialog className="p-0 h-full max-h-[720px] overflow-hidden gap-0">
-        <AccountHeader
-          isOpened={showAside}
-          account={account}
-          toggleAside={toggleAside}
-        />
-        <div className="grow min-w-0 min-h-0 overflow-hidden">
-          <div
-            className={cn(
-              "grid grid-cols-2 w-[200%] h-full",
-              showAside ? "translate-x-[-50%]" : "translate-x-0",
-              "transition-transform duration-500 ease-in-out"
-            )}
-          >
-            <WebviewArea account={account} />
-            <WebviewAside account={account} />
-          </div>
+    <PopupDialog
+      onInteractOutside={(ev) => ev.preventDefault()}
+      className="p-0 h-full max-h-[768px] overflow-hidden gap-0"
+    >
+      <AccountHeader
+        isOpened={showAside}
+        account={account}
+        toggleAside={toggleAside}
+      />
+      <div className="grow min-w-0 min-h-0 overflow-hidden">
+        <div
+          className={cn(
+            "grid grid-cols-2 w-[200%] h-full",
+            showAside ? "translate-x-[-50%]" : "translate-x-0",
+            "transition-transform duration-500 ease-in-out"
+          )}
+        >
+          <WebviewArea account={account} />
+          <WebviewAside account={account} />
         </div>
-      </PopupDialog>
-    </Dialog.Root>
+      </div>
+    </PopupDialog>
   );
 };
 

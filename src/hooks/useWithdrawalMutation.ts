@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
+import { useProgress } from "./useProgress";
 
 interface WithdrawMutationParams {
   accounts: Account[];
@@ -19,6 +20,7 @@ interface WithdrawalResult {
 }
 
 const useWithdrawalMutation = () => {
+  const { progress, resetProgress, incrementProgress } = useProgress();
   const password = useAppStore((state) => state.password)!;
 
   /** Form */
@@ -26,6 +28,9 @@ const useWithdrawalMutation = () => {
   const mutation = useMutation({
     mutationKey: ["withdrawal"],
     mutationFn: async (data: WithdrawMutationParams) => {
+      /* Reset Progress */
+      resetProgress();
+
       /* Create Provider */
       const provider = new ethers.JsonRpcProvider(RPC);
 
@@ -107,6 +112,9 @@ const useWithdrawalMutation = () => {
               error,
             });
           }
+
+          /* Increment Progress */
+          incrementProgress();
         })
       );
 
@@ -114,7 +122,7 @@ const useWithdrawalMutation = () => {
     },
   });
 
-  return mutation;
+  return { mutation, progress };
 };
 
 export { useWithdrawalMutation };

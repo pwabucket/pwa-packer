@@ -2,12 +2,13 @@ import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import copy from "copy-to-clipboard";
 import { Wallet } from "ethers/wallet";
-import Encrypter, { type EncryptionResult } from "./Encrypter";
+import { type EncryptionResult } from "./Encrypter";
 import { provider, USDT_DECIMALS, usdtToken } from "./transaction";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import { useAppStore } from "../store/useAppStore";
 import type { BackupData } from "../types";
+import { encryption } from "../services/encryption";
 
 export { v4 as uuid } from "uuid";
 
@@ -52,7 +53,7 @@ export async function getPrivateKey(accountId: string, password: string) {
   ) as EncryptionResult;
 
   /* Decrypt private key */
-  const decryptedPrivateKey = await Encrypter.decryptData({
+  const decryptedPrivateKey = await encryption.decryptData({
     ...encryptedData,
     password,
   });

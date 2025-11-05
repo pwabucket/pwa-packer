@@ -13,7 +13,7 @@ const AccountDialogWithdrawTab = ({ account }: { account: Account }) => {
   const { form } = useWithdrawalForm();
 
   /** Mutation */
-  const mutation = useWithdrawalMutation();
+  const { mutation } = useWithdrawalMutation();
 
   const handleFormSubmit = async (data: WithdrawFormData) => {
     const { totalSentValue } = await mutation.mutateAsync({

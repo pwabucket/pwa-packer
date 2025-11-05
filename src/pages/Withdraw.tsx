@@ -10,6 +10,7 @@ import {
   type WithdrawFormData,
 } from "../hooks/useWithdrawalForm";
 import { useWithdrawalMutation } from "../hooks/useWithdrawalMutation";
+import { Progress } from "../components/Progress";
 
 const Withdraw = () => {
   const password = useAppStore((state) => state.password);
@@ -21,7 +22,7 @@ const Withdraw = () => {
   const { form } = useWithdrawalForm();
 
   /** Mutation */
-  const mutation = useWithdrawalMutation();
+  const { mutation, progress } = useWithdrawalMutation();
 
   const handleFormSubmit = async (data: WithdrawFormData) => {
     if (selectedAccounts.length === 0) {
@@ -48,13 +49,19 @@ const Withdraw = () => {
   };
 
   return (
-    <InnerPageLayout title="Withdraw Funds">
+    <InnerPageLayout title="Withdraw Funds" className="gap-2">
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-2"
         >
+          {/* Withdraw Form Fields */}
           <WithdrawFormFields disabled={mutation.isPending} />
+
+          {/* Progress Bar */}
+          {mutation.isPending && (
+            <Progress max={selectedAccounts.length} current={progress} />
+          )}
 
           {/* Accounts Chooser */}
           <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
