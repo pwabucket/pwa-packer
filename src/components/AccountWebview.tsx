@@ -8,6 +8,8 @@ import { AccountAddresses } from "./AccountAddresses";
 import { AccountAvatar } from "./AccountAvatar";
 import { useCallback, useState } from "react";
 import { AccountDialogSendTab } from "./AccountDialogSendTab";
+import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
+import { MdOutlineArrowBackIos } from "react-icons/md";
 
 interface AccountWebviewProps {
   account: Account;
@@ -69,6 +71,10 @@ const WebviewAside = ({ account }: { account: Account }) => {
         <Tabs.Content value="send">
           <AccountDialogSendTab account={account} />
         </Tabs.Content>
+
+        <Tabs.Content value="withdraw">
+          <AccountDialogWithdrawTab account={account} />
+        </Tabs.Content>
       </div>
     </Tabs.Root>
   );
@@ -76,19 +82,34 @@ const WebviewAside = ({ account }: { account: Account }) => {
 
 const AccountHeader = ({
   account,
+  isOpened,
   toggleAside,
 }: {
   account: Account;
+  isOpened: boolean;
   toggleAside: () => void;
 }) => {
   return (
     <div className="flex gap-2 items-center justify-center shrink-0 p-4">
       <div className="size-10 shrink-0">
-        <AccountAvatar
-          account={account}
-          className="size-full"
-          onClick={toggleAside}
-        />
+        {isOpened ? (
+          <button
+            className={cn(
+              "size-full bg-neutral-800 rounded-full",
+              "flex justify-center items-center",
+              "cursor-pointer hover:bg-neutral-700/80 transition-colors duration-200 ease-in-out"
+            )}
+            onClick={toggleAside}
+          >
+            <MdOutlineArrowBackIos className="size-5 text-yellow-500" />
+          </button>
+        ) : (
+          <AccountAvatar
+            account={account}
+            className="size-full"
+            onClick={toggleAside}
+          />
+        )}
       </div>
       <div className="flex flex-col items-center justify-center grow min-w-0 min-h-0">
         <Dialog.Title className="font-bold text-sm text-center text-yellow-500 ">
@@ -123,7 +144,11 @@ const AccountWebview = ({ account, close }: AccountWebviewProps) => {
   return (
     <Dialog.Root open onOpenChange={close}>
       <PopupDialog className="p-0 h-full max-h-[720px] overflow-hidden gap-0">
-        <AccountHeader account={account} toggleAside={toggleAside} />
+        <AccountHeader
+          isOpened={showAside}
+          account={account}
+          toggleAside={toggleAside}
+        />
         <div className="grow min-w-0 min-h-0 overflow-hidden">
           <div
             className={cn(
