@@ -10,6 +10,7 @@ import { usePassword } from "../hooks/usePassword";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { encryption } from "../services/encryption";
+import { MdDelete, MdHourglassEmpty, MdWarning } from "react-icons/md";
 
 interface ExistingAccountFormProps {
   account: Account;
@@ -114,16 +115,34 @@ const ExistingAccountForm = ({
           {/* Divider */}
           <p className="my-2 text-neutral-400 text-center">OR</p>
 
-          {/* Delete Account Button */}
-          <button
-            onClick={handleDelete}
-            className="text-red-200 hover:text-red-500 cursor-pointer"
-          >
-            Delete Account
-          </button>
+          {/* Danger Zone */}
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <div className="flex items-center gap-2 mb-3">
+              <MdWarning className="size-5 text-red-400" />
+              <h3 className="font-semibold text-red-400">Danger Zone</h3>
+            </div>
+            <p className="text-sm text-red-300/80 mb-3">
+              This action cannot be undone. This will permanently delete the
+              account and all associated data.
+            </p>
+
+            {/* Delete Account Button */}
+            <button
+              onClick={handleDelete}
+              className="flex items-center justify-center gap-2 text-red-200 hover:text-red-500 cursor-pointer transition-colors duration-200 py-2 px-4 rounded-lg hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 w-full"
+            >
+              <MdDelete className="size-4" />
+              <span>Delete Account</span>
+            </button>
+          </div>
         </>
       ) : (
-        <p className="text-center text-neutral-400">Loading...</p>
+        <div className="flex items-center justify-center gap-2 py-8">
+          <MdHourglassEmpty className="size-5 text-neutral-400 animate-spin" />
+          <p className="text-center text-neutral-400">
+            Loading account data...
+          </p>
+        </div>
       )}
     </>
   );

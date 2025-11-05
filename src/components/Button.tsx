@@ -5,6 +5,7 @@ const Button = (props: React.ComponentProps<"button">) => {
     <button
       {...props}
       className={cn(
+        "flex items-center justify-center gap-2",
         "px-4 py-2 rounded-full cursor-pointer",
         "bg-yellow-500 text-black",
         "hover:bg-yellow-400",
