@@ -23,11 +23,17 @@ interface WebviewAreaProps {
 const WebviewArea = ({ account }: WebviewAreaProps) => {
   return (
     <div className="flex flex-col h-full">
-      <iframe
-        src={account.url}
-        className="grow w-full bg-neutral-800/50"
-        referrerPolicy="no-referrer"
-      />
+      {account.url ? (
+        <iframe
+          src={account.url}
+          className="grow w-full bg-neutral-800/50"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        <div className="grow flex justify-center items-center text-sm text-neutral-400">
+          No URL Set
+        </div>
+      )}
     </div>
   );
 };
@@ -115,6 +121,9 @@ const AccountHeader = ({
         <Dialog.Title className="font-bold text-sm text-center text-yellow-500 ">
           {account.title}
         </Dialog.Title>
+        <Dialog.Description className="sr-only">
+          Panel for {account.title}
+        </Dialog.Description>
         <AccountAddresses account={account} canCopy />
         <AccountBalance account={account} />
       </div>

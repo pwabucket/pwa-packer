@@ -10,26 +10,20 @@ import { Reorder, useDragControls } from "motion/react";
 import { useCallback, useState } from "react";
 import { AccountWebview } from "./AccountWebview";
 import { AccountAvatar } from "./AccountAvatar";
-import toast from "react-hot-toast";
 import { AccountEditDialog } from "./AccountEditDialog";
 
 /** Single Account Item Component */
 const AccountItem = ({ account }: { account: Account }) => {
   const dragControls = useDragControls();
-  const [openURL, setOpenURL] = useState(false);
+  const [openWebview, setOpenWebview] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
-  const launchURL = useCallback(() => {
-    if (!account.url) {
-      toast.error("No URL set for this account.");
-      return;
-    }
+  const launchWebview = useCallback(() => {
+    setOpenWebview(true);
+  }, []);
 
-    setOpenURL(true);
-  }, [account.url]);
-
-  const closeURL = useCallback(() => {
-    setOpenURL(false);
+  const closeWebview = useCallback(() => {
+    setOpenWebview(false);
   }, []);
 
   return (
@@ -85,7 +79,7 @@ const AccountItem = ({ account }: { account: Account }) => {
               <div className="flex items-center gap-2 shrink-0">
                 {/* Launch URL Button */}
                 <button
-                  onClick={launchURL}
+                  onClick={launchWebview}
                   className={cn(
                     "size-10 flex items-center justify-center cursor-pointer",
                     "hover:bg-neutral-700 rounded-full",
@@ -127,7 +121,7 @@ const AccountItem = ({ account }: { account: Account }) => {
         </Dialog.Root>
       </Reorder.Item>
 
-      {openURL && <AccountWebview account={account} close={closeURL} />}
+      {openWebview && <AccountWebview account={account} close={closeWebview} />}
       {showEditForm && (
         <AccountEditDialog
           account={account}
