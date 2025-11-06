@@ -158,6 +158,8 @@ const Gas = () => {
                 <Input
                   {...field}
                   id="amount"
+                  type="number"
+                  inputMode="decimal"
                   autoComplete="off"
                   placeholder="Amount"
                   disabled={mutation.isPending}
