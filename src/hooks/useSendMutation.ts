@@ -23,9 +23,6 @@ const useSendMutation = () => {
       /* Reset Progress */
       resetProgress();
 
-      /* Create Provider */
-      const provider = HashMaker.createProvider();
-
       /* Process all accounts concurrently using Promise.all */
       const results = await Promise.all(
         data.accounts.map(async (account): Promise<SendResult> => {
@@ -36,7 +33,7 @@ const useSendMutation = () => {
 
           try {
             const privateKey = await getPrivateKey(account.id, password);
-            const hashMaker = new HashMaker({ privateKey, provider });
+            const hashMaker = new HashMaker({ privateKey });
 
             /* Initialize Hash Maker */
             await hashMaker.initialize();

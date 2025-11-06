@@ -3,12 +3,11 @@ import { twMerge } from "tailwind-merge";
 import copy from "copy-to-clipboard";
 import { Wallet } from "ethers/wallet";
 import { type EncryptionResult } from "./Encrypter";
-import { provider, USDT_DECIMALS, usdtToken } from "./transaction";
-import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import { useAppStore } from "../store/useAppStore";
 import type { BackupData } from "../types";
 import { encryption } from "../services/encryption";
+import { WalletProvider } from "./WalletProvider";
 
 export { v4 as uuid } from "uuid";
 
@@ -62,14 +61,16 @@ export async function getPrivateKey(accountId: string, password: string) {
 }
 
 export async function fetchBalance(address: string) {
+  const walletProvider = new WalletProvider(address);
+
   const [usdtBalance, bnbBalance] = await Promise.all([
-    usdtToken.balanceOf(address),
-    provider.getBalance(address),
+    walletProvider.getUSDTBalance(),
+    walletProvider.getBNBBalance(),
   ]);
 
   return {
-    usdtBalance: Number(ethers.formatUnits(usdtBalance, USDT_DECIMALS)),
-    bnbBalance: Number(ethers.formatEther(bnbBalance)),
+    usdtBalance,
+    bnbBalance,
   };
 }
 

@@ -1,10 +1,11 @@
 import { useAppStore } from "../store/useAppStore";
-import { RPC, usdtToken } from "../lib/transaction";
+import { USDT_DECIMALS } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
+import { WalletProvider } from "../lib/WalletProvider";
 
 interface WithdrawMutationParams {
   accounts: Account[];
@@ -31,15 +32,6 @@ const useWithdrawalMutation = () => {
       /* Reset Progress */
       resetProgress();
 
-      /* Create Provider */
-      const provider = new ethers.JsonRpcProvider(RPC);
-
-      /* Fetch Token Decimals and Symbol */
-      const [decimals, symbol] = await Promise.all([
-        usdtToken.decimals(),
-        usdtToken.symbol(),
-      ]);
-
       /* Results Array */
       const results: WithdrawalResult[] = [];
 
@@ -53,19 +45,25 @@ const useWithdrawalMutation = () => {
       await Promise.all(
         data.accounts.map(async (account) => {
           try {
+            const walletProvider = new WalletProvider(account.walletAddress);
+            const provider = walletProvider.getProvider();
+            const usdtToken = walletProvider.getUsdtTokenContract();
+
             const privateKey = await getPrivateKey(account.id, password);
             const wallet = new ethers.Wallet(privateKey, provider);
 
             let amountToSend = data.amount;
 
             if (!amountToSend || amountToSend.trim() === "") {
+              /* Fetch USDT Balance */
+              const balance = await walletProvider.getUSDTBalance();
+
               /* If amount is not specified, send the entire balance */
-              const rawBal = await usdtToken.balanceOf(account.walletAddress);
-              amountToSend = ethers.formatUnits(rawBal, decimals);
+              amountToSend = balance.toString();
 
               /* Log Balance */
               console.log(
-                `Balance of ${account.walletAddress}: ${amountToSend} ${symbol}`
+                `Balance of ${account.walletAddress}: ${amountToSend} USDT`
               );
             }
 
@@ -74,7 +72,7 @@ const useWithdrawalMutation = () => {
 
             /* Log Withdrawal Info */
             console.log(
-              `Withdrawing ${amountToSend} ${symbol} from ${account.title} (${account.walletAddress}) to ${receiver}`
+              `Withdrawing ${amountToSend} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
             );
 
             /* Perform Transfer */
@@ -83,7 +81,7 @@ const useWithdrawalMutation = () => {
             ) as typeof usdtToken;
             const tx = await connectedToken.transfer(
               receiver,
-              ethers.parseUnits(amountToSend, decimals)
+              ethers.parseUnits(amountToSend, USDT_DECIMALS)
             );
 
             /* Wait for Transaction to be Mined */
