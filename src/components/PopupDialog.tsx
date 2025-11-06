@@ -12,6 +12,7 @@ const PopupDialog = (props: Dialog.DialogContentProps) => {
         )}
       >
         <Dialog.Content
+          onOpenAutoFocus={(ev) => ev.preventDefault()}
           {...props}
           className={cn(
             "bg-neutral-900 p-6 rounded-2xl max-w-sm w-full",
