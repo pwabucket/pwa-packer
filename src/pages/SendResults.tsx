@@ -35,8 +35,10 @@ const SendResults = ({ results }: SendResultsProps) => {
         Click each item to view detailed information about the send results.
       </Dialog.Description>
 
-      {/* Send Results Accordion */}
-      <SendResultsAccordion results={results} />
+      <div className="flex flex-col overflow-auto max-h-96 px-2 -mx-2">
+        {/* Send Results Accordion */}
+        <SendResultsAccordion results={results} />
+      </div>
 
       {/* Close Button */}
       <Dialog.Close asChild>
