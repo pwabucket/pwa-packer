@@ -9,7 +9,13 @@ import { AccountAvatar } from "./AccountAvatar";
 import { useCallback, useState } from "react";
 import { AccountDialogSendTab } from "./AccountDialogSendTab";
 import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
-import { MdOutlineArrowBackIos } from "react-icons/md";
+import {
+  MdChevronLeft,
+  MdChevronRight,
+  MdOutlineArrowBackIos,
+} from "react-icons/md";
+import { useLocation, useNavigate } from "react-router";
+import { useAppStore } from "../store/useAppStore";
 
 interface AccountWebviewProps {
   account: Account;
@@ -83,6 +89,73 @@ const WebviewAside = ({ account }: { account: Account }) => {
         </Tabs.Content>
       </div>
     </Tabs.Root>
+  );
+};
+
+const AccountSwitcherButton = (props: React.ComponentProps<"button">) => {
+  return (
+    <button
+      {...props}
+      className={cn(
+        "size-10 shrink-0 rounded-full",
+        "flex items-center justify-center gap-2",
+        "border border-neutral-700 cursor-pointer",
+        "hover:bg-yellow-500 hover:text-black transition-colors"
+      )}
+    />
+  );
+};
+
+const AccountSwitcher = ({ account }: { account: Account }) => {
+  const navigate = useNavigate();
+  const accounts = useAppStore((state) => state.accounts);
+  const location = useLocation();
+
+  const switchToPreviousAccount = () => {
+    const currentIndex = accounts.findIndex((a) => a.id === account.id);
+    const previousIndex =
+      (currentIndex - 1 + accounts.length) % accounts.length;
+    const previousAccount = accounts[previousIndex];
+
+    const newState = {
+      ...location.state,
+      [`${previousAccount.id}-webview`]: true,
+    };
+    delete newState[`${account.id}-webview`];
+
+    navigate(location, {
+      state: newState,
+      replace: true,
+    });
+  };
+
+  const switchToNextAccount = () => {
+    const currentIndex = accounts.findIndex((a) => a.id === account.id);
+    const nextIndex = currentIndex + 1;
+    const nextAccount = accounts[nextIndex % accounts.length];
+
+    const newState = {
+      ...location.state,
+      [`${nextAccount.id}-webview`]: true,
+    };
+    delete newState[`${account.id}-webview`];
+
+    navigate(location, {
+      state: newState,
+      replace: true,
+    });
+  };
+
+  return (
+    <div className="flex gap-2 items-center justify-center shrink-0 p-2">
+      <AccountSwitcherButton onClick={switchToPreviousAccount}>
+        <MdChevronLeft className="size-6" />
+      </AccountSwitcherButton>
+
+      <AccountSwitcherButton onClick={switchToNextAccount}>
+        <MdChevronRight className="size-6" />
+      </AccountSwitcherButton>
+    </div>
   );
 };
 
@@ -172,6 +245,8 @@ const AccountWebview = ({ account }: AccountWebviewProps) => {
           <WebviewAside account={account} />
         </div>
       </div>
+
+      <AccountSwitcher account={account} />
     </PopupDialog>
   );
 };
