@@ -29,7 +29,6 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               {...field}
               disabled={disabled}
               id="amount"
-              min="0"
               type="number"
               inputMode="decimal"
               autoComplete="off"
