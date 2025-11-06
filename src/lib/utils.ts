@@ -62,8 +62,11 @@ export async function getPrivateKey(accountId: string, password: string) {
 }
 
 export async function fetchBalance(address: string) {
-  const usdtBalance = await usdtToken.balanceOf(address);
-  const bnbBalance = await provider.getBalance(address);
+  const [usdtBalance, bnbBalance] = await Promise.all([
+    usdtToken.balanceOf(address),
+    provider.getBalance(address),
+  ]);
+
   return {
     usdtBalance: Number(ethers.formatUnits(usdtBalance, USDT_DECIMALS)),
     bnbBalance: Number(ethers.formatEther(bnbBalance)),
