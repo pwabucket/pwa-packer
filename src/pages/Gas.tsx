@@ -158,6 +158,7 @@ const Gas = () => {
                 <Input
                   {...field}
                   id="amount"
+                  min="0"
                   type="number"
                   inputMode="decimal"
                   autoComplete="off"

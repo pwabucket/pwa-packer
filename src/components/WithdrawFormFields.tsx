@@ -25,6 +25,7 @@ const WithdrawFormFields = ({ disabled }: WithdrawFormFieldsProps) => {
               {...field}
               disabled={disabled}
               id="amount"
+              min="0"
               type="number"
               inputMode="decimal"
               autoComplete="off"
