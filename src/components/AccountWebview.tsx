@@ -111,32 +111,17 @@ const AccountSwitcher = ({ account }: { account: Account }) => {
   const accounts = useAppStore((state) => state.accounts);
   const location = useLocation();
 
-  const switchToPreviousAccount = () => {
+  const switchAccount = (direction: "next" | "previous") => {
     const currentIndex = accounts.findIndex((a) => a.id === account.id);
-    const previousIndex =
-      (currentIndex - 1 + accounts.length) % accounts.length;
-    const previousAccount = accounts[previousIndex];
+    const newIndex =
+      direction === "next"
+        ? (currentIndex + 1) % accounts.length
+        : (currentIndex - 1 + accounts.length) % accounts.length;
+    const newAccount = accounts[newIndex];
 
     const newState = {
       ...location.state,
-      [`${previousAccount.id}-webview`]: true,
-    };
-    delete newState[`${account.id}-webview`];
-
-    navigate(location, {
-      state: newState,
-      replace: true,
-    });
-  };
-
-  const switchToNextAccount = () => {
-    const currentIndex = accounts.findIndex((a) => a.id === account.id);
-    const nextIndex = currentIndex + 1;
-    const nextAccount = accounts[nextIndex % accounts.length];
-
-    const newState = {
-      ...location.state,
-      [`${nextAccount.id}-webview`]: true,
+      [`${newAccount.id}-webview`]: true,
     };
     delete newState[`${account.id}-webview`];
 
@@ -148,11 +133,11 @@ const AccountSwitcher = ({ account }: { account: Account }) => {
 
   return (
     <div className="flex gap-2 items-center justify-center shrink-0 p-2">
-      <AccountSwitcherButton onClick={switchToPreviousAccount}>
+      <AccountSwitcherButton onClick={() => switchAccount("previous")}>
         <MdChevronLeft className="size-6" />
       </AccountSwitcherButton>
 
-      <AccountSwitcherButton onClick={switchToNextAccount}>
+      <AccountSwitcherButton onClick={() => switchAccount("next")}>
         <MdChevronRight className="size-6" />
       </AccountSwitcherButton>
     </div>
