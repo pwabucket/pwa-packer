@@ -30,11 +30,6 @@ const useSendMutation = () => {
       const results = await Promise.all(
         data.accounts.map(async (account): Promise<SendResult> => {
           let hashResult: HashResult | null = null;
-          /* Select Random Target Character */
-          const targetCharacter =
-            data.targetCharacters[
-              Math.floor(Math.random() * data.targetCharacters.length)
-            ];
 
           /* Receiver Address */
           const receiver = account.depositAddress;
@@ -48,14 +43,18 @@ const useSendMutation = () => {
 
             /* Log Sending Info */
             console.log(
-              `Sending $${data.amount} from account ${account.title} (${account.walletAddress}) to ${receiver} with targeting character ${targetCharacter}`
+              `Sending $${data.amount} from account ${account.title} (${
+                account.walletAddress
+              }) to ${receiver} with targeting characters ${data.targetCharacters.join(
+                ", "
+              )}`
             );
 
             /* Generate Transaction */
             hashResult = (await hashMaker.generateTransaction({
               amount: data.amount,
               gasLimit: data.gasLimit,
-              targetCharacter,
+              targetCharacters: data.targetCharacters,
               receiver,
             })) as HashResult;
 
@@ -82,7 +81,6 @@ const useSendMutation = () => {
             return {
               status: true,
               account,
-              targetCharacter,
               hashResult,
               receiver,
               result,
@@ -101,7 +99,6 @@ const useSendMutation = () => {
               error,
               receiver,
               hashResult,
-              targetCharacter,
             };
           }
         })

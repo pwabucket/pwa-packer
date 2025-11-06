@@ -62,7 +62,7 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
           {/* Target Character */}
           <ResultInfo
             title="Target Character"
-            value={res.targetCharacter}
+            value={res.hashResult?.character || ""}
             icon={<span>🔠</span>}
             valueClassName="text-blue-300"
           />
@@ -75,29 +75,34 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
             valueClassName="text-lime-300"
           />
 
-          {/* Wallet Address */}
-          <ResultInfo
-            title="Wallet Address"
-            value={res.hashResult?.wallet?.address || ""}
-            icon={<span>💼</span>}
-            valueClassName="text-cyan-300"
-          />
+          {/* Wallet */}
+          {res.hashResult?.wallet ? (
+            <>
+              {/* Wallet Address */}
+              <ResultInfo
+                title="Wallet Address"
+                value={res.hashResult?.wallet?.address || ""}
+                icon={<span>💼</span>}
+                valueClassName="text-cyan-300"
+              />
 
-          {/* Private Key */}
-          <ResultInfo
-            title="Wallet Private Key"
-            value={res.hashResult?.wallet?.privateKey || ""}
-            icon={<span>🔑</span>}
-            valueClassName="text-red-300"
-          />
+              {/* Private Key */}
+              <ResultInfo
+                title="Wallet Private Key"
+                value={res.hashResult?.wallet?.privateKey || ""}
+                icon={<span>🔑</span>}
+                valueClassName="text-red-300"
+              />
 
-          {/* Wallet Phrase */}
-          <ResultInfo
-            title="Wallet Phrase"
-            value={res.hashResult?.wallet?.mnemonic?.phrase || ""}
-            icon={<span>🗣️</span>}
-            valueClassName="text-pink-300"
-          />
+              {/* Wallet Phrase */}
+              <ResultInfo
+                title="Wallet Phrase"
+                value={res.hashResult?.wallet?.mnemonic?.phrase || ""}
+                icon={<span>🗣️</span>}
+                valueClassName="text-pink-300"
+              />
+            </>
+          ) : null}
         </Accordion.Content>
       </Accordion.Item>
     ))}

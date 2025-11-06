@@ -11,7 +11,6 @@ export interface Account {
 export interface SendResult {
   status: boolean;
   account: Account;
-  targetCharacter: string;
   hashResult: HashResult | null;
   receiver: string;
   result?: {

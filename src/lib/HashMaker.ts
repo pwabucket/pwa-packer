@@ -19,6 +19,7 @@ export interface HashResult {
   gasPrice: bigint;
   amount: string;
   attempts: number;
+  character: string;
   wallet?: ethers.HDNodeWallet;
 }
 
@@ -68,12 +69,12 @@ class HashMaker {
    */
   private async _findMatchingWallet({
     baseTx,
-    targetCharacter,
+    targetCharacters,
     gasPrice,
     amount,
   }: {
     baseTx: object;
-    targetCharacter: string;
+    targetCharacters: string[];
     gasPrice: bigint;
     amount: string;
   }): Promise<HashResult> {
@@ -94,7 +95,7 @@ class HashMaker {
 
       attempts++;
 
-      if (targetCharacter === actualSuffix) {
+      if (targetCharacters.includes(actualSuffix)) {
         console.log(`\n✅ Found matching wallet after ${attempts} attempts!`);
         console.log("Target Suffix:", actualSuffix);
         console.log("Wallet Address:", randomWallet.address);
@@ -109,6 +110,7 @@ class HashMaker {
           gasPrice,
           amount,
           attempts,
+          character: actualSuffix,
         };
       }
 
@@ -122,13 +124,13 @@ class HashMaker {
    * Loops through nonces, signs transactions, and checks hash suffix until a match is found.
    */
   private async _findMatchingHash({
-    targetCharacter,
+    targetCharacters,
     baseTx,
     initialNonce,
     gasPrice,
     amount,
   }: {
-    targetCharacter: string;
+    targetCharacters: string[];
     baseTx: object;
     initialNonce: number;
     gasPrice: bigint;
@@ -145,7 +147,7 @@ class HashMaker {
 
       attempts++;
 
-      if (targetCharacter === actualSuffix) {
+      if (targetCharacters.includes(actualSuffix)) {
         console.log(`\n✅ Found match after ${attempts} attempts!`);
         console.log("Target Suffix:", actualSuffix);
         console.log("Target Nonce:", nonce);
@@ -159,6 +161,7 @@ class HashMaker {
           gasPrice,
           amount,
           attempts,
+          character: actualSuffix,
         };
       }
 
@@ -168,6 +171,49 @@ class HashMaker {
       /** Increment nonce for next attempt */
       nonce++;
     }
+  }
+
+  /**
+   * @method _findSingleMatchingHash
+   * Attempts to find a matching hash for a single nonce.
+   */
+  private async _findSingleMatchingHash({
+    targetCharacters,
+    baseTx,
+    initialNonce,
+    gasPrice,
+    amount,
+  }: {
+    targetCharacters: string[];
+    baseTx: object;
+    initialNonce: number;
+    gasPrice: bigint;
+    amount: string;
+  }): Promise<HashResult | null> {
+    const nonce = initialNonce;
+
+    const tx = { ...baseTx, nonce };
+    const signed = await this.wallet.signTransaction(tx);
+    const txHash = ethers.keccak256(signed);
+    const actualSuffix = txHash.slice(-1).toLowerCase();
+
+    if (targetCharacters.includes(actualSuffix)) {
+      console.log("Target Suffix:", actualSuffix);
+      console.log("Target Nonce:", nonce);
+      console.log("Target Hash:", txHash);
+
+      return {
+        signedRawTx: signed,
+        txHash,
+        nonce,
+        initialNonce,
+        gasPrice,
+        amount,
+        character: actualSuffix,
+        attempts: 1,
+      };
+    }
+    return null;
   }
 
   /**
@@ -510,19 +556,20 @@ class HashMaker {
    * Main method to find a matching hash, submit fillers, and broadcast the target transaction.
    */
   public async generateTransaction({
-    targetCharacter,
+    targetCharacters,
     receiver,
     amount,
     gasLimit,
-    freshWallet = true,
     broadcastIfFound = false,
+    singleAttempt = true,
   }: {
-    targetCharacter: string;
+    targetCharacters: string[];
     receiver: string;
     amount: string;
     gasLimit: keyof typeof GAS_LIMITS_TRANSFER;
     freshWallet?: boolean;
     broadcastIfFound?: boolean;
+    singleAttempt?: boolean;
   }) {
     if (!this.address) {
       throw new Error("Wallet address is not initialized.");
@@ -545,25 +592,39 @@ class HashMaker {
 
     let hashResult: HashResult;
 
-    if (freshWallet) {
-      hashResult = await this._findMatchingWallet({
+    const initialNonce = await this.provider.getTransactionCount(
+      this.address,
+      "pending"
+    );
+
+    let found: HashResult | null;
+
+    if (singleAttempt) {
+      found = await this._findSingleMatchingHash({
         amount,
-        targetCharacter,
+        targetCharacters,
         baseTx,
+        initialNonce,
         gasPrice: txGasPrice,
       });
     } else {
-      const initialNonce = await this.provider.getTransactionCount(
-        this.address,
-        "pending"
-      );
-
-      hashResult = await this._findMatchingHash({
+      found = await this._findMatchingHash({
         amount,
-        targetCharacter,
+        targetCharacters,
+        baseTx,
+        initialNonce,
+        gasPrice: txGasPrice,
+      });
+    }
+
+    if (found) {
+      hashResult = found;
+    } else {
+      hashResult = await this._findMatchingWallet({
+        amount,
+        targetCharacters,
         baseTx,
         gasPrice: txGasPrice,
-        initialNonce,
       });
     }
 
