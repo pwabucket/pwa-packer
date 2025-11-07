@@ -10,6 +10,7 @@ import { PopupDialog } from "./PopupDialog";
 import toast from "react-hot-toast";
 import { ItemInfo } from "./ItemInfo";
 import { AccountProfile } from "./AccountProfile";
+import { AccountSwitcher } from "./AccountSwitcher";
 
 interface AccountDetailsDialogProps {
   account: Account;
@@ -91,6 +92,8 @@ const AccountDetailsDialog = ({ account }: AccountDetailsDialogProps) => {
       <Dialog.Close asChild>
         <Button className="my-2">Close</Button>
       </Dialog.Close>
+
+      <AccountSwitcher account={account} switchKey="details" />
     </PopupDialog>
   );
 };
