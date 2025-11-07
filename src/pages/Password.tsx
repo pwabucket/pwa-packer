@@ -16,6 +16,7 @@ import { encryption } from "../services/encryption";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
 import { MdSecurity, MdUpdate, MdLock, MdLockReset } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
 
 /** Password Form Schema */
 const PasswordFormSchema = yup
@@ -46,11 +47,45 @@ const Password = () => {
     },
   });
 
-  const handleFormSubmit = async (data: PasswordFormData) => {
-    const { currentPassword, newPassword } = data;
+  const mutation = useMutation({
+    mutationKey: ["change-password"],
+    mutationFn: async (data: PasswordFormData) => {
+      /** Reset Progress */
+      resetProgress();
 
+      /** Re-encrypt All Accounts with New Password */
+      for (const account of accounts) {
+        const privateKey = await getPrivateKey(
+          account.id,
+          data.currentPassword
+        );
+
+        /* Encrypt Private Key */
+        const encryptedPrivateKey = await encryption.encryptData({
+          data: privateKey,
+          password: data.newPassword,
+        });
+
+        /* Store encrypted private key in localStorage */
+        localStorage.setItem(
+          getLocalStorageKeyForAccountPrivateKey(account.id),
+          JSON.stringify(encryptedPrivateKey)
+        );
+
+        /** Increment Progress */
+        incrementProgress();
+      }
+
+      /** Update Password in Store */
+      await setPassword(data.newPassword);
+
+      return { status: true };
+    },
+  });
+
+  const handleFormSubmit = async (data: PasswordFormData) => {
     /** Validate Current Password */
-    if (currentPassword !== password) {
+    if (data.currentPassword !== password) {
       form.setError("currentPassword", {
         type: "validate",
         message: "Current password is incorrect.",
@@ -58,31 +93,8 @@ const Password = () => {
       return;
     }
 
-    /** Reset Progress */
-    resetProgress();
-
-    /** Re-encrypt All Accounts with New Password */
-    for (const account of accounts) {
-      const privateKey = await getPrivateKey(account.id, currentPassword);
-
-      /* Encrypt Private Key */
-      const encryptedPrivateKey = await encryption.encryptData({
-        data: privateKey,
-        password: newPassword,
-      });
-
-      /* Store encrypted private key in localStorage */
-      localStorage.setItem(
-        getLocalStorageKeyForAccountPrivateKey(account.id),
-        JSON.stringify(encryptedPrivateKey)
-      );
-
-      /** Increment Progress */
-      incrementProgress();
-    }
-
-    /** Update Password in Store */
-    await setPassword(newPassword);
+    /** Execute Mutation */
+    await mutation.mutateAsync(data);
 
     /** Reset Form */
     form.reset();
