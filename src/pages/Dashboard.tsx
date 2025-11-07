@@ -4,11 +4,11 @@ import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
 import {
-  MdOutlineLocalGasStation,
   MdOutlinePushPin,
   MdPushPin,
   MdOutlineMenu,
   MdPersonAdd,
+  MdCallSplit,
 } from "react-icons/md";
 
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
@@ -77,15 +77,6 @@ const Dashboard = () => {
           <TotalBalanceCard />
 
           <div className="flex justify-center items-center gap-4">
-            {/* Withdraw */}
-            <ActionButton
-              asChild
-              label="Withdraw"
-              icon={<HiOutlineArrowDownLeft className="size-5" />}
-            >
-              <Link to="/withdraw" />
-            </ActionButton>
-
             {/* Send Action Button */}
             <ActionButton
               asChild
@@ -95,13 +86,22 @@ const Dashboard = () => {
               <Link to="/send" />
             </ActionButton>
 
-            {/* Gas */}
+            {/* Withdraw */}
             <ActionButton
               asChild
-              label="Gas"
-              icon={<MdOutlineLocalGasStation className="size-5" />}
+              label="Withdraw"
+              icon={<HiOutlineArrowDownLeft className="size-5" />}
             >
-              <Link to="/gas" />
+              <Link to="/withdraw" />
+            </ActionButton>
+
+            {/* Split */}
+            <ActionButton
+              asChild
+              label="Split"
+              icon={<MdCallSplit className="size-5" />}
+            >
+              <Link to="/split" />
             </ActionButton>
 
             {/* More Tools */}

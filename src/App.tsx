@@ -6,7 +6,7 @@ import { ProtectedRoutes } from "./routes/ProtectedRoutes";
 import { AccountEditPage } from "./pages/AccountEditPage";
 import { Withdraw } from "./pages/Withdraw";
 import { Send } from "./pages/Send";
-import { Gas } from "./pages/Gas";
+import { Split } from "./pages/Split";
 import { useInactivity } from "./hooks/useInactivity";
 import { Toaster } from "react-hot-toast";
 import { Restore } from "./pages/Restore";
@@ -46,7 +46,7 @@ function App() {
           />
           <Route path="withdraw" element={<Withdraw />} />
           <Route path="send" element={<Send />} />
-          <Route path="gas" element={<Gas />} />
+          <Route path="split" element={<Split />} />
           <Route path="password" element={<Password />} />
           <Route path="validate" element={<Validate />} />
         </Route>
