@@ -4,12 +4,14 @@ import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type { Account, SendResult } from "../types";
 import { useProgress } from "./useProgress";
+import { Packer } from "../lib/Packer";
 
 interface SendMutationData {
   accounts: Account[];
   amount: string;
   targetCharacters: string[];
   gasLimit: "average" | "fast" | "instant";
+  validate: boolean;
 }
 
 const useSendMutation = () => {
@@ -61,6 +63,7 @@ const useSendMutation = () => {
               hashResult
             );
 
+            /* Submit Transfer Transaction */
             const result = await hashMaker.submitTransferTransaction(
               hashResult
             );
@@ -70,6 +73,33 @@ const useSendMutation = () => {
               `Submit Result: ${account.title} (${account.walletAddress})`,
               result
             );
+
+            /* Optional Validation */
+            let validation = null;
+            if (data.validate && account.url) {
+              try {
+                const packer = new Packer(account.url);
+                await packer.initialize();
+                await packer.getTime();
+
+                /* Check Validation */
+                validation = await packer.checkActivity();
+
+                /* Delay to avoid rate limiting */
+                await new Promise((resolve) =>
+                  setTimeout(
+                    resolve,
+                    Math.max(1000, Math.floor(Math.random() * 5000))
+                  )
+                );
+              } catch (error) {
+                /* Log Validation Error */
+                console.error(
+                  `Validation failed for account ${account.id}:`,
+                  error
+                );
+              }
+            }
 
             /* Increment Progress */
             incrementProgress();
@@ -81,6 +111,7 @@ const useSendMutation = () => {
               hashResult,
               receiver,
               result,
+              validation,
             };
           } catch (error) {
             /* Increment Progress */

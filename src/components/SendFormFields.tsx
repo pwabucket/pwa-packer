@@ -6,6 +6,7 @@ import { cn, HEXADECIMAL_CHARS } from "../lib/utils";
 import { Controller } from "react-hook-form";
 import { FormFieldError } from "./FormFieldError";
 import { Select } from "./Select";
+import { LabelToggle } from "./LabelToggle";
 
 interface SendFormFieldsProps {
   disabled?: boolean;
@@ -87,6 +88,23 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               ))}
             </div>
 
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Validate */}
+      <Controller
+        name="validate"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <LabelToggle
+              checked={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+            >
+              Validate Confirmation?
+            </LabelToggle>
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}

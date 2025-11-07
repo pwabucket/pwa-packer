@@ -48,12 +48,17 @@ const useValidationMutation = () => {
           /* Push Failed Result */
           results.push({ status: false, account, error });
         } finally {
+          /* Delay to avoid rate limiting */
+          await new Promise((resolve) =>
+            setTimeout(
+              resolve,
+              Math.max(1000, Math.floor(Math.random() * 5000))
+            )
+          );
+
           /* Increment Progress */
           incrementProgress();
         }
-
-        /* Delay to avoid rate limiting */
-        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     },
   });

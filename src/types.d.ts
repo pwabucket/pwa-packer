@@ -19,6 +19,9 @@ export interface SendResult {
     txHash: string;
   };
   error?: unknown;
+  validation?: {
+    activity: boolean;
+  };
 }
 
 export interface BackupData {

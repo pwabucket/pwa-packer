@@ -36,6 +36,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
       amount: data.amount,
       targetCharacters: data.targetCharacters,
       gasLimit: data.gasLimit,
+      validate: data.validate,
     });
 
     /* Show Summary Alert */

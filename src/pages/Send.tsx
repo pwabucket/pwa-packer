@@ -7,16 +7,9 @@ import { Dialog } from "radix-ui";
 import { SendResults } from "./SendResults";
 import toast from "react-hot-toast";
 import { SendFormFields } from "../components/SendFormFields";
-import { useSendForm } from "../hooks/useSendForm";
+import { useSendForm, type SendFormData } from "../hooks/useSendForm";
 import { useSendMutation } from "../hooks/useSendMutation";
 import { Progress } from "../components/Progress";
-
-/** Send Form Data Interface */
-interface SendFormData {
-  amount: string;
-  targetCharacters: string[];
-  gasLimit: "average" | "fast" | "instant";
-}
 
 /** Send Page Component */
 const Send = () => {
@@ -56,6 +49,7 @@ const Send = () => {
       amount: data.amount,
       targetCharacters: data.targetCharacters,
       gasLimit: data.gasLimit,
+      validate: data.validate,
     });
 
     /* Count Successful Sends */
