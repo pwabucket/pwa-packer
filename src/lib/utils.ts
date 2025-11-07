@@ -182,3 +182,8 @@ export async function restoreBackupData(data: BackupData["data"]) {
 export function truncateAddress(address: string, length = 6) {
   return `${address.slice(0, length)}...${address.slice(-4)}`;
 }
+
+export function delayBetween(min: number, max: number) {
+  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+  return new Promise((resolve) => setTimeout(resolve, delay));
+}

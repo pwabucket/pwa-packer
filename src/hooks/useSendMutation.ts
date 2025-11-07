@@ -1,5 +1,5 @@
 import { usePassword } from "./usePassword";
-import { getPrivateKey } from "../lib/utils";
+import { delayBetween, getPrivateKey } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type { Account, SendResult } from "../types";
@@ -77,6 +77,9 @@ const useSendMutation = () => {
             /* Optional Validation */
             let validation = null;
             if (data.validate && account.url) {
+              /* Delay for confirmation */
+              await delayBetween(5000, 10_000);
+
               try {
                 const packer = new Packer(account.url);
                 await packer.initialize();
@@ -86,12 +89,7 @@ const useSendMutation = () => {
                 validation = await packer.checkActivity();
 
                 /* Delay to avoid rate limiting */
-                await new Promise((resolve) =>
-                  setTimeout(
-                    resolve,
-                    Math.max(1000, Math.floor(Math.random() * 5000))
-                  )
-                );
+                await delayBetween(2000, 5000);
               } catch (error) {
                 /* Log Validation Error */
                 console.error(

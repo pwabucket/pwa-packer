@@ -23,6 +23,7 @@ const EVENTS = [
 const useInactivity = (duration: number = 5 * 60 * 1000) => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLoggedIn = usePassword() !== null;
+  const isProcessing = useAppStore((state) => state.isProcessing);
   const clearPassword = useAppStore((state) => state.clearPassword);
 
   /** Callback to Reset Timeout */
@@ -35,7 +36,7 @@ const useInactivity = (duration: number = 5 * 60 * 1000) => {
 
   /** Register Effect */
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (isProcessing || !isLoggedIn) return;
 
     /** Callback to Reset Timeout */
 
@@ -59,7 +60,7 @@ const useInactivity = (duration: number = 5 * 60 * 1000) => {
         timeoutRef.current = null;
       }
     };
-  }, [duration, isLoggedIn, resetTimer, clearPassword]);
+  }, [duration, isLoggedIn, isProcessing, resetTimer, clearPassword]);
 };
 
 export { useInactivity };

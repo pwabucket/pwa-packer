@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
+import { delayBetween } from "../lib/utils";
 
 interface ValidationMutationParams {
   accounts: Account[];
@@ -49,12 +50,7 @@ const useValidationMutation = () => {
           results.push({ status: false, account, error });
         } finally {
           /* Delay to avoid rate limiting */
-          await new Promise((resolve) =>
-            setTimeout(
-              resolve,
-              Math.max(1000, Math.floor(Math.random() * 5000))
-            )
-          );
+          await delayBetween(2000, 5000);
 
           /* Increment Progress */
           incrementProgress();

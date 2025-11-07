@@ -12,9 +12,23 @@ import { Toaster } from "react-hot-toast";
 import { Restore } from "./pages/Restore";
 import { Password } from "./pages/Password";
 import { Validate } from "./pages/Validate";
+import { useAppStore } from "./store/useAppStore";
+import { useWakeLock } from "./hooks/useWakeLock";
+import { useIsMutating } from "@tanstack/react-query";
+import { usePendingActivity } from "./hooks/usePendingActivity";
 const INACTIVITY_DURATION = 3 * 60 * 1000;
 function App() {
+  const isProcessing = useAppStore((state) => state.isProcessing);
+  const isMutating = useIsMutating();
+
+  /* Wake Lock Hook */
+  useWakeLock(isProcessing);
+
+  /* Inactivity Hook */
   useInactivity(INACTIVITY_DURATION);
+
+  /* Set Pending Activity Based on Mutations */
+  usePendingActivity(isMutating > 0);
 
   return (
     <>

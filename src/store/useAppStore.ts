@@ -23,13 +23,20 @@ export type AppStore = {
 
   /** Reset App */
   resetApp: () => void;
+
+  /** Extras */
+  isProcessing: boolean;
+  setIsProcessing: (isProcessing: boolean) => void;
 };
 
-const EXCLUDED_KEYS: (keyof AppStore)[] = ["password"];
+const EXCLUDED_KEYS: (keyof AppStore)[] = ["password", "isProcessing"];
 
 const useAppStore = create(
   persist<AppStore>(
     (set, get) => ({
+      /** Processing State */
+      isProcessing: false,
+
       /** Accounts */
       accounts: [],
 
@@ -112,6 +119,9 @@ const useAppStore = create(
         /* Reset Store */
         set({ passwordHash: null, password: null, accounts: [] });
       },
+
+      /** Extras */
+      setIsProcessing: (isProcessing) => set({ isProcessing }),
     }),
     {
       name: "app-storage",
