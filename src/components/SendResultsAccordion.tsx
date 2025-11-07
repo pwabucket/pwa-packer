@@ -51,6 +51,19 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
         </Accordion.Header>
 
         <Accordion.Content className="flex flex-col gap-2 p-4 pt-0">
+          {/* Validation */}
+          {res.validation ? (
+            <ResultInfo
+              title="Validation"
+              value={res.validation.activity ? "Successful" : "Failed"}
+              icon={<span>{res.validation.activity ? "✅" : "❌"}</span>}
+              valueClassName={
+                res.validation.activity ? "text-green-300" : "text-red-300"
+              }
+              canCopy={false}
+            />
+          ) : null}
+
           {/* Receiver */}
           <ResultInfo
             title="Receiver"
