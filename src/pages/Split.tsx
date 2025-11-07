@@ -1,3 +1,4 @@
+import ParcelIcon from "../assets/parcel-icon.svg";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
@@ -18,6 +19,13 @@ import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
+import { useState } from "react";
+import { PopupDialog } from "../components/PopupDialog";
+import { Dialog } from "radix-ui";
+import { HiOutlineXMark } from "react-icons/hi2";
+
+/** Whether to Use Iframe for Parcel */
+const USE_IFRAME_FOR_PARCEL = true;
 
 /** Parcel URL from Environment Variables */
 const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
@@ -96,11 +104,57 @@ const TokenButton = ({
   );
 };
 
+const ParcelDialog = (props: Dialog.DialogProps) => {
+  return (
+    <Dialog.Root {...props}>
+      <PopupDialog className="p-0 h-full max-h-[768px] overflow-hidden gap-0 max-w-md">
+        {/* Header */}
+        <div className="flex gap-2 items-center justify-center shrink-0 p-2">
+          <div className="size-10 shrink-0" />
+
+          {/* Title */}
+          <Dialog.Title className="flex items-center justify-center gap-2 grow min-w-0">
+            <img src={ParcelIcon} className="size-6" />
+            Parcel
+          </Dialog.Title>
+
+          {/* Hidden Description */}
+          <Dialog.Description className="sr-only">
+            Split Panel
+          </Dialog.Description>
+
+          {/* Close Button */}
+          <div className="size-10 shrink-0">
+            {/* Close Parcel */}
+            <Dialog.Close
+              title="Close Parcel"
+              className={cn(
+                "size-full text-neutral-400 hover:text-yellow-500 cursor-pointer",
+                "flex justify-center items-center"
+              )}
+            >
+              <HiOutlineXMark className="size-5" />
+            </Dialog.Close>
+          </div>
+        </div>
+
+        {/* Iframe */}
+        <iframe
+          src={new URL("/split", PARCEL_URL).href}
+          title="Parcel"
+          className="border-0 grow"
+        ></iframe>
+      </PopupDialog>
+    </Dialog.Root>
+  );
+};
+
 /** Split Page Component */
 const Split = () => {
   const { progress, resetProgress } = useProgress();
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
+  const [showIframe, setShowIframe] = useState(false);
 
   /** Form */
   const form = useForm<SplitFormData>({
@@ -128,16 +182,11 @@ const Split = () => {
       }
 
       const result = await new Promise((resolve) => {
-        const parcelWindow = window.open(
-          new URL("/split", PARCEL_URL).href,
-          "_blank",
-          "popup,width=400,height=768"
-        );
-
+        /** Handle Parcel Ready Message */
         function handleParcelReady(event: MessageEvent) {
           if (event.origin !== new URL(PARCEL_URL).origin) return;
           if (event.data === "ready") {
-            parcelWindow!.postMessage(
+            event.source!.postMessage(
               {
                 blockchain: "bsc",
                 token: data.token,
@@ -151,11 +200,24 @@ const Split = () => {
               PARCEL_URL
             );
             window.removeEventListener("message", handleParcelReady);
+
             resolve({ status: true });
           }
         }
 
+        /** Listen for Parcel Ready Message */
         window.addEventListener("message", handleParcelReady);
+
+        /* Open Parcel in New Window or Iframe */
+        if (USE_IFRAME_FOR_PARCEL) {
+          setShowIframe(true);
+        } else {
+          window.open(
+            new URL("/split", PARCEL_URL).href,
+            "_blank",
+            "popup,width=400,height=768"
+          );
+        }
       });
 
       return result;
@@ -169,6 +231,11 @@ const Split = () => {
 
   return (
     <InnerPageLayout title="Split">
+      {/* Iframe for Parcel */}
+      {showIframe ? (
+        <ParcelDialog open={showIframe} onOpenChange={setShowIframe} />
+      ) : null}
+
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
