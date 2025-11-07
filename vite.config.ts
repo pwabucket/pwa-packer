@@ -1,5 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import process from "process";
 import version from "vite-plugin-package-version";
@@ -86,11 +86,7 @@ export default defineConfig(({ mode }) => {
       ViteEjsPlugin(env),
       tailwindcss(),
       imagetools(),
-      react({
-        babel: {
-          plugins: [["babel-plugin-react-compiler"]],
-        },
-      }),
+      react(),
     ],
   };
 });
