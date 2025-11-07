@@ -42,79 +42,75 @@ const useWithdrawalMutation = () => {
       let totalSentValue = 0;
 
       /* Iterate Over Accounts and Send Funds */
-      await Promise.all(
-        data.accounts.map(async (account) => {
-          try {
-            const walletProvider = new WalletProvider(account.walletAddress);
-            const provider = walletProvider.getProvider();
-            const usdtToken = walletProvider.getUsdtTokenContract();
+      for (const account of data.accounts) {
+        try {
+          const walletProvider = new WalletProvider(account.walletAddress);
+          const provider = walletProvider.getProvider();
+          const usdtToken = walletProvider.getUsdtTokenContract();
 
-            const privateKey = await getPrivateKey(account.id, password);
-            const wallet = new ethers.Wallet(privateKey, provider);
+          const privateKey = await getPrivateKey(account.id, password);
+          const wallet = new ethers.Wallet(privateKey, provider);
 
-            let amountToSend = data.amount;
+          let amountToSend = data.amount;
 
-            if (!amountToSend || amountToSend.trim() === "") {
-              /* Fetch USDT Balance */
-              const balance = await walletProvider.getUSDTBalance();
+          if (!amountToSend || amountToSend.trim() === "") {
+            /* Fetch USDT Balance */
+            const balance = await walletProvider.getUSDTBalance();
 
-              /* If amount is not specified, send the entire balance */
-              amountToSend = balance.toString();
+            /* If amount is not specified, send the entire balance */
+            amountToSend = balance.toString();
 
-              /* Log Balance */
-              console.log(
-                `Balance of ${account.walletAddress}: ${amountToSend} USDT`
-              );
-            }
-
-            /* Receiver Address */
-            const receiver = data.address;
-
-            /* Log Withdrawal Info */
+            /* Log Balance */
             console.log(
-              `Withdrawing ${amountToSend} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
+              `Balance of ${account.walletAddress}: ${amountToSend} USDT`
             );
-
-            /* Perform Transfer */
-            const connectedToken = usdtToken.connect(
-              wallet
-            ) as typeof usdtToken;
-            const tx = await connectedToken.transfer(
-              receiver,
-              ethers.parseUnits(amountToSend, USDT_DECIMALS)
-            );
-
-            /* Wait for Transaction to be Mined */
-            const result = await tx.wait();
-
-            /* Log Result */
-            console.log(result);
-
-            /* Push Success Result */
-            results.push({
-              status: true,
-              account,
-              result,
-            });
-
-            totalSentValue += parseFloat(amountToSend);
-            successfulSends++;
-          } catch (error) {
-            /* Log Error */
-            console.error(`Failed to send from account ${account.id}:`, error);
-
-            /* Push Failure Result */
-            results.push({
-              status: false,
-              account,
-              error,
-            });
           }
 
+          /* Receiver Address */
+          const receiver = data.address;
+
+          /* Log Withdrawal Info */
+          console.log(
+            `Withdrawing ${amountToSend} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
+          );
+
+          /* Perform Transfer */
+          const connectedToken = usdtToken.connect(wallet) as typeof usdtToken;
+          const tx = await connectedToken.transfer(
+            receiver,
+            ethers.parseUnits(amountToSend, USDT_DECIMALS)
+          );
+
+          /* Wait for Transaction to be Mined */
+          const result = await tx.wait();
+
+          /* Log Result */
+          console.log(result);
+
+          /* Push Success Result */
+          results.push({
+            status: true,
+            account,
+            result,
+          });
+
+          totalSentValue += parseFloat(amountToSend);
+          successfulSends++;
+        } catch (error) {
+          /* Log Error */
+          console.error(`Failed to send from account ${account.id}:`, error);
+
+          /* Push Failure Result */
+          results.push({
+            status: false,
+            account,
+            error,
+          });
+        } finally {
           /* Increment Progress */
           incrementProgress();
-        })
-      );
+        }
+      }
 
       return { results, successfulSends, totalSentValue };
     },

@@ -177,7 +177,10 @@ class Packer {
 
   /* Check and Refresh Activity if Not Participated */
   async checkActivity() {
+    /* Get Current Activity Status */
     const status = await this.getActivity();
+
+    /* If Not Participated, Refresh Activity */
     if (!status.activity) {
       return await this.refreshActivity();
     }
