@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
-import { delayBetween } from "../lib/utils";
+import { chunkArrayGenerator, delayBetween } from "../lib/utils";
 
 interface ValidationMutationParams {
   accounts: Account[];
@@ -26,36 +26,46 @@ const useValidationMutation = () => {
       /* Reset Progress */
       resetProgress();
 
-      /* Results Array */
       const results: ValidationResult[] = [];
 
-      for (const account of data.accounts) {
-        if (!account.url) {
-          results.push({ status: false, account, error: "No URL provided" });
-          incrementProgress();
-          continue;
-        }
-        const packer = new Packer(account.url);
-        try {
-          await packer.initialize();
-          await packer.getTime();
+      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
+        const chunkResults = await Promise.all<ValidationResult>(
+          chunk.map(async (account) => {
+            /* Skip if no URL */
+            if (!account.url) {
+              incrementProgress();
+              return { status: false, account, error: "No URL provided" };
+            }
 
-          /* Check Activity */
-          const activity = await packer.checkActivity();
+            const packer = new Packer(account.url);
 
-          /* Push Successful Result */
-          results.push({ status: true, account, activity });
-        } catch (error) {
-          /* Push Failed Result */
-          results.push({ status: false, account, error });
-        } finally {
-          /* Delay to avoid rate limiting */
-          await delayBetween(2000, 5000);
+            try {
+              await packer.initialize();
+              await packer.getTime();
 
-          /* Increment Progress */
-          incrementProgress();
-        }
+              /* Check Activity */
+              const activity = await packer.checkActivity();
+
+              /* Push Successful Result */
+              return { status: true, account, activity };
+            } catch (error) {
+              /* Push Failed Result */
+              return { status: false, account, error };
+            } finally {
+              /* Delay to avoid rate limiting */
+              await delayBetween(2000, 5000);
+
+              /* Increment Progress */
+              incrementProgress();
+            }
+          })
+        );
+
+        /* Append Chunk Results */
+        results.push(...chunkResults);
       }
+
+      return results;
     },
   });
 
