@@ -1,4 +1,3 @@
-import ParcelIcon from "../assets/parcel-icon.svg";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
@@ -20,9 +19,7 @@ import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
 import { useState } from "react";
-import { PopupDialog } from "../components/PopupDialog";
-import { Dialog } from "radix-ui";
-import { HiOutlineXMark } from "react-icons/hi2";
+import { ParcelDialog } from "../components/ParcelDialog";
 
 /** Whether to Use Iframe for Parcel */
 const USE_IFRAME_FOR_PARCEL = true;
@@ -104,51 +101,6 @@ const TokenButton = ({
   );
 };
 
-const ParcelDialog = (props: Dialog.DialogProps) => {
-  return (
-    <Dialog.Root {...props}>
-      <PopupDialog className="p-0 h-full max-h-[768px] overflow-hidden gap-0 max-w-md">
-        {/* Header */}
-        <div className="flex gap-2 items-center justify-center shrink-0 p-2">
-          <div className="size-10 shrink-0" />
-
-          {/* Title */}
-          <Dialog.Title className="flex items-center justify-center gap-2 grow min-w-0">
-            <img src={ParcelIcon} className="size-6" />
-            Parcel
-          </Dialog.Title>
-
-          {/* Hidden Description */}
-          <Dialog.Description className="sr-only">
-            Split Panel
-          </Dialog.Description>
-
-          {/* Close Button */}
-          <div className="size-10 shrink-0">
-            {/* Close Parcel */}
-            <Dialog.Close
-              title="Close Parcel"
-              className={cn(
-                "size-full text-neutral-400 hover:text-yellow-500 cursor-pointer",
-                "flex justify-center items-center"
-              )}
-            >
-              <HiOutlineXMark className="size-5" />
-            </Dialog.Close>
-          </div>
-        </div>
-
-        {/* Iframe */}
-        <iframe
-          src={new URL("/split", PARCEL_URL).href}
-          title="Parcel"
-          className="border-0 grow"
-        ></iframe>
-      </PopupDialog>
-    </Dialog.Root>
-  );
-};
-
 /** Split Page Component */
 const Split = () => {
   const { progress, resetProgress } = useProgress();
@@ -212,11 +164,23 @@ const Split = () => {
         if (USE_IFRAME_FOR_PARCEL) {
           setShowIframe(true);
         } else {
-          window.open(
-            new URL("/split", PARCEL_URL).href,
-            "_blank",
-            "popup,width=400,height=768"
+          const isMobile = /Android|iPhone|iPad|iPod/i.test(
+            navigator.userAgent
           );
+
+          if (isMobile) {
+            const link = document.createElement("a");
+            link.href = new URL("/split", PARCEL_URL).href;
+            link.target = "_blank";
+            link.rel = "opener";
+            link.click();
+          } else {
+            window.open(
+              new URL("/split", PARCEL_URL).href,
+              "_blank",
+              "popup,width=400,height=768"
+            );
+          }
         }
       });
 
