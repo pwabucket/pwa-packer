@@ -3,6 +3,7 @@ import { PopupDialog } from "./PopupDialog";
 import { ActionButton } from "./ActionButton";
 import {
   MdOutlineBackup,
+  MdOutlineCheck,
   MdOutlinePassword,
   MdOutlineRestore,
 } from "react-icons/md";
@@ -63,6 +64,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlinePassword className="size-5" />}
         >
           <Link to="/password" />
+        </ActionButton>
+
+        {/* Validate */}
+        <ActionButton
+          asChild
+          title="Validate Accounts"
+          label="Validate"
+          icon={<MdOutlineCheck className="size-5" />}
+        >
+          <Link to="/validate" />
         </ActionButton>
       </div>
     </PopupDialog>
