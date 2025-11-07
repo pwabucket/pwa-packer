@@ -38,17 +38,17 @@ const Dashboard = () => {
     <div className="flex flex-col min-h-dvh">
       <AppHeader
         leftContent={
-          <AppHeader.Button>
+          <AppHeader.Button
+            onClick={() =>
+              setDashboardStyle(
+                dashboardStyle === "normal" ? "sticky" : "normal"
+              )
+            }
+          >
             {dashboardStyle === "normal" ? (
-              <MdOutlinePushPin
-                className="size-6"
-                onClick={() => setDashboardStyle("sticky")}
-              />
+              <MdOutlinePushPin className="size-6" />
             ) : (
-              <MdPushPin
-                className="size-6"
-                onClick={() => setDashboardStyle("normal")}
-              />
+              <MdPushPin className="size-6" />
             )}
           </AppHeader.Button>
         }
