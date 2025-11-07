@@ -22,7 +22,8 @@ import { useState } from "react";
 import { ParcelDialog } from "../components/ParcelDialog";
 
 /** Whether to Use Iframe for Parcel */
-const USE_IFRAME_FOR_PARCEL = true;
+const USE_IFRAME_FOR_PARCEL =
+  import.meta.env.VITE_USE_IFRAME_FOR_PARCEL === "true";
 
 /** Parcel URL from Environment Variables */
 const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
