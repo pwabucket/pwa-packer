@@ -131,7 +131,7 @@ const Split = () => {
         const parcelWindow = window.open(
           new URL("/split", PARCEL_URL).href,
           "_blank",
-          "width=400,height=768"
+          "popup,width=400,height=768"
         );
 
         function handleParcelReady(event: MessageEvent) {
@@ -274,7 +274,9 @@ const Split = () => {
 
           {/* Submit Button */}
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Processing..." : "Send Split to Accounts"}
+            {mutation.isPending
+              ? "Processing..."
+              : `Send ${token.toUpperCase()} to Accounts`}
           </Button>
 
           {/* Progress Bar */}
