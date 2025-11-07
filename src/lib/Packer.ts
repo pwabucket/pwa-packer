@@ -177,12 +177,12 @@ class Packer {
 
   /* Check and Refresh Activity if Not Participated */
   async checkActivity() {
-    const activity = await this.getActivity();
-    if (!activity.participated) {
-      await this.refreshActivity();
+    const status = await this.getActivity();
+    if (!status.activity) {
+      return await this.refreshActivity();
     }
 
-    return activity;
+    return status;
   }
 }
 
