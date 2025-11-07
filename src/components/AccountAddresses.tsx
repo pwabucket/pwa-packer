@@ -23,7 +23,7 @@ const AccountAddresses = ({ account, canCopy }: AccountAddressesProps) => {
   return (
     <span className="flex flex-col shrink-0">
       {/* Wallet Address */}
-      <span className="text-lime-300 text-xs flex items-center gap-1">
+      <span className="text-lime-300 text-xs flex items-center gap-1 truncate">
         <span className="font-bold">W:</span>{" "}
         {truncateAddress(account.walletAddress)}
         {canCopy && (
@@ -35,7 +35,7 @@ const AccountAddresses = ({ account, canCopy }: AccountAddressesProps) => {
       </span>
 
       {/* Deposit Address */}
-      <span className="text-orange-300 text-xs flex items-center gap-1">
+      <span className="text-orange-300 text-xs flex items-center gap-1 truncate">
         <span className="font-bold">D:</span>{" "}
         {truncateAddress(account.depositAddress)}
         {canCopy && (

@@ -79,7 +79,7 @@ const AccountItem = ({ account }: { account: Account }) => {
               />
 
               {/* Account Info - Dialog Trigger */}
-              <Dialog.Trigger className="grow text-left cursor-pointer group">
+              <Dialog.Trigger className="grow min-w-0 text-left cursor-pointer group">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex justify-between">
                     <h2 className="font-bold text-sm group-hover:text-yellow-500 transition-colors grow min-w-0 min-h-0">
@@ -98,7 +98,6 @@ const AccountItem = ({ account }: { account: Account }) => {
                   </div>
 
                   {/* Balance Info */}
-
                   <AccountBalance account={account} />
                 </div>
               </Dialog.Trigger>

@@ -31,7 +31,7 @@ const TotalBalanceCard = () => {
   };
 
   return queries.isSuccess ? (
-    <div className="flex flex-col gap-2 pt-4">
+    <div className="flex flex-col gap-2">
       <p className="text-center flex items-center justify-center gap-2">
         {/* Spacer */}
         <span className="size-6 shrink-0" />
@@ -56,12 +56,8 @@ const TotalBalanceCard = () => {
           <MdOutlineRefresh className="size-4" />
         </button>
       </p>
-      <p className="text-center text-sm">
-        <img
-          src={BNBIcon}
-          alt="BNB"
-          className="inline-block size-6 mr-2 mb-1"
-        />
+      <p className="text-center text-xs flex justify-center items-center gap-2 text-neutral-400">
+        <img src={BNBIcon} alt="BNB" className="inline-block size-5" />
         {totalBalance.bnb.toFixed(8)} BNB
       </p>
     </div>

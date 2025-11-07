@@ -42,64 +42,69 @@ const Dashboard = () => {
         }
       />
 
-      {/* Main content area */}
-      <MainContainer className="gap-4">
-        <TotalBalanceCard />
+      <div className="sticky top-12 z-10 bg-neutral-950">
+        <MainContainer className="gap-4">
+          {/* Total Balance */}
+          <TotalBalanceCard />
 
-        <div className="flex justify-center items-center gap-6">
-          {/* Withdraw */}
-          <ActionButton
-            asChild
-            label="Withdraw"
-            icon={<HiOutlineArrowDownLeft className="size-5" />}
-          >
-            <Link to="/withdraw" />
-          </ActionButton>
-
-          {/* Send Action Button */}
-          <ActionButton
-            asChild
-            label="Send"
-            icon={<HiOutlineArrowUpRight className="size-5" />}
-          >
-            <Link to="/send" />
-          </ActionButton>
-
-          {/* Gas */}
-          <ActionButton
-            asChild
-            label="Gas"
-            icon={<MdOutlineLocalGasStation className="size-5" />}
-          >
-            <Link to="/gas" />
-          </ActionButton>
-
-          <Dialog.Root>
+          <div className="flex justify-center items-center gap-4">
+            {/* Withdraw */}
             <ActionButton
-              icon={<MdOutlineMenu className="size-5" />}
-              label="More"
               asChild
+              label="Withdraw"
+              icon={<HiOutlineArrowDownLeft className="size-5" />}
             >
-              <Dialog.Trigger />
+              <Link to="/withdraw" />
             </ActionButton>
-            <ExtraUtilsDialog />
-          </Dialog.Root>
-        </div>
 
-        {/* Account List Heading */}
-        <h4 className="font-protest-guerrilla px-4 text-center text-lg">
-          Your Accounts ({accounts.length})
-        </h4>
+            {/* Send Action Button */}
+            <ActionButton
+              asChild
+              label="Send"
+              icon={<HiOutlineArrowUpRight className="size-5" />}
+            >
+              <Link to="/send" />
+            </ActionButton>
 
-        {/* New Account Button */}
-        <Button onClick={() => setShowNewAccountDialog(true)}>
-          New Account
-        </Button>
+            {/* Gas */}
+            <ActionButton
+              asChild
+              label="Gas"
+              icon={<MdOutlineLocalGasStation className="size-5" />}
+            >
+              <Link to="/gas" />
+            </ActionButton>
 
-        {showNewAccountDialog && (
-          <NewAccountDialog onClose={() => setShowNewAccountDialog(false)} />
-        )}
+            {/* More Tools */}
+            <Dialog.Root>
+              <ActionButton
+                icon={<MdOutlineMenu className="size-5" />}
+                label="More"
+                asChild
+              >
+                <Dialog.Trigger />
+              </ActionButton>
+              <ExtraUtilsDialog />
+            </Dialog.Root>
+          </div>
 
+          {/* New Account Button */}
+          <Button onClick={() => setShowNewAccountDialog(true)}>
+            New Account
+          </Button>
+
+          {showNewAccountDialog && (
+            <NewAccountDialog onClose={() => setShowNewAccountDialog(false)} />
+          )}
+
+          {/* Account List Heading */}
+          <h4 className="font-protest-guerrilla px-4 text-center">
+            Accounts ({accounts.length})
+          </h4>
+        </MainContainer>
+      </div>
+      {/* Main content area */}
+      <MainContainer className="gap-4" wrapperClassName="pt-0">
         {/* Account List */}
         <div className="flex flex-col gap-2">
           {accounts.length === 0 ? (
