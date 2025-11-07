@@ -3,7 +3,13 @@ import { useAppStore } from "../store/useAppStore";
 import AppIcon from "../assets/icon.svg";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
-import { MdOutlineLocalGasStation, MdOutlineMenu } from "react-icons/md";
+import {
+  MdOutlineLocalGasStation,
+  MdOutlinePushPin,
+  MdPushPin,
+  MdOutlineMenu,
+  MdPersonAdd,
+} from "react-icons/md";
 
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
 import { cn } from "../lib/utils";
@@ -25,9 +31,27 @@ const Dashboard = () => {
   const [showNewAccountDialog, setShowNewAccountDialog] =
     useLocationToggle("new-account-dialog");
 
+  const dashboardStyle = useAppStore((state) => state.dashboardStyle);
+  const setDashboardStyle = useAppStore((state) => state.setDashboardStyle);
+
   return (
     <div className="flex flex-col min-h-dvh">
       <AppHeader
+        leftContent={
+          <AppHeader.Button>
+            {dashboardStyle === "normal" ? (
+              <MdOutlinePushPin
+                className="size-6"
+                onClick={() => setDashboardStyle("sticky")}
+              />
+            ) : (
+              <MdPushPin
+                className="size-6"
+                onClick={() => setDashboardStyle("normal")}
+              />
+            )}
+          </AppHeader.Button>
+        }
         middleContent={
           <h1
             className={cn(
@@ -42,7 +66,12 @@ const Dashboard = () => {
         }
       />
 
-      <div className="sticky top-12 z-10 bg-neutral-950">
+      <div
+        className={cn(
+          "bg-neutral-950",
+          dashboardStyle === "sticky" ? "sticky top-12 z-10" : ""
+        )}
+      >
         <MainContainer className="gap-4">
           {/* Total Balance */}
           <TotalBalanceCard />
@@ -90,7 +119,10 @@ const Dashboard = () => {
 
           {/* New Account Button */}
           <Button onClick={() => setShowNewAccountDialog(true)}>
-            New Account
+            <div className="flex items-center gap-2">
+              <MdPersonAdd className="size-4" />
+              <span>New Account</span>
+            </div>
           </Button>
 
           {showNewAccountDialog && (

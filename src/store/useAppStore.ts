@@ -5,6 +5,10 @@ import type { Account } from "../types";
 import { getLocalStorageKeyForAccountPrivateKey } from "../lib/utils";
 
 export type AppStore = {
+  /** Dashboard Style */
+  dashboardStyle: "normal" | "sticky";
+  setDashboardStyle: (style: "normal" | "sticky") => void;
+
   /** Accounts */
   accounts: Account[];
   addAccount: (account: Account) => void;
@@ -34,8 +38,13 @@ const EXCLUDED_KEYS: (keyof AppStore)[] = ["password", "isProcessing"];
 const useAppStore = create(
   persist<AppStore>(
     (set, get) => ({
-      /** Processing State */
+      /** Extras */
       isProcessing: false,
+      setIsProcessing: (isProcessing) => set({ isProcessing }),
+
+      /** Dashboard Style */
+      dashboardStyle: "normal",
+      setDashboardStyle: (style) => set({ dashboardStyle: style }),
 
       /** Accounts */
       accounts: [],
@@ -119,9 +128,6 @@ const useAppStore = create(
         /* Reset Store */
         set({ passwordHash: null, password: null, accounts: [] });
       },
-
-      /** Extras */
-      setIsProcessing: (isProcessing) => set({ isProcessing }),
     }),
     {
       name: "app-storage",
