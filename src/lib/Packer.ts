@@ -130,7 +130,7 @@ class Packer {
         tgInfo: {
           ["invite"]: 0,
           ["language_code"]: "",
-          ["initData"]: this.telegramWebApp.initData || "",
+          ["initData"]: this.getInitData(),
           ["id"]: this.getUserId(),
         },
       })
@@ -147,11 +147,21 @@ class Packer {
     return this.telegramWebApp.initDataUnsafe?.user?.id || null;
   }
 
+  /* Get Telegram ID as String */
+  getTgId() {
+    return this.getUserId()?.toString() || "";
+  }
+
+  /* Get Init Data */
+  getInitData() {
+    return this.telegramWebApp.initData || "";
+  }
+
   /* Get Activity Data */
   getActivity() {
     return this.api
       .post("/api/activity", {
-        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["tg_id"]: this.getTgId(),
         ["status"]: 1,
       })
       .then((res) => res.data.data);
@@ -161,7 +171,7 @@ class Packer {
   refreshActivity() {
     return this.api
       .post("/api/depositActivity", {
-        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["tg_id"]: this.getTgId(),
       })
       .then((res) => res.data.data);
   }
@@ -170,7 +180,7 @@ class Packer {
   getActivityWallet() {
     return this.api
       .post("/api/generatedActivityWallet", {
-        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["tg_id"]: this.getTgId(),
       })
       .then((res) => res.data.data);
   }
@@ -179,7 +189,7 @@ class Packer {
   getDepositWallet() {
     return this.api
       .post("/api/generated", {
-        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["tg_id"]: this.getTgId(),
       })
       .then((res) => res.data.data);
   }
@@ -187,7 +197,7 @@ class Packer {
   /* Get Withdraw Activity */
   getWithdrawActivity() {
     return this.api
-      .get(`/api/withdrawActivity?tg_id=${this.getUserId()}`)
+      .get(`/api/withdrawActivity?tg_id=${this.getTgId()}`)
       .then((res) => res.data.data);
   }
 
@@ -195,8 +205,8 @@ class Packer {
   withdrawActivity(withdrawalAddress: string) {
     return this.api
       .post("/api/withdrawActivity", {
-        ["tgInfo"]: this.telegramWebApp.initData,
-        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["tgInfo"]: this.getInitData(),
+        ["tg_id"]: this.getTgId(),
         ["withdrawalAddress"]: withdrawalAddress,
       })
       .then((res) => res.data.data);
