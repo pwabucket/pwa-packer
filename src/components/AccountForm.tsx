@@ -53,7 +53,13 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
   const mutation = useMutation({
     mutationKey: ["get-deposit-address"],
     mutationFn: async (url: string) => {
+      /* Create Packer Instance */
       const packer = new Packer(url);
+
+      /* Initialize Packer */
+      await packer.initialize();
+
+      /* Get Data */
       const { data } = await packer.validate();
 
       if (data.activityAddress) {
@@ -72,6 +78,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
     toast.success("Deposit Address filled successfully");
   };
 
+  /* Generate New Wallet Private Key */
   const generateWalletPrivateKey = () => {
     const wallet = ethers.Wallet.createRandom();
     form.setValue("privateKey", wallet.privateKey);
