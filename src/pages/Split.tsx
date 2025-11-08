@@ -308,7 +308,7 @@ const Split = () => {
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending
               ? "Processing..."
-              : `Send ${token.toUpperCase()} to Accounts`}
+              : `Split ${token.toUpperCase()} to Accounts`}
           </Button>
 
           {/* Progress Bar */}
