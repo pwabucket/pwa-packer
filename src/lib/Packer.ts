@@ -175,6 +175,15 @@ class Packer {
       .then((res) => res.data.data);
   }
 
+  /* Get Deposit Wallet */
+  getDepositWallet() {
+    return this.api
+      .post("/api/generated", {
+        ["tg_id"]: this.getUserId()?.toString() || "",
+      })
+      .then((res) => res.data.data);
+  }
+
   /* Check and Refresh Activity if Not Participated */
   async checkActivity() {
     /* Get Current Activity Status */

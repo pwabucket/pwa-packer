@@ -6,7 +6,12 @@ import * as yup from "yup";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { TextArea } from "../components/TextArea";
-import { getWalletAddressFromPrivateKey } from "../lib/utils";
+import { cn, getWalletAddressFromPrivateKey } from "../lib/utils";
+import { Packer } from "../lib/Packer";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { ethers } from "ethers";
+import { MdOutlineAutorenew, MdAccountBalanceWallet } from "react-icons/md";
 
 /** Account Form Data */
 interface AccountFormData {
@@ -44,6 +49,34 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
       privateKey: initialValues?.privateKey || "",
     },
   });
+
+  const mutation = useMutation({
+    mutationKey: ["get-deposit-address"],
+    mutationFn: async (url: string) => {
+      const packer = new Packer(url);
+      const { data } = await packer.validate();
+
+      if (data.activityAddress) {
+        return data.activityAddress;
+      } else {
+        const wallet = await packer.getActivityWallet();
+        return wallet.msg;
+      }
+    },
+  });
+
+  /* Fill Deposit Address from URL */
+  const fillDepositAddress = async (url: string) => {
+    const address = await mutation.mutateAsync(url);
+    form.setValue("depositAddress", address);
+    toast.success("Deposit Address filled successfully");
+  };
+
+  const generateWalletPrivateKey = () => {
+    const wallet = ethers.Wallet.createRandom();
+    form.setValue("privateKey", wallet.privateKey);
+    toast.success("New wallet generated successfully");
+  };
 
   return (
     <FormProvider {...form}>
@@ -92,6 +125,24 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
             <>
               <Label htmlFor="url">URL</Label>
               <Input {...field} id="url" autoComplete="off" placeholder="URL" />
+              {field.value && (
+                <div className="flex justify-end">
+                  <button
+                    disabled={mutation.isPending}
+                    type="button"
+                    onClick={() => fillDepositAddress(field.value)}
+                    className={cn(
+                      "text-sm text-orange-300 cursor-pointer hover:underline disabled:opacity-50",
+                      "flex items-center gap-1"
+                    )}
+                  >
+                    <MdAccountBalanceWallet className="size-3" />
+                    {mutation.isPending
+                      ? "Fetching..."
+                      : "Fill Deposit Address from URL"}
+                  </button>
+                </div>
+              )}
               <FormFieldError message={fieldState.error?.message} />
             </>
           )}
@@ -110,7 +161,22 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                 placeholder="Private Key"
                 rows={4}
               />
-              <p className="text-sm px-4 text-blue-500 text-center font-mono wrap-break-word">
+              {!field.value && (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={generateWalletPrivateKey}
+                    className={cn(
+                      "text-sm text-lime-300 cursor-pointer hover:underline disabled:opacity-50",
+                      "flex items-center gap-1"
+                    )}
+                  >
+                    <MdOutlineAutorenew className="size-3" />
+                    Generate New Wallet
+                  </button>
+                </div>
+              )}
+              <p className="text-sm px-4 text-lime-300 text-center font-mono wrap-break-word">
                 {getWalletAddressFromPrivateKey(field.value)}
               </p>
               <FormFieldError message={fieldState.error?.message} />
