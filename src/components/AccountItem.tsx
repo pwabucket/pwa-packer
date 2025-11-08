@@ -3,7 +3,7 @@ import { MdEditNote, MdOutlineAccountBalanceWallet } from "react-icons/md";
 
 import { Dialog } from "radix-ui";
 import { AccountDetailsDialog } from "../components/AccountDialog";
-import { cn } from "../lib/utils";
+import { cn, truncateAddress } from "../lib/utils";
 import { AccountBalance } from "./AccountBalance";
 import { Reorder, useDragControls } from "motion/react";
 import { useCallback } from "react";
@@ -82,18 +82,16 @@ const AccountItem = ({ account }: { account: Account }) => {
               <Dialog.Trigger className="grow min-w-0 text-left cursor-pointer group">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex justify-between">
-                    <h2 className="font-bold text-sm group-hover:text-yellow-500 transition-colors grow min-w-0 min-h-0">
+                    <h2 className="font-bold text-sm text-yellow-500 transition-colors grow min-w-0 min-h-0">
                       {account.title}
                     </h2>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <p className="text-xs text-lime-300 font-mono truncate">
-                      Wallet: {account.walletAddress.slice(0, 6)}...
-                      {account.walletAddress.slice(-4)}
+                      Wallet: {truncateAddress(account.walletAddress)}
                     </p>
                     <p className="text-xs text-orange-300 font-mono truncate">
-                      Deposit: {account.depositAddress.slice(0, 6)}...
-                      {account.depositAddress.slice(-4)}
+                      Deposit: {truncateAddress(account.depositAddress)}
                     </p>
                   </div>
 
