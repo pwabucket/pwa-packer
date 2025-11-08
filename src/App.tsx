@@ -16,7 +16,9 @@ import { useAppStore } from "./store/useAppStore";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useIsMutating } from "@tanstack/react-query";
 import { usePendingActivity } from "./hooks/usePendingActivity";
-const INACTIVITY_DURATION = 3 * 60 * 1000;
+
+const INACTIVITY_DURATION = 1 * 60 * 1000;
+
 function App() {
   const isProcessing = useAppStore((state) => state.isProcessing);
   const isMutating = useIsMutating();
