@@ -3,6 +3,12 @@ import type { Account } from "../types";
 import { AccountAddresses } from "./AccountAddresses";
 import { AccountBalance } from "./AccountBalance";
 import { LabelToggle } from "./LabelToggle";
+import { cn } from "../lib/utils";
+import { Toggle } from "./Toggle";
+import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { Dialog } from "radix-ui";
+import useLocationToggle from "../hooks/useLocationToggle";
+import { AccountDetailsDialog } from "./AccountDialog";
 
 interface AccountsChooserProps {
   disabled?: boolean;
@@ -25,26 +31,57 @@ const AccountItem = ({
   disabled,
   toggleAccount,
 }: AccountItemProps) => {
+  const [showAccountDetails, toggleShowAccountDetails] = useLocationToggle(
+    `${account.id}-details`
+  );
+
   return (
-    <LabelToggle
-      key={account.id}
-      className="flex justify-between items-center gap-2"
-      checked={checked}
-      onChange={(ev) => toggleAccount(account, ev.target.checked)}
-      disabled={disabled}
+    <div
+      className={cn(
+        "dark:bg-neutral-900",
+        "flex items-center gap-2 p-1.5 rounded-full",
+        "has-[input:disabled]:opacity-60"
+      )}
     >
-      {/* Title and balance */}
-      <span className="flex flex-col">
-        <span className="text-xs font-bold text-yellow-500">
-          {account.title}
-        </span>
+      <label className="flex items-center gap-2 cursor-pointer grow min-w-0 pl-1">
+        <Toggle
+          checked={checked}
+          onChange={(ev) => toggleAccount(account, ev.target.checked)}
+          disabled={disabled}
+        />
 
-        <AccountBalance account={account} />
-      </span>
+        {/* Title and balance */}
+        <div className="flex flex-col grow min-w-0">
+          <span className="text-xs font-bold text-yellow-500">
+            {account.title}
+          </span>
 
-      {/* Addresses */}
-      <AccountAddresses account={account} />
-    </LabelToggle>
+          <AccountBalance account={account} />
+        </div>
+
+        {/* Addresses */}
+        <AccountAddresses account={account} />
+      </label>
+
+      <Dialog.Root
+        open={showAccountDetails}
+        onOpenChange={toggleShowAccountDetails}
+      >
+        <Dialog.Trigger
+          disabled={disabled}
+          className={cn(
+            "p-2 flex items-center justify-center cursor-pointer",
+            "hover:bg-neutral-700 rounded-full",
+            "text-neutral-500 hover:text-yellow-500",
+            "transition-colors duration-200"
+          )}
+        >
+          <MdOutlineAccountBalanceWallet className="size-5" />
+        </Dialog.Trigger>
+
+        <AccountDetailsDialog account={account} />
+      </Dialog.Root>
+    </div>
   );
 };
 
