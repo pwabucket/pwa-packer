@@ -5,19 +5,12 @@ import { usePassword } from "./usePassword";
 
 const EVENTS = [
   "mousemove",
-  "mousedown",
-  "mouseup",
   "keydown",
-  "keyup",
   "click",
   "scroll",
   "touchstart",
   "touchmove",
-  "touchend",
   "wheel",
-  "focus",
-  "blur",
-  "visibilitychange",
 ];
 
 const useInactivity = (duration: number = 5 * 60 * 1000) => {
