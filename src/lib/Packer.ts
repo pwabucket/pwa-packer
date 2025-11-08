@@ -184,6 +184,24 @@ class Packer {
       .then((res) => res.data.data);
   }
 
+  /* Get Withdraw Activity */
+  getWithdrawActivity() {
+    return this.api
+      .get(`/api/withdrawActivity?tg_id=${this.getUserId()}`)
+      .then((res) => res.data.data);
+  }
+
+  /* Withdraw Activity */
+  withdrawActivity(withdrawalAddress: string) {
+    return this.api
+      .post("/api/withdrawActivity", {
+        ["tgInfo"]: this.telegramWebApp.initData,
+        ["tg_id"]: this.getUserId()?.toString() || "",
+        ["withdrawalAddress"]: withdrawalAddress,
+      })
+      .then((res) => res.data.data);
+  }
+
   /* Check and Refresh Activity if Not Participated */
   async checkActivity() {
     /* Get Current Activity Status */
