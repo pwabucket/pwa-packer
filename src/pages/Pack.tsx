@@ -27,7 +27,12 @@ const Pack = () => {
     });
 
     /* Show Success Toast */
-    toast.success(`Packing completed! Total withdrawn: ${totalWithdrawn} USDT`);
+    toast.success(
+      `Packing completed! Total withdrawn: ${Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(totalWithdrawn)} USDT`
+    );
   };
 
   return (
