@@ -38,7 +38,12 @@ const Pack = () => {
 
       {mutation.isSuccess && (
         <p className="text-center text-green-400 text-sm">
-          Packing completed successfully!
+          Packing completed successfully -{" "}
+          {Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(mutation.data?.totalWithdrawn)}{" "}
+          USDT
         </p>
       )}
 
