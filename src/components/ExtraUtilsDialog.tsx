@@ -6,6 +6,7 @@ import {
   MdOutlineCheck,
   MdOutlinePassword,
   MdOutlineRestore,
+  MdLink,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -37,7 +38,7 @@ const ExtraUtilsDialog = () => {
       </Dialog.Description>
 
       {/* Utilities Content */}
-      <div className="flex justify-center items-center gap-6">
+      <div className="flex flex-wrap justify-center items-center gap-6">
         {/* Backup */}
         <ActionButton
           label="Backup"
@@ -64,6 +65,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlinePassword className="size-5" />}
         >
           <Link to="/password" />
+        </ActionButton>
+
+        {/* Update URLs */}
+        <ActionButton
+          asChild
+          title="Update Account URLs"
+          label="URLs"
+          icon={<MdLink className="size-5" />}
+        >
+          <Link to="/update-urls" />
         </ActionButton>
 
         {/* Validate */}
