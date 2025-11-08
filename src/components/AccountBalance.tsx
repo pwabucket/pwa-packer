@@ -15,17 +15,20 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
   return balance ? (
     <span
       {...props}
-      className={cn("shrink-0 text-xs gap-2 flex", props.className)}
+      className={cn(
+        "shrink-0 text-xs gap-2 flex text-neutral-300",
+        props.className
+      )}
     >
       {/* USDT Balance */}
-      <span>
-        <img src={USDTIcon} alt="USDT" className="inline-block size-3 mr-1" />
+      <span className="flex items-center gap-1">
+        <img src={USDTIcon} alt="USDT" className="size-3" />
         {balance.usdtBalance.toFixed(2)}
       </span>
 
       {/* BNB Balance */}
-      <span>
-        <img src={BNBIcon} alt="BNB" className="inline-block size-3 mr-1" />
+      <span className="flex items-center gap-1">
+        <img src={BNBIcon} alt="BNB" className="size-3" />
         {balance.bnbBalance.toFixed(8)}
       </span>
     </span>
