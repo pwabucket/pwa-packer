@@ -1,0 +1,127 @@
+import { useMutation } from "@tanstack/react-query";
+import type { Account } from "../types";
+import { useProgress } from "./useProgress";
+import { Packer } from "../lib/Packer";
+import { chunkArrayGenerator, delay, delayBetween } from "../lib/utils";
+
+/** Parameters for Pack Mutation */
+interface PackMutationParams {
+  accounts: Account[];
+}
+
+/** Result of Pack Mutation */
+interface PackResult {
+  status: boolean;
+  account: Account;
+  amount?: number;
+  error?: unknown;
+}
+
+const usePackMutation = () => {
+  const { progress, resetProgress, incrementProgress } = useProgress();
+
+  const mutation = useMutation({
+    mutationKey: ["pack-accounts"],
+    mutationFn: async (data: PackMutationParams) => {
+      /* Reset Progress */
+      resetProgress();
+
+      /* Initialize Results Array */
+      const results: PackResult[] = [];
+
+      /* Initialize Total Withdrawn */
+      let totalWithdrawn = 0;
+
+      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
+        const chunkResults = await Promise.all<PackResult>(
+          chunk.map(async (account) => {
+            /* Skip if no URL */
+            if (!account.url) {
+              incrementProgress();
+              return { status: false, account, error: "No URL provided" };
+            }
+
+            try {
+              /* Create Packer Instance */
+              const packer = new Packer(account.url);
+
+              /* Initialize Packer */
+              await packer.initialize();
+
+              /* Get Time and Validate */
+              await packer.getTime();
+              await packer.validate();
+
+              /* Delay to avoid rate limiting */
+              await delay(1000);
+
+              /* Get Activity */
+              await packer.getActivity();
+
+              /* Delay to avoid rate limiting */
+              await delay(1000);
+
+              /* Check Activity */
+              const withdrawActivity = await packer.getWithdrawActivity();
+              const amount = Number(withdrawActivity.activityBalance || 0);
+
+              /* Skip if No Activity Balance */
+              if (amount <= 0) {
+                return { status: false, account, error: "No activity balance" };
+              }
+
+              /* Delay to avoid rate limiting */
+              await delayBetween(5000, 15_000);
+
+              /* Determine Withdrawal Address */
+              const withdrawalAddress =
+                withdrawActivity.withdrawalAddress || account.walletAddress;
+
+              /* Perform Pack Operation */
+              const packResponse = await packer.withdrawActivity(
+                withdrawalAddress
+              );
+
+              /* Check Pack Response */
+              if (packResponse.code !== 200) {
+                return {
+                  status: false,
+                  account,
+                  error: `Pack failed with message: ${packResponse.msg}`,
+                };
+              }
+
+              /* Update Total Withdrawn */
+              totalWithdrawn += amount;
+
+              /* Push Successful Result */
+              return {
+                status: true,
+                account,
+                amount,
+              };
+            } catch (error) {
+              /* Push Failed Result */
+              return { status: false, account, error };
+            } finally {
+              /* Delay to avoid rate limiting */
+              await delayBetween(5000, 15_000);
+
+              /* Increment Progress */
+              incrementProgress();
+            }
+          })
+        );
+
+        /* Append Chunk Results */
+        results.push(...chunkResults);
+      }
+
+      return { results, totalWithdrawn };
+    },
+  });
+
+  return { mutation, progress };
+};
+
+export { usePackMutation };

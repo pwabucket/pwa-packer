@@ -18,8 +18,6 @@ interface ValidationResult {
 const useValidationMutation = () => {
   const { progress, resetProgress, incrementProgress } = useProgress();
 
-  /** Form */
-
   const mutation = useMutation({
     mutationKey: ["validate"],
     mutationFn: async (data: ValidationMutationParams) => {

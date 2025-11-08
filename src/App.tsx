@@ -17,6 +17,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import { useIsMutating } from "@tanstack/react-query";
 import { usePendingActivity } from "./hooks/usePendingActivity";
 import { UpdateURLs } from "./pages/UpdateURLs";
+import { Pack } from "./pages/Pack";
 
 const INACTIVITY_DURATION = 1 * 60 * 1000;
 
@@ -51,8 +52,9 @@ function App() {
           <Route path="send" element={<Send />} />
           <Route path="split" element={<Split />} />
           <Route path="password" element={<Password />} />
-          <Route path="validate" element={<Validate />} />
           <Route path="update-urls" element={<UpdateURLs />} />
+          <Route path="validate" element={<Validate />} />
+          <Route path="pack" element={<Pack />} />
         </Route>
       </Routes>
 

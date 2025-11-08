@@ -11,6 +11,7 @@ import {
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
 import { Link } from "react-router";
+import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 
 const ExtraUtilsDialog = () => {
   /* Handle Backup Action */
@@ -75,6 +76,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdLink className="size-5" />}
         >
           <Link to="/update-urls" />
+        </ActionButton>
+
+        {/* Pack */}
+        <ActionButton
+          asChild
+          title="Pack Accounts"
+          label="Pack"
+          icon={<HiOutlineCurrencyDollar className="size-5" />}
+        >
+          <Link to="/pack" />
         </ActionButton>
 
         {/* Validate */}
