@@ -51,7 +51,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
           <h2 className="text-sm font-bold text-yellow-500 text-center">
             <MdReceipt className="inline-block mr-1" /> Transfer Receipt
           </h2>
-          <SendResultsAccordion results={mutation.data} />
+          <SendResultsAccordion results={mutation.data.results} />
         </div>
       ) : null}
 
