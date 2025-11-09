@@ -10,9 +10,12 @@ import { SendFormFields } from "../components/SendFormFields";
 import { useSendForm, type SendFormData } from "../hooks/useSendForm";
 import { useSendMutation } from "../hooks/useSendMutation";
 import { Progress } from "../components/Progress";
+import { useState } from "react";
+import { Button } from "../components/Button";
 
 /** Send Page Component */
 const Send = () => {
+  const [showResults, setShowResults] = useState(false);
   const password = usePassword();
 
   const accountsChooser = useAccountsChooser();
@@ -60,24 +63,56 @@ const Send = () => {
       `Successfully sent from ${successfulSends}/${selectedAccounts.length} accounts.`
     );
 
+    /* Reset Form */
+    form.reset();
+
     return results;
   };
 
   return (
     <InnerPageLayout title="Send" className="gap-2">
-      {/* Send Results Dialog */}
-      {mutation.isSuccess && mutation.data ? (
-        <Dialog.Root open onOpenChange={() => mutation.reset()}>
-          <SendResults results={mutation.data.results} />
-        </Dialog.Root>
-      ) : null}
+      {/* Send Results Summary / Dialog */}
+      {mutation.isSuccess && (
+        <>
+          {/* Send Results Summary */}
+          <div className="flex flex-col text-center text-sm">
+            <p className="text-green-400">Transfers completed successfully!</p>
+            <p className="text-blue-300">
+              Accounts: ({mutation.data?.successfulSends} /{" "}
+              {mutation.data?.totalAccounts})
+            </p>
+
+            <p className="text-rose-300">
+              Validations: ({mutation.data?.successfulValidations} /{" "}
+              {mutation.data?.totalAccounts})
+            </p>
+
+            <p className="text-lime-300">
+              Total Amount:{" "}
+              {Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+              }).format(mutation.data?.totalAmountSent || 0)}{" "}
+              USDT
+            </p>
+          </div>
+
+          {/* Send Results Dialog */}
+          <Dialog.Root open={showResults} onOpenChange={setShowResults}>
+            <Dialog.Trigger asChild>
+              <Button className="mx-auto">View Detailed Results</Button>
+            </Dialog.Trigger>
+            <SendResults results={mutation.data.results} />
+          </Dialog.Root>
+        </>
+      )}
 
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-4"
         >
-          <p className="text-center text-blue-500">
+          <p className="text-center text-sm text-blue-400">
             A transfer will be initiated from each account to their respective
             deposit addresses.
           </p>

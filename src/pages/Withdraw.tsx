@@ -46,6 +46,9 @@ const Withdraw = () => {
     toast.success(
       `Successfully sent $${totalSentValue} from ${successfulSends}/${selectedAccounts.length} accounts.`
     );
+
+    /* Reset Form */
+    form.reset();
   };
 
   return (

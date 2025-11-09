@@ -33,6 +33,18 @@ const useSendMutation = () => {
       /* Iterate Over Accounts */
       const results: SendResult[] = [];
 
+      /* Get Total Accounts */
+      const totalAccounts = data.accounts.length;
+
+      /* Total Amount Sent */
+      let totalAmountSent = 0;
+
+      /* Successful Sends Counter */
+      let successfulSends = 0;
+
+      /* Successful Validations Counter */
+      let successfulValidations = 0;
+
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<SendResult>(
           chunk.map(async (account) => {
@@ -82,6 +94,12 @@ const useSendMutation = () => {
                 result
               );
 
+              /* Increment Successful Sends */
+              successfulSends++;
+
+              /* Accumulate Total Amount Sent */
+              totalAmountSent += parseFloat(data.amount);
+
               /* Optional Validation */
               let validation = null;
               if (data.validate && account.url) {
@@ -100,6 +118,11 @@ const useSendMutation = () => {
                   if (!validation.activity) {
                     await delay(5000);
                     validation = await packer.checkActivity();
+                  }
+
+                  /* Increment Successful Validations */
+                  if (validation.activity) {
+                    successfulValidations++;
                   }
                 } catch (error) {
                   /* Log Validation Error */
@@ -148,7 +171,13 @@ const useSendMutation = () => {
         results.push(...chunkResults);
       }
 
-      return { results };
+      return {
+        results,
+        successfulSends,
+        successfulValidations,
+        totalAccounts,
+        totalAmountSent,
+      };
     },
   });
 
