@@ -32,9 +32,29 @@ const Validate = () => {
       </p>
 
       {mutation.isSuccess && (
-        <p className="text-center text-green-400 text-sm">
-          Validation completed successfully!
-        </p>
+        <div className="flex flex-col text-center text-sm">
+          <p className="text-green-400">Validation completed successfully!</p>
+          <p className="text-blue-300">
+            Active Accounts: ({mutation.data?.activeAccounts} /{" "}
+            {mutation.data?.totalAccounts})
+          </p>
+          <p className="text-orange-300">
+            Total Amount:{" "}
+            {Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(mutation.data?.totalAmount || 0)}{" "}
+            USDT
+          </p>
+          <p className="text-lime-300">
+            Available Balance:{" "}
+            {Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(mutation.data?.availableBalance || 0)}{" "}
+            USDT
+          </p>
+        </div>
       )}
 
       {/* Validate Button */}

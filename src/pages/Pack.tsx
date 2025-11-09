@@ -42,14 +42,21 @@ const Pack = () => {
       </p>
 
       {mutation.isSuccess && (
-        <p className="text-center text-green-400 text-sm">
-          Packing completed successfully -{" "}
-          {Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(mutation.data?.totalWithdrawn)}{" "}
-          USDT
-        </p>
+        <div className="flex flex-col text-center text-sm">
+          <p className="text-green-400">Packing completed successfully!</p>
+          <p className="text-blue-300">
+            Accounts: ({mutation.data?.packedAccounts} /{" "}
+            {mutation.data?.totalAccounts})
+          </p>
+          <p className="text-lime-300">
+            Total Withdrawn:{" "}
+            {Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(mutation.data?.totalWithdrawn)}{" "}
+            USDT
+          </p>
+        </div>
       )}
 
       {/* Pack Button */}

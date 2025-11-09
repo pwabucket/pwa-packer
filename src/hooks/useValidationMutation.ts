@@ -26,6 +26,11 @@ const useValidationMutation = () => {
 
       const results: ValidationResult[] = [];
 
+      const totalAccounts = data.accounts.length;
+      let activeAccounts = 0;
+      let totalAmount = 0;
+      let availableBalance = 0;
+
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<ValidationResult>(
           chunk.map(async (account) => {
@@ -43,6 +48,13 @@ const useValidationMutation = () => {
 
               /* Check Activity */
               const activity = await packer.checkActivity();
+
+              /* Count Active Accounts */
+              if (activity.activity) {
+                activeAccounts++;
+                totalAmount += Number(activity.amount) || 0;
+                availableBalance += Number(activity.activityBalance) || 0;
+              }
 
               /* Push Successful Result */
               return { status: true, account, activity };
@@ -63,7 +75,13 @@ const useValidationMutation = () => {
         results.push(...chunkResults);
       }
 
-      return results;
+      return {
+        results,
+        totalAccounts,
+        activeAccounts,
+        totalAmount,
+        availableBalance,
+      };
     },
   });
 

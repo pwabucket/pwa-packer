@@ -15,6 +15,9 @@ interface PackResult {
   account: Account;
   amount?: number;
   error?: unknown;
+  activity?: unknown;
+  withdrawActivity?: unknown;
+  response?: unknown;
 }
 
 const usePackMutation = () => {
@@ -29,8 +32,14 @@ const usePackMutation = () => {
       /* Initialize Results Array */
       const results: PackResult[] = [];
 
+      /* Get Total Accounts */
+      const totalAccounts = data.accounts.length;
+
       /* Initialize Total Withdrawn */
       let totalWithdrawn = 0;
+
+      /* Packed Accounts Counter */
+      let packedAccounts = 0;
 
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<PackResult>(
@@ -56,7 +65,7 @@ const usePackMutation = () => {
               await delay(1000);
 
               /* Get Activity */
-              await packer.getActivity();
+              const activity = await packer.getActivity();
 
               /* Delay to avoid rate limiting */
               await delay(1000);
@@ -91,6 +100,9 @@ const usePackMutation = () => {
                 };
               }
 
+              /* Increment Packed Accounts */
+              packedAccounts++;
+
               /* Update Total Withdrawn */
               totalWithdrawn += amount;
 
@@ -99,6 +111,9 @@ const usePackMutation = () => {
                 status: true,
                 account,
                 amount,
+                activity,
+                withdrawActivity,
+                response: packResponse,
               };
             } catch (error) {
               /* Push Failed Result */
@@ -117,7 +132,7 @@ const usePackMutation = () => {
         results.push(...chunkResults);
       }
 
-      return { results, totalWithdrawn };
+      return { results, totalAccounts, packedAccounts, totalWithdrawn };
     },
   });
 

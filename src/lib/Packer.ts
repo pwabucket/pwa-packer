@@ -219,7 +219,12 @@ class Packer {
 
     /* If Not Participated, Refresh Activity */
     if (!status.activity) {
-      return await this.refreshActivity();
+      const refresh = await this.refreshActivity();
+
+      /* If Now Participated, Get Updated Activity */
+      if (refresh.activity) {
+        return await this.getActivity();
+      }
     }
 
     return status;
