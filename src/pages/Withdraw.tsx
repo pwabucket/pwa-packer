@@ -50,6 +50,24 @@ const Withdraw = () => {
 
   return (
     <InnerPageLayout title="Withdraw Funds" className="gap-2">
+      {mutation.isSuccess && (
+        <div className="flex flex-col text-center text-sm">
+          <p className="text-green-400">Withdrawal completed successfully!</p>
+          <p className="text-blue-300">
+            Accounts: ({mutation.data?.successfulSends} /{" "}
+            {mutation.data?.totalAccounts})
+          </p>
+          <p className="text-lime-300">
+            Total Amount:{" "}
+            {Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(mutation.data?.totalSentValue || 0)}{" "}
+            USDT
+          </p>
+        </div>
+      )}
+
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
@@ -64,7 +82,11 @@ const Withdraw = () => {
           )}
 
           {/* Accounts Chooser */}
-          <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
+          <AccountsChooser
+            {...accountsChooser}
+            disabled={mutation.isPending}
+            results={mutation.data?.results}
+          />
         </form>
       </FormProvider>
     </InnerPageLayout>

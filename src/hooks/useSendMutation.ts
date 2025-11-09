@@ -99,7 +99,7 @@ const useSendMutation = () => {
                   /* If still not validated, try refreshing */
                   if (!validation.activity) {
                     await delay(5000);
-                    validation = await packer.refreshActivity();
+                    validation = await packer.checkActivity();
                   }
                 } catch (error) {
                   /* Log Validation Error */
@@ -148,7 +148,7 @@ const useSendMutation = () => {
         results.push(...chunkResults);
       }
 
-      return results;
+      return { results };
     },
   });
 

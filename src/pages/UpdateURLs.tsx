@@ -10,6 +10,13 @@ import { Label } from "../components/Label";
 import { Input } from "../components/Input";
 import { FormFieldError } from "../components/FormFieldError";
 import { useAppStore } from "../store/useAppStore";
+import { useState } from "react";
+import type { Account } from "../types";
+
+interface UpdateURLsResult {
+  account: Account;
+  status: boolean;
+}
 
 /** URLs Update Form Schema */
 const UpdateURLsFormSchema = yup
@@ -29,6 +36,7 @@ const UpdateURLs = () => {
   const { selectedAccounts } = accountsChooser;
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
+  const [results, setResults] = useState<UpdateURLsResult[]>([]);
 
   /** Form */
   const form = useForm<UpdateURLsFormData>({
@@ -68,6 +76,8 @@ const UpdateURLs = () => {
 
     /* Set Updated Accounts to Store */
     setAccounts(updatedAccounts);
+
+    setResults(selectedAccounts.map((account) => ({ account, status: true })));
 
     /* Show Success Toast */
     toast.success(`Updated ${selectedAccounts.length} account(s) successfully`);
@@ -111,7 +121,7 @@ const UpdateURLs = () => {
           <Button type="submit">Update URLs for Selected Accounts</Button>
 
           {/* Accounts Chooser */}
-          <AccountsChooser {...accountsChooser} />
+          <AccountsChooser {...accountsChooser} results={results} />
         </form>
       </FormProvider>
     </InnerPageLayout>

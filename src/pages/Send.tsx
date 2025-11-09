@@ -44,7 +44,7 @@ const Send = () => {
       return;
     }
 
-    const results = await mutation.mutateAsync({
+    const { results } = await mutation.mutateAsync({
       accounts: selectedAccounts,
       amount: data.amount,
       targetCharacters: data.targetCharacters,
@@ -68,7 +68,7 @@ const Send = () => {
       {/* Send Results Dialog */}
       {mutation.isSuccess && mutation.data ? (
         <Dialog.Root open onOpenChange={() => mutation.reset()}>
-          <SendResults results={mutation.data} />
+          <SendResults results={mutation.data.results} />
         </Dialog.Root>
       ) : null}
 
@@ -95,7 +95,11 @@ const Send = () => {
           )}
 
           {/* Accounts Chooser */}
-          <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
+          <AccountsChooser
+            {...accountsChooser}
+            disabled={mutation.isPending}
+            results={mutation.data?.results}
+          />
         </form>
       </FormProvider>
     </InnerPageLayout>

@@ -32,6 +32,9 @@ const useWithdrawalMutation = () => {
       /* Reset Progress */
       resetProgress();
 
+      /* Get Total Accounts */
+      const totalAccounts = data.accounts.length;
+
       /* Successful Sends Counter */
       let successfulSends = 0;
 
@@ -123,7 +126,7 @@ const useWithdrawalMutation = () => {
         results.push(...chunkResults);
       }
 
-      return { results, successfulSends, totalSentValue };
+      return { results, successfulSends, totalAccounts, totalSentValue };
     },
   });
 

@@ -12,12 +12,12 @@ const Toggle = memo(function Toggle({
         className={cn(
           "shrink-0",
           "relative rounded-full",
-          "inline-flex h-6 w-11 items-center",
+          "inline-flex h-6 w-10 items-center",
           "dark:bg-neutral-800",
           "peer-checked:bg-yellow-500",
 
           // Before
-          "peer-checked:before:translate-x-6 before:translate-x-1",
+          "peer-checked:before:translate-x-5 before:translate-x-1",
           "before:inline-block before:h-4 before:w-4",
           "before:transform before:transition",
           "before:rounded-full",

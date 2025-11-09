@@ -5,10 +5,20 @@ import { AccountBalance } from "./AccountBalance";
 import { LabelToggle } from "./LabelToggle";
 import { cn } from "../lib/utils";
 import { Toggle } from "./Toggle";
-import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import {
+  MdCancel,
+  MdCheckCircle,
+  MdInfo,
+  MdOutlineAccountBalanceWallet,
+} from "react-icons/md";
 import { Dialog } from "radix-ui";
 import useLocationToggle from "../hooks/useLocationToggle";
 import { AccountDetailsDialog } from "./AccountDialog";
+
+interface AccountsChooserResult {
+  status: boolean;
+  account: Account;
+}
 
 interface AccountsChooserProps {
   disabled?: boolean;
@@ -16,6 +26,7 @@ interface AccountsChooserProps {
   selectedAccounts: Account[];
   toggleAccount: (account: Account, checked: boolean) => void;
   toggleAllAccounts: (checked: boolean) => void;
+  results?: AccountsChooserResult[];
 }
 
 interface AccountItemProps {
@@ -23,12 +34,14 @@ interface AccountItemProps {
   checked: boolean;
   disabled?: boolean;
   toggleAccount: (account: Account, checked: boolean) => void;
+  result?: AccountsChooserResult | null;
 }
 
 const AccountItem = ({
   account,
   checked,
   disabled,
+  result,
   toggleAccount,
 }: AccountItemProps) => {
   const [showAccountDetails, toggleShowAccountDetails] = useLocationToggle(
@@ -44,11 +57,25 @@ const AccountItem = ({
       )}
     >
       <label className="flex items-center gap-2 cursor-pointer grow min-w-0 pl-1">
-        <Toggle
-          checked={checked}
-          onChange={(ev) => toggleAccount(account, ev.target.checked)}
-          disabled={disabled}
-        />
+        {typeof result !== "undefined" ? (
+          <span className="w-10 flex items-center justify-center">
+            {result ? (
+              result.status ? (
+                <MdCheckCircle className="size-5 text-green-500 shrink-0" />
+              ) : (
+                <MdCancel className="size-5 text-red-500 shrink-0" />
+              )
+            ) : (
+              <MdInfo className="size-5 text-neutral-500 shrink-0" />
+            )}
+          </span>
+        ) : (
+          <Toggle
+            checked={checked}
+            onChange={(ev) => toggleAccount(account, ev.target.checked)}
+            disabled={disabled}
+          />
+        )}
 
         {/* Title and balance */}
         <div className="flex flex-col grow min-w-0">
@@ -89,6 +116,7 @@ const AccountsChooser = ({
   disabled,
   allSelected,
   selectedAccounts,
+  results,
   toggleAccount,
   toggleAllAccounts,
 }: AccountsChooserProps) => {
@@ -100,13 +128,16 @@ const AccountsChooser = ({
       <h4 className="font-protest-guerrilla px-4 text-center text-lg">
         Accounts ({accounts.length})
       </h4>
-      <LabelToggle
-        disabled={disabled}
-        checked={allSelected}
-        onChange={(ev) => toggleAllAccounts(ev.target.checked)}
-      >
-        Toggle Accounts
-      </LabelToggle>
+
+      {!results && (
+        <LabelToggle
+          disabled={disabled}
+          checked={allSelected}
+          onChange={(ev) => toggleAllAccounts(ev.target.checked)}
+        >
+          Toggle Accounts
+        </LabelToggle>
+      )}
 
       <div className="flex flex-col gap-2">
         {accounts.map((account) => (
@@ -114,6 +145,11 @@ const AccountsChooser = ({
             key={account.id}
             account={account}
             checked={selectedAccounts.some((item) => item.id === account.id)}
+            result={
+              results
+                ? results.find((res) => res.account.id === account.id) || null
+                : undefined
+            }
             toggleAccount={toggleAccount}
             disabled={disabled}
           />

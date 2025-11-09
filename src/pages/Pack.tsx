@@ -71,7 +71,11 @@ const Pack = () => {
       )}
 
       {/* Accounts Chooser */}
-      <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
+      <AccountsChooser
+        {...accountsChooser}
+        disabled={mutation.isPending}
+        results={mutation.data?.results}
+      />
     </InnerPageLayout>
   );
 };

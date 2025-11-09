@@ -16,7 +16,7 @@ const LabelToggle = memo(function LabelToggle({
     <label
       className={cn(
         "dark:bg-neutral-900",
-        "flex items-center gap-4 px-3 py-2 cursor-pointer rounded-full",
+        "flex items-center gap-2 px-2.5 py-2 cursor-pointer rounded-full",
         "has-[input:disabled]:opacity-60"
       )}
     >
