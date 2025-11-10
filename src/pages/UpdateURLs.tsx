@@ -80,7 +80,13 @@ const UpdateURLs = () => {
     /* Set Updated Accounts to Store */
     setAccounts(updatedAccounts);
 
-    setResults(selectedAccounts.map((account) => ({ account, status: true })));
+    /* Set Results */
+    setResults(
+      selectedAccounts.map((account) => ({
+        account: updatedAccounts.find((a) => a.id === account.id)!,
+        status: true,
+      }))
+    );
 
     /* Show Success Toast */
     toast.success(`Updated ${selectedAccounts.length} account(s) successfully`);
