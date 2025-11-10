@@ -22,14 +22,43 @@ interface WebviewAreaProps {
 }
 
 const WebviewArea = ({ account }: WebviewAreaProps) => {
+  const getWithdrawalsUrl = (baseUrl: string) => {
+    try {
+      const url = new URL(baseUrl);
+      url.hash = "#/Withdrawal";
+      return url.toString();
+    } catch {
+      return baseUrl;
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {account.url ? (
-        <iframe
-          src={account.url}
-          className="grow w-full bg-neutral-800/50"
-          referrerPolicy="no-referrer"
-        />
+        <Tabs.Root defaultValue="main" className="h-full flex flex-col">
+          <Tabs.List className="grid grid-cols-2 shrink-0">
+            <WebviewAsideTabTrigger title="Main" value="main" />
+            <WebviewAsideTabTrigger title="Withdrawals" value="withdrawals" />
+          </Tabs.List>
+
+          {/* Main */}
+          <Tabs.Content value="main" className="grow min-w-0 min-h-0">
+            <iframe
+              src={account.url}
+              className="size-full bg-neutral-800/50"
+              referrerPolicy="no-referrer"
+            />
+          </Tabs.Content>
+
+          {/* Withdrawals */}
+          <Tabs.Content value="withdrawals" className="grow min-w-0 min-h-0">
+            <iframe
+              src={getWithdrawalsUrl(account.url)}
+              className="size-full bg-neutral-800/50"
+              referrerPolicy="no-referrer"
+            />
+          </Tabs.Content>
+        </Tabs.Root>
       ) : (
         <div className="grow flex justify-center items-center text-sm text-neutral-400">
           No URL Set
