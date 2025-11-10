@@ -120,7 +120,7 @@ const usePackMutation = () => {
               return { status: false, account, error };
             } finally {
               /* Delay to avoid rate limiting */
-              await delayBetween(5000, 15_000);
+              await delayBetween(10_000, 20_000);
 
               /* Increment Progress */
               incrementProgress();
