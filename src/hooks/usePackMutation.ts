@@ -77,7 +77,13 @@ const usePackMutation = () => {
 
               /* Skip if No Activity Balance */
               if (amount <= 0) {
-                return { status: false, account, error: "No activity balance" };
+                return {
+                  status: true,
+                  account,
+                  amount,
+                  activity,
+                  withdrawActivity,
+                };
               }
 
               /* Delay to avoid rate limiting */
