@@ -24,7 +24,7 @@ import { ActionButton } from "../components/ActionButton";
 import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
 import { NewAccountDialog } from "../components/NewAccountDialog";
 import useLocationToggle from "../hooks/useLocationToggle";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "../components/Input";
 import { useDebounce } from "react-use";
 
@@ -39,10 +39,12 @@ const Dashboard = () => {
   const dashboardStyle = useAppStore((state) => state.dashboardStyle);
   const setDashboardStyle = useAppStore((state) => state.setDashboardStyle);
 
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
   const [tempSearch, setTempSearch] = useState("");
 
+  /* Filtered Accounts based on Search */
   const filteredAccounts = useMemo(() => {
     return search
       ? accounts.filter(
@@ -56,6 +58,7 @@ const Dashboard = () => {
       : accounts;
   }, [accounts, search]);
 
+  /* Debounce Search Input */
   useDebounce(
     () => {
       setSearch(tempSearch);
@@ -63,6 +66,13 @@ const Dashboard = () => {
     500,
     [tempSearch]
   );
+
+  /* Focus Search Input when shown */
+  useEffect(() => {
+    if (showSearch) {
+      searchInputRef.current?.focus();
+    }
+  }, [showSearch]);
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -85,6 +95,7 @@ const Dashboard = () => {
         middleContent={
           showSearch ? (
             <Input
+              ref={searchInputRef}
               type="search"
               placeholder="Search accounts..."
               className="w-full"
