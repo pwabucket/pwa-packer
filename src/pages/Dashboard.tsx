@@ -26,6 +26,7 @@ import { NewAccountDialog } from "../components/NewAccountDialog";
 import useLocationToggle from "../hooks/useLocationToggle";
 import { useMemo, useState } from "react";
 import { Input } from "../components/Input";
+import { useDebounce } from "react-use";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -40,6 +41,7 @@ const Dashboard = () => {
 
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+  const [tempSearch, setTempSearch] = useState("");
 
   const filteredAccounts = useMemo(() => {
     return search
@@ -53,6 +55,14 @@ const Dashboard = () => {
         )
       : accounts;
   }, [accounts, search]);
+
+  useDebounce(
+    () => {
+      setSearch(tempSearch);
+    },
+    500,
+    [tempSearch]
+  );
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -78,8 +88,8 @@ const Dashboard = () => {
               type="search"
               placeholder="Search accounts..."
               className="w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={tempSearch}
+              onChange={(e) => setTempSearch(e.target.value)}
             />
           ) : (
             <h1
