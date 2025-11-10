@@ -1,8 +1,7 @@
 import { usePassword } from "./usePassword";
 import {
   chunkArrayGenerator,
-  delay,
-  delayBetween,
+  delayForSeconds,
   getPrivateKey,
 } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
@@ -104,7 +103,7 @@ const useSendMutation = () => {
               let validation = null;
               if (data.validate && account.url) {
                 /* Delay for confirmation */
-                await delay(10_000);
+                await delayForSeconds(10);
 
                 try {
                   const packer = new Packer(account.url);
@@ -116,7 +115,7 @@ const useSendMutation = () => {
 
                   /* If still not validated, try refreshing */
                   if (!validation.activity) {
-                    await delay(5000);
+                    await delayForSeconds(5);
                     validation = await packer.checkActivity();
                   }
 
@@ -162,7 +161,7 @@ const useSendMutation = () => {
               incrementProgress();
 
               /* Delay to avoid rate limiting */
-              await delayBetween(2000, 5000);
+              await delayForSeconds(2);
             }
           })
         );

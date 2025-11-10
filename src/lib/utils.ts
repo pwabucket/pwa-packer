@@ -183,13 +183,36 @@ export function truncateAddress(address: string, length = 6) {
   return `${address.slice(0, length)}...${address.slice(-4)}`;
 }
 
-export function delayBetween(min: number, max: number = min) {
-  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-  return new Promise((resolve) => setTimeout(resolve, delay));
+/** Delay Options */
+interface DelayOptions {
+  precised?: boolean;
+  signal?: AbortSignal;
 }
 
-export function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function delay(
+  length: number,
+  { precised = false, signal }: DelayOptions = {}
+) {
+  return new Promise((resolve, reject) => {
+    const duration = precised
+      ? length
+      : (length * (Math.floor(Math.random() * 50) + 100)) / 100;
+
+    const timeoutId = setTimeout(() => resolve(true), duration);
+
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timeoutId);
+      reject(new Error("Aborted"));
+    });
+  });
+}
+
+export function delayForSeconds(length: number, options?: DelayOptions) {
+  return delay(length * 1000, options);
+}
+
+export function delayForMinutes(length: number, options?: DelayOptions) {
+  return delay(length * 60 * 1000, options);
 }
 
 export function* chunkArrayGenerator<T>(arr: T[], size: number) {

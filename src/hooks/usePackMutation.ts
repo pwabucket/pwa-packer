@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
-import { chunkArrayGenerator, delay, delayBetween } from "../lib/utils";
+import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 
 /** Parameters for Pack Mutation */
 interface PackMutationParams {
@@ -63,13 +63,13 @@ const usePackMutation = () => {
               await packer.validate();
 
               /* Delay to avoid rate limiting */
-              await delay(1000);
+              await delayForSeconds(1);
 
               /* Get Activity */
               const activity = await packer.getActivity();
 
               /* Delay to avoid rate limiting */
-              await delay(1000);
+              await delayForSeconds(1);
 
               /* Check Activity */
               const { data: withdrawActivity } =
@@ -89,7 +89,7 @@ const usePackMutation = () => {
               }
 
               /* Delay to avoid rate limiting */
-              await delayBetween(5000, 15_000);
+              await delayForSeconds(10);
 
               /* Determine Withdrawal Address */
               const withdrawalAddress =
@@ -129,7 +129,7 @@ const usePackMutation = () => {
               return { status: false, account, error };
             } finally {
               /* Delay to avoid rate limiting */
-              await delayBetween(10_000, 20_000);
+              await delayForSeconds(15);
 
               /* Increment Progress */
               incrementProgress();
