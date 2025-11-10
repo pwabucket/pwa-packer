@@ -11,7 +11,11 @@ interface ValidationMutationParams {
 interface ValidationResult {
   status: boolean;
   account: Account;
-  activity?: unknown;
+  activity?: {
+    activity: boolean;
+    amount: number;
+    activityBalance: number;
+  };
   error?: unknown;
 }
 

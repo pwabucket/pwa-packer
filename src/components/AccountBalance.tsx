@@ -29,7 +29,7 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
       {/* BNB Balance */}
       <span className="flex items-center gap-1">
         <img src={BNBIcon} alt="BNB" className="size-3" />
-        {balance.bnbBalance.toFixed(8)}
+        {balance.bnbBalance.toFixed(6)}
       </span>
     </span>
   ) : (

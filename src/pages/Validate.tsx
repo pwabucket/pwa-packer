@@ -5,9 +5,14 @@ import { Button } from "../components/Button";
 import { useValidationMutation } from "../hooks/useValidationMutation";
 import { Progress } from "../components/Progress";
 import { toast } from "react-hot-toast";
+import { Dialog } from "radix-ui";
+import { ValidationResults } from "../components/ValidationResults";
+import { useState } from "react";
+import { MdSearch } from "react-icons/md";
 
 /** Validate Page Component */
 const Validate = () => {
+  const [showResults, setShowResults] = useState(false);
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
@@ -29,29 +34,39 @@ const Validate = () => {
     <InnerPageLayout title="Validate" className="gap-2">
       {/* Results summary */}
       {mutation.isSuccess && (
-        <div className="flex flex-col text-center text-sm">
-          <p className="text-green-400">Validation completed successfully!</p>
-          <p className="text-blue-300">
-            Active Accounts: ({mutation.data?.activeAccounts} /{" "}
-            {mutation.data?.totalAccounts})
-          </p>
-          <p className="text-orange-300">
-            Total Amount:{" "}
-            {Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(mutation.data?.totalAmount || 0)}{" "}
-            USDT
-          </p>
-          <p className="text-lime-300">
-            Available Balance:{" "}
-            {Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(mutation.data?.availableBalance || 0)}{" "}
-            USDT
-          </p>
-        </div>
+        <>
+          <div className="flex flex-col text-center text-sm">
+            <p className="text-green-400">Validation completed successfully!</p>
+            <p className="text-blue-300">
+              Active Accounts: ({mutation.data?.activeAccounts} /{" "}
+              {mutation.data?.totalAccounts})
+            </p>
+            <p className="text-orange-300">
+              Total Amount:{" "}
+              {Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+              }).format(mutation.data?.totalAmount || 0)}{" "}
+              USDT
+            </p>
+            <p className="text-lime-300">
+              Available Balance:{" "}
+              {Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+              }).format(mutation.data?.availableBalance || 0)}{" "}
+              USDT
+            </p>
+          </div>
+
+          {/* Send Results Dialog */}
+          <Dialog.Root open={showResults} onOpenChange={setShowResults}>
+            <Dialog.Trigger asChild>
+              <Button className="mx-auto">View Detailed Results</Button>
+            </Dialog.Trigger>
+            <ValidationResults results={mutation.data.results} />
+          </Dialog.Root>
+        </>
       )}
 
       {/* Validate Button */}
@@ -62,7 +77,8 @@ const Validate = () => {
           </p>
 
           <Button disabled={mutation.isPending} onClick={handleValidateClick}>
-            Validate Accounts
+            <MdSearch className="size-5" />
+            {mutation.isPending ? "Validating..." : "Validate Accounts"}
           </Button>
         </>
       )}
