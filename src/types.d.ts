@@ -36,3 +36,20 @@ export interface BackupData {
     }[];
   };
 }
+
+export interface Activity {
+  activity: boolean;
+  amount: number;
+  activityBalance: number;
+}
+
+export interface PackResult {
+  status: boolean;
+  skipped?: boolean;
+  account: Account;
+  amount?: number;
+  error?: unknown;
+  activity?: Activity;
+  withdrawActivity?: unknown;
+  response?: unknown;
+}

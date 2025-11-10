@@ -59,7 +59,7 @@ const Validate = () => {
             </p>
           </div>
 
-          {/* Send Results Dialog */}
+          {/* Validation Results Dialog */}
           <Dialog.Root open={showResults} onOpenChange={setShowResults}>
             <Dialog.Trigger asChild>
               <Button className="mx-auto">View Detailed Results</Button>

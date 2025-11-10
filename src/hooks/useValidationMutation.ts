@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { Account } from "../types";
+import type { Account, Activity } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
@@ -11,11 +11,7 @@ interface ValidationMutationParams {
 interface ValidationResult {
   status: boolean;
   account: Account;
-  activity?: {
-    activity: boolean;
-    amount: number;
-    activityBalance: number;
-  };
+  activity?: Activity;
   error?: unknown;
 }
 

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { Account } from "../types";
+import type { Account, PackResult } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
@@ -7,18 +7,6 @@ import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 /** Parameters for Pack Mutation */
 interface PackMutationParams {
   accounts: Account[];
-}
-
-/** Result of Pack Mutation */
-interface PackResult {
-  status: boolean;
-  skipped?: boolean;
-  account: Account;
-  amount?: number;
-  error?: unknown;
-  activity?: unknown;
-  withdrawActivity?: unknown;
-  response?: unknown;
 }
 
 const usePackMutation = () => {

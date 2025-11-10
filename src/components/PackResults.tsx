@@ -1,41 +1,32 @@
 import { PopupDialog } from "./PopupDialog";
 import { Dialog } from "radix-ui";
 import { Button } from "./Button";
-import {
-  MdCheckCircle,
-  MdOutlineClose,
-  MdOutlineSearch,
-  MdRemoveCircle,
-} from "react-icons/md";
+import { MdCheckCircle, MdOutlineClose, MdRemoveCircle } from "react-icons/md";
 import { cn } from "../lib/utils";
-import type { Account, Activity } from "../types";
+import type { PackResult } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
+import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 
-interface ValidationResult {
-  status: boolean;
-  account: Account;
-  activity?: Activity;
-  error?: unknown;
+/** Pack Results Props Interface */
+interface PackResultsProps {
+  results: PackResult[];
 }
 
-/** Validation Results Props Interface */
-interface ValidationResultsProps {
-  results: ValidationResult[];
-}
-
-/** Validation Results Component */
-const ValidationResults = ({ results }: ValidationResultsProps) => {
+/** Pack Results Component */
+const PackResults = ({ results }: PackResultsProps) => {
   return (
     <PopupDialog onInteractOutside={(e) => e.preventDefault()}>
       <div className="flex items-center gap-4">
         <span className="size-10 shrink-0" />
         <div className="grow min-w-0">
-          <Dialog.Title className="font-bold text-yellow-500 text-center">
-            <MdOutlineSearch className="inline-block mr-2" /> Validation Results
+          <Dialog.Title className=" font-bold text-yellow-500 text-center">
+            <HiOutlineCurrencyDollar className="inline-block mr-2" /> Pack
+            Results
           </Dialog.Title>
+
           <Dialog.Description className="text-neutral-400 text-sm text-center">
-            Here are the results of the account validation process.
+            Here are the results of the packing process.
           </Dialog.Description>
         </div>
         <Dialog.Close
@@ -73,25 +64,20 @@ const ValidationResults = ({ results }: ValidationResultsProps) => {
 
             {/* Deposit Details */}
             <p className="flex flex-col shrink-0">
-              {/* Deposited Amount */}
-              <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-                <span className="font-bold">IN:</span> $
-                {Number(result.activity?.amount || 0).toFixed?.(2)}
-              </span>{" "}
               {/* Available Amount */}
               <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-                <span className="font-bold">AV:</span> $
-                {Number(result.activity?.activityBalance || 0).toFixed?.(2)}
+                <span className="font-bold">OUT:</span> $
+                {Number(result.amount || 0).toFixed?.(2)}
               </span>
             </p>
 
             {/* Status Icon */}
             <span className="shrink-0">
               {result.status ? (
-                result.activity?.activity ? (
-                  <MdCheckCircle className="size-6 text-lime-400" />
-                ) : (
+                result.skipped ? (
                   <MdRemoveCircle className="size-6 text-yellow-500" />
+                ) : (
+                  <MdCheckCircle className="size-6 text-lime-400" />
                 )
               ) : (
                 <MdOutlineClose className="size-6 text-red-500" />
@@ -109,4 +95,4 @@ const ValidationResults = ({ results }: ValidationResultsProps) => {
   );
 };
 
-export { ValidationResults };
+export { PackResults };

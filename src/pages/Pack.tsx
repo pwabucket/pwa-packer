@@ -6,9 +6,13 @@ import { Progress } from "../components/Progress";
 import { toast } from "react-hot-toast";
 import { usePackMutation } from "../hooks/usePackMutation";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
+import { Dialog } from "radix-ui";
+import { PackResults } from "../components/PackResults";
+import { useState } from "react";
 
 /** Pack Page Component */
 const Pack = () => {
+  const [showResults, setShowResults] = useState(false);
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
@@ -37,33 +41,46 @@ const Pack = () => {
 
   return (
     <InnerPageLayout title="Pack" className="gap-2">
-      <p className="text-center text-neutral-400 text-sm">
-        This will pack the selected accounts.
-      </p>
-
       {mutation.isSuccess && (
-        <div className="flex flex-col text-center text-sm">
-          <p className="text-green-400">Packing completed successfully!</p>
-          <p className="text-blue-300">
-            Accounts: ({mutation.data?.packedAccounts} /{" "}
-            {mutation.data?.totalAccounts})
-          </p>
-          <p className="text-lime-300">
-            Total Withdrawn:{" "}
-            {Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(mutation.data?.totalWithdrawn)}{" "}
-            USDT
-          </p>
-        </div>
+        <>
+          <div className="flex flex-col text-center text-sm">
+            <p className="text-green-400">Packing completed successfully!</p>
+            <p className="text-blue-300">
+              Accounts: ({mutation.data?.packedAccounts} /{" "}
+              {mutation.data?.totalAccounts})
+            </p>
+            <p className="text-lime-300">
+              Total Withdrawn:{" "}
+              {Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+              }).format(mutation.data?.totalWithdrawn)}{" "}
+              USDT
+            </p>
+          </div>
+
+          {/* Pack Results Dialog */}
+          <Dialog.Root open={showResults} onOpenChange={setShowResults}>
+            <Dialog.Trigger asChild>
+              <Button className="mx-auto">View Detailed Results</Button>
+            </Dialog.Trigger>
+            <PackResults results={mutation.data.results} />
+          </Dialog.Root>
+        </>
       )}
 
       {/* Pack Button */}
-      <Button disabled={mutation.isPending} onClick={handlePackClick}>
-        <HiOutlineCurrencyDollar className="size-5" />
-        {mutation.isPending ? "Packing..." : "Pack Selected Accounts"}
-      </Button>
+      {!mutation.isSuccess && (
+        <>
+          <p className="text-center text-neutral-400 text-sm">
+            This will pack the selected accounts.
+          </p>
+          <Button disabled={mutation.isPending} onClick={handlePackClick}>
+            <HiOutlineCurrencyDollar className="size-5" />
+            {mutation.isPending ? "Packing..." : "Pack Selected Accounts"}
+          </Button>
+        </>
+      )}
 
       {/* Progress Bar */}
       {mutation.isPending && (
