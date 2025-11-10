@@ -58,12 +58,20 @@ const Dashboard = () => {
       : accounts;
   }, [accounts, search]);
 
+  const toggleSearch = () => {
+    setShowSearch(!showSearch);
+    if (showSearch) {
+      setSearch("");
+      setTempSearch("");
+    }
+  };
+
   /* Debounce Search Input */
   useDebounce(
     () => {
       setSearch(tempSearch);
     },
-    500,
+    300,
     [tempSearch]
   );
 
@@ -98,7 +106,7 @@ const Dashboard = () => {
               ref={searchInputRef}
               type="search"
               placeholder="Search accounts..."
-              className="w-full"
+              className="w-full py-1.5 px-3 focus:ring-0 focus:border-yellow-500"
               value={tempSearch}
               onChange={(e) => setTempSearch(e.target.value)}
             />
@@ -116,7 +124,7 @@ const Dashboard = () => {
           )
         }
         rightContent={
-          <AppHeader.Button onClick={() => setShowSearch(!showSearch)}>
+          <AppHeader.Button onClick={toggleSearch}>
             {showSearch ? (
               <MdOutlineClose className="size-6" />
             ) : (
