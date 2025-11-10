@@ -36,7 +36,7 @@ const UpdateURLs = () => {
   const { selectedAccounts } = accountsChooser;
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
-  const [results, setResults] = useState<UpdateURLsResult[]>([]);
+  const [results, setResults] = useState<UpdateURLsResult[] | null>(null);
 
   /** Form */
   const form = useForm<UpdateURLsFormData>({
@@ -53,6 +53,9 @@ const UpdateURLs = () => {
       toast.error("No accounts selected.");
       return;
     }
+
+    /* Clear Previous Results */
+    setResults(null);
 
     /* Get Origin from New URL */
     const origin = new URL(data.url).origin;
@@ -121,7 +124,10 @@ const UpdateURLs = () => {
           <Button type="submit">Update URLs for Selected Accounts</Button>
 
           {/* Accounts Chooser */}
-          <AccountsChooser {...accountsChooser} results={results} />
+          <AccountsChooser
+            {...accountsChooser}
+            results={results || undefined}
+          />
         </form>
       </FormProvider>
     </InnerPageLayout>
