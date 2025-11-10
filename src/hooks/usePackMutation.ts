@@ -12,6 +12,7 @@ interface PackMutationParams {
 /** Result of Pack Mutation */
 interface PackResult {
   status: boolean;
+  skipped?: boolean;
   account: Account;
   amount?: number;
   error?: unknown;
@@ -79,6 +80,7 @@ const usePackMutation = () => {
               if (amount <= 0) {
                 return {
                   status: true,
+                  skipped: true,
                   account,
                   amount,
                   activity,

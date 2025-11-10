@@ -17,6 +17,7 @@ import { AccountDetailsDialog } from "./AccountDialog";
 
 interface AccountsChooserResult {
   status: boolean;
+  skipped?: boolean;
   account: Account;
 }
 
@@ -61,7 +62,11 @@ const AccountItem = ({
           <span className="w-10 flex items-center justify-center">
             {result ? (
               result.status ? (
-                <MdCheckCircle className="size-5 text-green-500 shrink-0" />
+                result.skipped ? (
+                  <MdCheckCircle className="size-5 text-yellow-500 shrink-0" />
+                ) : (
+                  <MdCheckCircle className="size-5 text-green-500 shrink-0" />
+                )
               ) : (
                 <MdCancel className="size-5 text-red-500 shrink-0" />
               )
