@@ -71,7 +71,8 @@ const usePackMutation = () => {
               await delay(1000);
 
               /* Check Activity */
-              const withdrawActivity = await packer.getWithdrawActivity();
+              const { data: withdrawActivity } =
+                await packer.getWithdrawActivity();
               const amount = Number(withdrawActivity.activityBalance || 0);
 
               /* Skip if No Activity Balance */
