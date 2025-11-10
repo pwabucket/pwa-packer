@@ -53,8 +53,10 @@ const useValidationMutation = () => {
               if (activity.activity) {
                 activeAccounts++;
                 totalAmount += Number(activity.amount) || 0;
-                availableBalance += Number(activity.activityBalance) || 0;
               }
+
+              /* Sum Available Balance */
+              availableBalance += Number(activity.activityBalance) || 0;
 
               /* Push Successful Result */
               return { status: true, account, activity };
