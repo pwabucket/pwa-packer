@@ -77,7 +77,9 @@ const Withdraw = () => {
           className="flex flex-col gap-2"
         >
           {/* Withdraw Form Fields */}
-          <WithdrawFormFields disabled={mutation.isPending} />
+          {!mutation.isSuccess && (
+            <WithdrawFormFields disabled={mutation.isPending} />
+          )}
 
           {/* Progress Bar */}
           {mutation.isPending && (

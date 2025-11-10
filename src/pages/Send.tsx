@@ -112,17 +112,21 @@ const Send = () => {
           onSubmit={form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-4"
         >
-          <p className="text-center text-sm text-blue-400">
-            A transfer will be initiated from each account to their respective
-            deposit addresses.
-          </p>
+          {!mutation.isSuccess && (
+            <>
+              <p className="text-center text-sm text-blue-400">
+                A transfer will be initiated from each account to their
+                respective deposit addresses.
+              </p>
 
-          {/** Send Form Fields */}
-          <SendFormFields
-            append={append}
-            remove={remove}
-            disabled={mutation.isPending}
-          />
+              {/** Send Form Fields */}
+              <SendFormFields
+                append={append}
+                remove={remove}
+                disabled={mutation.isPending}
+              />
+            </>
+          )}
 
           {/* Progress Bar */}
           {mutation.isPending && (

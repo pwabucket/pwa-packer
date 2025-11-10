@@ -27,10 +27,7 @@ const Validate = () => {
 
   return (
     <InnerPageLayout title="Validate" className="gap-2">
-      <p className="text-center text-neutral-400 text-sm">
-        This will validate the selected accounts.
-      </p>
-
+      {/* Results summary */}
       {mutation.isSuccess && (
         <div className="flex flex-col text-center text-sm">
           <p className="text-green-400">Validation completed successfully!</p>
@@ -58,9 +55,17 @@ const Validate = () => {
       )}
 
       {/* Validate Button */}
-      <Button disabled={mutation.isPending} onClick={handleValidateClick}>
-        Validate Accounts
-      </Button>
+      {!mutation.isSuccess && (
+        <>
+          <p className="text-center text-neutral-400 text-sm">
+            This will validate the selected accounts.
+          </p>
+
+          <Button disabled={mutation.isPending} onClick={handleValidateClick}>
+            Validate Accounts
+          </Button>
+        </>
+      )}
 
       {/* Progress Bar */}
       {mutation.isPending && (
