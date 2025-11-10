@@ -21,13 +21,13 @@ const AppHeader = ({
     >
       <div className="w-full max-w-sm mx-auto flex items-center gap-4">
         {/* Left Content */}
-        <div className="size-10">{leftContent}</div>
+        <div className="size-10 shrink-0">{leftContent}</div>
 
         {/* Middle Content */}
         <div className="grow min-w-0 min-h-0 text-center">{middleContent}</div>
 
         {/* Right Content */}
-        <div className="size-10">{rightContent}</div>
+        <div className="size-10 shrink-0">{rightContent}</div>
       </div>
     </header>
   );

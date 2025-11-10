@@ -9,6 +9,8 @@ import {
   MdOutlineMenu,
   MdPersonAdd,
   MdCallSplit,
+  MdOutlineSearch,
+  MdOutlineClose,
 } from "react-icons/md";
 
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
@@ -22,6 +24,8 @@ import { ActionButton } from "../components/ActionButton";
 import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
 import { NewAccountDialog } from "../components/NewAccountDialog";
 import useLocationToggle from "../hooks/useLocationToggle";
+import { useMemo, useState } from "react";
+import { Input } from "../components/Input";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -33,6 +37,22 @@ const Dashboard = () => {
 
   const dashboardStyle = useAppStore((state) => state.dashboardStyle);
   const setDashboardStyle = useAppStore((state) => state.setDashboardStyle);
+
+  const [showSearch, setShowSearch] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredAccounts = useMemo(() => {
+    return search
+      ? accounts.filter(
+          (account) =>
+            account.title.toLowerCase().includes(search.toLowerCase()) ||
+            account.walletAddress
+              .toLowerCase()
+              .includes(search.toLowerCase()) ||
+            account.depositAddress.toLowerCase().includes(search.toLowerCase())
+        )
+      : accounts;
+  }, [accounts, search]);
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -53,16 +73,35 @@ const Dashboard = () => {
           </AppHeader.Button>
         }
         middleContent={
-          <h1
-            className={cn(
-              "grow min-w-0 min-h-0",
-              "font-protest-guerrilla text-2xl",
-              "flex justify-center items-center gap-2"
+          showSearch ? (
+            <Input
+              type="search"
+              placeholder="Search accounts..."
+              className="w-full"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          ) : (
+            <h1
+              className={cn(
+                "grow min-w-0 min-h-0",
+                "font-protest-guerrilla text-2xl",
+                "flex justify-center items-center gap-2"
+              )}
+            >
+              <img src={AppIcon} alt="Packer" className="size-6" />
+              Packer
+            </h1>
+          )
+        }
+        rightContent={
+          <AppHeader.Button onClick={() => setShowSearch(!showSearch)}>
+            {showSearch ? (
+              <MdOutlineClose className="size-6" />
+            ) : (
+              <MdOutlineSearch className="size-6" />
             )}
-          >
-            <img src={AppIcon} alt="Packer" className="size-6" />
-            Packer
-          </h1>
+          </AppHeader.Button>
         }
       />
 
@@ -146,10 +185,10 @@ const Dashboard = () => {
           ) : (
             <Reorder.Group
               values={accounts}
-              onReorder={(newOrder) => setAccounts(newOrder)}
+              onReorder={(newOrder) => !search && setAccounts(newOrder)}
               className="flex flex-col gap-2"
             >
-              {accounts.map((account) => (
+              {filteredAccounts.map((account) => (
                 <AccountItem key={account.id} account={account} />
               ))}
             </Reorder.Group>
