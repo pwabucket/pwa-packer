@@ -15,6 +15,7 @@ interface WithdrawMutationParams {
 
 interface WithdrawalResult {
   status: boolean;
+  skipped?: boolean;
   account: Account;
   result?: ethers.ContractTransactionReceipt | null;
   error?: unknown;
@@ -48,27 +49,38 @@ const useWithdrawalMutation = () => {
         const chunkResults = await Promise.all<WithdrawalResult>(
           chunk.map(async (account) => {
             try {
+              /* Create Wallet Provider */
               const walletProvider = new WalletProvider(account.walletAddress);
-              const provider = walletProvider.getProvider();
-              const usdtToken = walletProvider.getUsdtTokenContract();
 
-              const privateKey = await getPrivateKey(account.id, password);
-              const wallet = new ethers.Wallet(privateKey, provider);
+              /* Fetch USDT Balance */
+              const balance = await walletProvider.getUSDTBalance();
 
+              /* Determine Amount to Send */
               let amountToSend = data.amount;
 
               if (!amountToSend || amountToSend.trim() === "") {
-                /* Fetch USDT Balance */
-                const balance = await walletProvider.getUSDTBalance();
-
                 /* If amount is not specified, send the entire balance */
                 amountToSend = balance.toString();
-
                 /* Log Balance */
                 console.log(
                   `Balance of ${account.walletAddress}: ${amountToSend} USDT`
                 );
               }
+
+              /* Skip if Balance is Less Than Amount to Send */
+              if (balance < parseFloat(amountToSend)) {
+                return {
+                  status: false,
+                  skipped: true,
+                  account,
+                };
+              }
+
+              const provider = walletProvider.getProvider();
+              const usdtToken = walletProvider.getUsdtTokenContract();
+
+              const privateKey = await getPrivateKey(account.id, password);
+              const wallet = new ethers.Wallet(privateKey, provider);
 
               /* Receiver Address */
               const receiver = data.address;

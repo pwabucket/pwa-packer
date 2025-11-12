@@ -1,10 +1,10 @@
 import type { SendResult } from "../types";
 import { Accordion } from "radix-ui";
 import { AccountAddresses } from "./AccountAddresses";
-import { HiCheckCircle, HiXCircle } from "react-icons/hi2";
 import { cn } from "../lib/utils";
 import { AccountBalance } from "./AccountBalance";
 import { ItemInfo, type ItemInfoProps } from "./ItemInfo";
+import { MdCheckCircle, MdOutlineClose, MdRemoveCircle } from "react-icons/md";
 
 /** Result Information Component */
 const ResultInfo = (props: ItemInfoProps) => (
@@ -32,9 +32,11 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
         <Accordion.Header>
           <Accordion.Trigger className="w-full text-left p-4 flex gap-2 items-center cursor-pointer">
             {res.status ? (
-              <HiCheckCircle className="size-4 text-green-500 shrink-0" />
+              <MdCheckCircle className="size-4 text-lime-400" />
+            ) : res.skipped ? (
+              <MdRemoveCircle className="size-4 text-yellow-500" />
             ) : (
-              <HiXCircle className="size-4 text-red-500 shrink-0" />
+              <MdOutlineClose className="size-4 text-red-500" />
             )}
 
             {/* Title */}

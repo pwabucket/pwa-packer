@@ -10,6 +10,7 @@ import {
   MdCheckCircle,
   MdInfo,
   MdOutlineAccountBalanceWallet,
+  MdRemoveCircle,
 } from "react-icons/md";
 import { Dialog } from "radix-ui";
 import useLocationToggle from "../hooks/useLocationToggle";
@@ -62,11 +63,9 @@ const AccountItem = ({
           <span className="w-10 flex items-center justify-center">
             {result ? (
               result.status ? (
-                result.skipped ? (
-                  <MdCheckCircle className="size-5 text-yellow-500 shrink-0" />
-                ) : (
-                  <MdCheckCircle className="size-5 text-green-500 shrink-0" />
-                )
+                <MdCheckCircle className="size-5 text-green-500 shrink-0" />
+              ) : result.skipped ? (
+                <MdRemoveCircle className="size-5 text-yellow-500 shrink-0" />
               ) : (
                 <MdCancel className="size-5 text-red-500 shrink-0" />
               )

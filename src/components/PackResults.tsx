@@ -74,11 +74,9 @@ const PackResults = ({ results }: PackResultsProps) => {
             {/* Status Icon */}
             <span className="shrink-0">
               {result.status ? (
-                result.skipped ? (
-                  <MdRemoveCircle className="size-6 text-yellow-500" />
-                ) : (
-                  <MdCheckCircle className="size-6 text-lime-400" />
-                )
+                <MdCheckCircle className="size-6 text-lime-400" />
+              ) : result.skipped ? (
+                <MdRemoveCircle className="size-6 text-yellow-500" />
               ) : (
                 <MdOutlineClose className="size-6 text-red-500" />
               )}

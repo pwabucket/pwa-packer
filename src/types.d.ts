@@ -10,9 +10,10 @@ export interface Account {
 
 export interface SendResult {
   status: boolean;
+  skipped?: boolean;
   account: Account;
-  hashResult: HashResult | null;
   receiver: string;
+  hashResult?: HashResult | null;
   result?: {
     receipt: TransactionReceipt | null;
     signedRawTx: string;
