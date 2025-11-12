@@ -40,6 +40,9 @@ const usePackMutation = () => {
             }
 
             try {
+              /* Random Delay to avoid rate limiting */
+              await delayForSeconds(Math.floor(Math.random() * 30) + 1);
+
               /* Create Packer Instance */
               const packer = new Packer(account.url);
 

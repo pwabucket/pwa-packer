@@ -40,6 +40,9 @@ const useValidationMutation = () => {
               return { status: false, account, error: "No URL provided" };
             }
 
+            /* Random Delay to avoid rate limiting */
+            await delayForSeconds(Math.floor(Math.random() * 30) + 1);
+
             const packer = new Packer(account.url);
 
             try {

@@ -67,6 +67,9 @@ const useSendMutation = () => {
                 };
               }
 
+              /* Random Delay to avoid rate limiting */
+              await delayForSeconds(Math.floor(Math.random() * 30) + 1);
+
               const privateKey = await getPrivateKey(account.id, password);
               const hashMaker = new HashMaker({
                 privateKey,
