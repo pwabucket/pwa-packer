@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
-import { WalletProvider } from "../lib/WalletProvider";
+import { WalletReader } from "../lib/WalletReader";
 
 interface WithdrawMutationParams {
   accounts: Account[];
@@ -50,10 +50,10 @@ const useWithdrawalMutation = () => {
           chunk.map(async (account) => {
             try {
               /* Create Wallet Provider */
-              const walletProvider = new WalletProvider(account.walletAddress);
+              const reader = new WalletReader(account.walletAddress);
 
               /* Fetch USDT Balance */
-              const balance = await walletProvider.getUSDTBalance();
+              const balance = await reader.getUSDTBalance();
 
               /* Determine Amount to Send */
               let amountToSend = data.amount;
@@ -76,8 +76,8 @@ const useWithdrawalMutation = () => {
                 };
               }
 
-              const provider = walletProvider.getProvider();
-              const usdtToken = walletProvider.getUsdtTokenContract();
+              const provider = reader.getProvider();
+              const usdtToken = reader.getUsdtTokenContract();
 
               const privateKey = await getPrivateKey(account.id, password);
               const wallet = new ethers.Wallet(privateKey, provider);

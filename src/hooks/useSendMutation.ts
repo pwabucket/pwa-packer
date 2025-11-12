@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Account, SendResult } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
-import { WalletProvider } from "../lib/WalletProvider";
+import { WalletReader } from "../lib/WalletReader";
 
 interface SendMutationData {
   accounts: Account[];
@@ -54,8 +54,8 @@ const useSendMutation = () => {
             const receiver = account.depositAddress;
 
             try {
-              const walletProvider = new WalletProvider(account.walletAddress);
-              const balance = await walletProvider.getUSDTBalance();
+              const reader = new WalletReader(account.walletAddress);
+              const balance = await reader.getUSDTBalance();
 
               if (balance < parseFloat(data.amount)) {
                 return {
@@ -68,7 +68,10 @@ const useSendMutation = () => {
               }
 
               const privateKey = await getPrivateKey(account.id, password);
-              const hashMaker = new HashMaker({ privateKey });
+              const hashMaker = new HashMaker({
+                privateKey,
+                provider: reader.getProvider(),
+              });
 
               /* Initialize Hash Maker */
               await hashMaker.initialize();

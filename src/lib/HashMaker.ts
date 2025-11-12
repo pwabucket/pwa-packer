@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import {
-  RPC,
   USDT_ABI,
   USDT_CONTRACT_ADDRESS,
   USDT_DECIMALS,
@@ -8,6 +7,7 @@ import {
   GAS_LIMIT_NATIVE,
   GAS_LIMITS_TRANSFER,
   MINOR_GAS_INCREMENT,
+  RPC,
 } from "./transaction";
 
 /** Hash Result Interface */
@@ -35,13 +35,8 @@ class HashMaker {
     privateKey: string;
     provider?: ethers.JsonRpcProvider | null;
   }) {
-    this.provider = provider || HashMaker.createProvider();
+    this.provider = provider || new ethers.JsonRpcProvider(RPC);
     this.wallet = new ethers.Wallet(privateKey, this.provider);
-  }
-
-  /** @method createProvider */
-  static createProvider() {
-    return new ethers.JsonRpcProvider(RPC);
   }
 
   async initialize() {

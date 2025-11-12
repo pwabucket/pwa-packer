@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { useAppStore } from "../store/useAppStore";
 import type { BackupData } from "../types";
 import { encryption } from "../services/encryption";
-import { WalletProvider } from "./WalletProvider";
+import { WalletReader } from "./WalletReader";
 
 export { v4 as uuid } from "uuid";
 
@@ -61,11 +61,11 @@ export async function getPrivateKey(accountId: string, password: string) {
 }
 
 export async function fetchBalance(address: string) {
-  const walletProvider = new WalletProvider(address);
+  const reader = new WalletReader(address);
 
   const [usdtBalance, bnbBalance] = await Promise.all([
-    walletProvider.getUSDTBalance(),
-    walletProvider.getBNBBalance(),
+    reader.getUSDTBalance(),
+    reader.getBNBBalance(),
   ]);
 
   return {

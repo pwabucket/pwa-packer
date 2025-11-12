@@ -1,10 +1,6 @@
 import { ethers } from "ethers";
-import {
-  RPC,
-  USDT_ABI,
-  USDT_CONTRACT_ADDRESS,
-  USDT_DECIMALS,
-} from "./transaction";
+import { USDT_ABI, USDT_CONTRACT_ADDRESS, USDT_DECIMALS } from "./transaction";
+import { providers } from "../services/providers";
 
 type UsdtTokenContract = ethers.Contract & {
   decimals: () => Promise<number>;
@@ -16,14 +12,14 @@ type UsdtTokenContract = ethers.Contract & {
   ) => Promise<ethers.ContractTransactionResponse>;
 };
 
-class WalletProvider {
+class WalletReader {
   protected address: string;
   protected provider: ethers.JsonRpcProvider;
   protected usdtToken: UsdtTokenContract;
 
   constructor(address: string) {
     this.address = address;
-    this.provider = new ethers.JsonRpcProvider(RPC);
+    this.provider = providers.getProvider(address);
     this.usdtToken = new ethers.Contract(
       USDT_CONTRACT_ADDRESS,
       USDT_ABI,
@@ -59,4 +55,4 @@ class WalletProvider {
   };
 }
 
-export { WalletProvider };
+export { WalletReader };
