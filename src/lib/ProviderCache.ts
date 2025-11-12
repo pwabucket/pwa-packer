@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { RPC } from "./transaction";
 
-const MAX_ADDRESSES_PER_PROVIDER = 50;
+const MAX_ADDRESSES_PER_PROVIDER = 40;
 
 interface ProviderPoolEntry {
   addressCount: number;
