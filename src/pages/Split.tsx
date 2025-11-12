@@ -20,6 +20,7 @@ import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
 import { useState } from "react";
 import { ParcelDialog } from "../components/ParcelDialog";
+import { usePendingActivity } from "../hooks/usePendingActivity";
 
 /** Whether to Use Iframe for Parcel */
 const USE_IFRAME_FOR_PARCEL =
@@ -193,6 +194,9 @@ const Split = () => {
   const handleFormSubmit = async (data: SplitFormData) => {
     await mutation.mutateAsync(data);
   };
+
+  /* Set Pending Activity */
+  usePendingActivity(true);
 
   return (
     <InnerPageLayout title="Split">
