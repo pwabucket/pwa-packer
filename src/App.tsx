@@ -18,6 +18,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { usePendingActivity } from "./hooks/usePendingActivity";
 import { UpdateURLs } from "./pages/UpdateURLs";
 import { Pack } from "./pages/Pack";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 const INACTIVITY_DURATION = 1 * 60 * 1000;
 
@@ -33,6 +34,9 @@ function App() {
 
   /* Set Pending Activity Based on Mutations */
   usePendingActivity(isMutating > 0);
+
+  /* Register analytics */
+  useAnalytics();
 
   return (
     <>
