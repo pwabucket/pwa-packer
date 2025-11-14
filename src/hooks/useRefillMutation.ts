@@ -84,6 +84,9 @@ const useRefillMutation = () => {
         })
       );
 
+      console.log("Excess funds accounts:", excessFundsAccounts);
+      console.log("Insufficient funds accounts:", insufficientFundsAccounts);
+
       for (const item of insufficientFundsAccounts) {
         let needed = item.difference;
 
