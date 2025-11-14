@@ -26,7 +26,7 @@ const Refill = () => {
 
   const handleFormSubmit = async (data: RefillFormData) => {
     if (selectedAccounts.length === 0) {
-      toast.error("No accounts selected for withdrawal.");
+      toast.error("No accounts selected for refill.");
       return;
     }
 
