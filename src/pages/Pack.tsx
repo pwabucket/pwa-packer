@@ -16,7 +16,7 @@ const Pack = () => {
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
-  const { mutation, progress } = usePackMutation();
+  const { mutation, target, progress } = usePackMutation();
 
   const handlePackClick = async () => {
     /* Pack Accounts */
@@ -83,9 +83,7 @@ const Pack = () => {
       )}
 
       {/* Progress Bar */}
-      {mutation.isPending && (
-        <Progress max={selectedAccounts.length} current={progress} />
-      )}
+      {mutation.isPending && <Progress max={target} current={progress} />}
 
       {/* Accounts Chooser */}
       <AccountsChooser

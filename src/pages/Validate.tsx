@@ -16,7 +16,7 @@ const Validate = () => {
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
-  const { mutation, progress } = useValidationMutation();
+  const { mutation, target, progress } = useValidationMutation();
 
   const handleValidateClick = async () => {
     /* Validate Accounts */
@@ -84,9 +84,7 @@ const Validate = () => {
       )}
 
       {/* Progress Bar */}
-      {mutation.isPending && (
-        <Progress max={selectedAccounts.length} current={progress} />
-      )}
+      {mutation.isPending && <Progress max={target} current={progress} />}
 
       {/* Accounts Chooser */}
       <AccountsChooser

@@ -16,7 +16,8 @@ interface ValidationResult {
 }
 
 const useValidationMutation = () => {
-  const { progress, resetProgress, incrementProgress } = useProgress();
+  const { target, progress, setTarget, resetProgress, incrementProgress } =
+    useProgress();
 
   const mutation = useMutation({
     mutationKey: ["validate"],
@@ -30,6 +31,9 @@ const useValidationMutation = () => {
       let activeAccounts = 0;
       let totalAmount = 0;
       let availableBalance = 0;
+
+      /* Set Target for Progress */
+      setTarget(totalAccounts);
 
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<ValidationResult>(
@@ -90,7 +94,7 @@ const useValidationMutation = () => {
     },
   });
 
-  return { mutation, progress };
+  return { mutation, target, progress };
 };
 
 export { useValidationMutation };

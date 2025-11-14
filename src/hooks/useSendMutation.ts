@@ -20,7 +20,8 @@ interface SendMutationData {
 }
 
 const useSendMutation = () => {
-  const { progress, resetProgress, incrementProgress } = useProgress();
+  const { target, progress, setTarget, resetProgress, incrementProgress } =
+    useProgress();
   const password = usePassword()!;
 
   /* Mutation for Sending Funds */
@@ -44,6 +45,9 @@ const useSendMutation = () => {
 
       /* Successful Validations Counter */
       let successfulValidations = 0;
+
+      /* Set Target for Progress */
+      setTarget(totalAccounts);
 
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<SendResult>(
@@ -209,7 +213,7 @@ const useSendMutation = () => {
     },
   });
 
-  return { mutation, progress };
+  return { mutation, progress, target };
 };
 
 export { useSendMutation };

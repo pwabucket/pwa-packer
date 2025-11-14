@@ -30,7 +30,8 @@ interface WithdrawalResult {
 }
 
 const useWithdrawalMutation = () => {
-  const { progress, resetProgress, incrementProgress } = useProgress();
+  const { target, progress, setTarget, resetProgress, incrementProgress } =
+    useProgress();
   const password = useAppStore((state) => state.password)!;
 
   /** Form */
@@ -51,6 +52,9 @@ const useWithdrawalMutation = () => {
       let totalSentValue = 0;
 
       const results: WithdrawalResult[] = [];
+
+      /* Set Target for Progress */
+      setTarget(totalAccounts);
 
       /* Iterate Over Accounts and Send Funds */
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
@@ -160,7 +164,7 @@ const useWithdrawalMutation = () => {
     },
   });
 
-  return { mutation, progress };
+  return { mutation, target, progress };
 };
 
 export { useWithdrawalMutation };

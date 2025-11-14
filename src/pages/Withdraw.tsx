@@ -22,7 +22,7 @@ const Withdraw = () => {
   const { form } = useWithdrawalForm();
 
   /** Mutation */
-  const { mutation, progress } = useWithdrawalMutation();
+  const { mutation, target, progress } = useWithdrawalMutation();
 
   const handleFormSubmit = async (data: WithdrawFormData) => {
     if (selectedAccounts.length === 0) {
@@ -82,9 +82,7 @@ const Withdraw = () => {
           )}
 
           {/* Progress Bar */}
-          {mutation.isPending && (
-            <Progress max={selectedAccounts.length} current={progress} />
-          )}
+          {mutation.isPending && <Progress max={target} current={progress} />}
 
           {/* Accounts Chooser */}
           <AccountsChooser

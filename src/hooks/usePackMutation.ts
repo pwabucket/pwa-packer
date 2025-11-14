@@ -10,7 +10,8 @@ interface PackMutationParams {
 }
 
 const usePackMutation = () => {
-  const { progress, resetProgress, incrementProgress } = useProgress();
+  const { target, progress, setTarget, resetProgress, incrementProgress } =
+    useProgress();
 
   const mutation = useMutation({
     mutationKey: ["pack-accounts"],
@@ -29,6 +30,9 @@ const usePackMutation = () => {
 
       /* Packed Accounts Counter */
       let packedAccounts = 0;
+
+      /* Set Target for Progress */
+      setTarget(totalAccounts);
 
       for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         const chunkResults = await Promise.all<PackResult>(
@@ -136,7 +140,7 @@ const usePackMutation = () => {
     },
   });
 
-  return { mutation, progress };
+  return { mutation, target, progress };
 };
 
 export { usePackMutation };

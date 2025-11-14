@@ -25,7 +25,7 @@ const Send = () => {
   const { form, append, remove } = useSendForm();
 
   /* Mutation for Sending Funds */
-  const { mutation, progress } = useSendMutation();
+  const { mutation, target, progress } = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
@@ -129,9 +129,7 @@ const Send = () => {
           )}
 
           {/* Progress Bar */}
-          {mutation.isPending && (
-            <Progress max={selectedAccounts.length} current={progress} />
-          )}
+          {mutation.isPending && <Progress max={target} current={progress} />}
 
           {/* Accounts Chooser */}
           <AccountsChooser
