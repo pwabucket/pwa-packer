@@ -8,6 +8,11 @@ interface AccountBalanceProps extends React.ComponentProps<"span"> {
   account: Account;
 }
 
+const floorToDecimals = (value: number, decimals: number) => {
+  const factor = Math.pow(10, decimals);
+  return Math.floor(value * factor) / factor;
+};
+
 const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
   const query = useAccountBalanceQuery(account.walletAddress);
   const balance = query.data;
@@ -23,13 +28,13 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
       {/* USDT Balance */}
       <span className="flex items-center gap-1">
         <img src={USDTIcon} alt="USDT" className="size-3" />
-        {(Math.floor(balance.usdtBalance * 100) / 100).toFixed(2)}
+        {floorToDecimals(balance.usdtBalance, 2).toFixed(2)}
       </span>
 
       {/* BNB Balance */}
       <span className="flex items-center gap-1">
         <img src={BNBIcon} alt="BNB" className="size-3" />
-        {(Math.floor(balance.bnbBalance * 1000000) / 1000000).toFixed(6)}
+        {floorToDecimals(balance.bnbBalance, 6).toFixed(6)}
       </span>
     </span>
   ) : (
