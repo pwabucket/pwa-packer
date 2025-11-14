@@ -7,6 +7,7 @@ import {
   MdOutlinePassword,
   MdOutlineRestore,
   MdLink,
+  MdWaterDrop,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -96,6 +97,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlineCheck className="size-5" />}
         >
           <Link to="/validate" />
+        </ActionButton>
+
+        {/* Refill */}
+        <ActionButton
+          asChild
+          title="Refill Accounts"
+          label="Refill"
+          icon={<MdWaterDrop className="size-5" />}
+        >
+          <Link to="/refill" />
         </ActionButton>
       </div>
     </PopupDialog>

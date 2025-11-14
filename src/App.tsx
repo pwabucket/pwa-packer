@@ -18,6 +18,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { usePendingActivity } from "./hooks/usePendingActivity";
 import { UpdateURLs } from "./pages/UpdateURLs";
 import { Pack } from "./pages/Pack";
+import { Refill } from "./pages/Refill";
 
 const INACTIVITY_DURATION = 1 * 60 * 1000;
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="update-urls" element={<UpdateURLs />} />
           <Route path="validate" element={<Validate />} />
           <Route path="pack" element={<Pack />} />
+          <Route path="refill" element={<Refill />} />
         </Route>
       </Routes>
 
