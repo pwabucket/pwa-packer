@@ -50,7 +50,7 @@ const Refill = () => {
   };
 
   return (
-    <InnerPageLayout title="Refill Funds" className="gap-2">
+    <InnerPageLayout title="Refill" className="gap-2">
       {mutation.isSuccess && (
         <div className="flex flex-col text-center text-sm">
           <p className="text-green-400">Refill completed successfully!</p>
