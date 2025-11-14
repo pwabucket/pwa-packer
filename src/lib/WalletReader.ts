@@ -8,7 +8,8 @@ type UsdtTokenContract = ethers.Contract & {
   balanceOf: (address: string) => Promise<bigint>;
   transfer: (
     to: string,
-    amount: bigint
+    amount: bigint,
+    overrides?: ethers.Overrides
   ) => Promise<ethers.ContractTransactionResponse>;
 };
 

@@ -1,5 +1,9 @@
 import { useAppStore } from "../store/useAppStore";
-import { USDT_DECIMALS } from "../lib/transaction";
+import {
+  BASE_GAS_PRICE,
+  GAS_LIMITS_TRANSFER,
+  USDT_DECIMALS,
+} from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
@@ -90,13 +94,20 @@ const useWithdrawalMutation = () => {
                 `Withdrawing ${amountToSend} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
               );
 
+              const txGasPrice = BASE_GAS_PRICE;
+              const txGasLimit = GAS_LIMITS_TRANSFER["fast"];
+
               /* Perform Transfer */
               const connectedToken = usdtToken.connect(
                 wallet
               ) as typeof usdtToken;
               const tx = await connectedToken.transfer(
                 receiver,
-                ethers.parseUnits(amountToSend, USDT_DECIMALS)
+                ethers.parseUnits(amountToSend, USDT_DECIMALS),
+                {
+                  gasLimit: txGasLimit,
+                  gasPrice: txGasPrice,
+                }
               );
 
               /* Wait for Transaction to be Mined */
