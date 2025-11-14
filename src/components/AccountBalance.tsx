@@ -9,9 +9,7 @@ interface AccountBalanceProps extends React.ComponentProps<"span"> {
 }
 
 const floorToDecimals = (value: number, decimals: number) => {
-  const factor = Math.pow(10, decimals);
-  const floored = Math.floor(value * factor) / factor;
-  return floored.toFixed(decimals);
+  return value.toFixed(decimals);
 };
 
 const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {

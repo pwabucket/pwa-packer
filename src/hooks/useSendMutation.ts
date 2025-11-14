@@ -57,6 +57,12 @@ const useSendMutation = () => {
               const reader = new WalletReader(account.walletAddress);
               const balance = await reader.getUSDTBalance();
 
+              /* Log Balance */
+              console.log(
+                `USDT Balance for account ${account.title} (${account.walletAddress}):`,
+                balance
+              );
+
               if (balance < parseFloat(data.amount)) {
                 return {
                   status: false,
