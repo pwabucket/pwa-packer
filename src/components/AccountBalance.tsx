@@ -23,13 +23,13 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
       {/* USDT Balance */}
       <span className="flex items-center gap-1">
         <img src={USDTIcon} alt="USDT" className="size-3" />
-        {balance.usdtBalance.toFixed(2)}
+        {(Math.floor(balance.usdtBalance * 100) / 100).toFixed(2)}
       </span>
 
       {/* BNB Balance */}
       <span className="flex items-center gap-1">
         <img src={BNBIcon} alt="BNB" className="size-3" />
-        {balance.bnbBalance.toFixed(6)}
+        {(Math.floor(balance.bnbBalance * 1000000) / 1000000).toFixed(6)}
       </span>
     </span>
   ) : (
