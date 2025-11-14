@@ -75,7 +75,7 @@ const useRefillMutation = () => {
               account,
               difference: balance - requiredBalance,
             });
-          } else {
+          } else if (balance < requiredBalance) {
             insufficientFundsAccounts.push({
               account,
               difference: requiredBalance - balance,
