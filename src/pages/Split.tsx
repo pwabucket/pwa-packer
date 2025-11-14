@@ -8,7 +8,7 @@ import { Input } from "../components/Input";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { TextArea } from "../components/TextArea";
-import { cn, getWalletAddressFromPrivateKey } from "../lib/utils";
+import { getWalletAddressFromPrivateKey } from "../lib/utils";
 import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ import { Progress } from "../components/Progress";
 import { useState } from "react";
 import { ParcelDialog } from "../components/ParcelDialog";
 import { usePendingActivity } from "../hooks/usePendingActivity";
+import { TokenButton } from "../components/TokenButton";
 
 /** Whether to Use Iframe for Parcel */
 const USE_IFRAME_FOR_PARCEL =
@@ -71,37 +72,6 @@ interface SplitFormData {
   amount: string;
   privateKey: string;
 }
-
-/** Token Selection Button Component */
-const TokenButton = ({
-  token,
-  selected,
-  onClick,
-}: {
-  token: "bnb" | "usdt";
-  selected: boolean;
-  onClick: () => void;
-}) => {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "border-2 rounded-full p-2 cursor-pointer",
-        "flex items-center justify-center gap-2",
-        "hover:bg-neutral-800",
-        selected ? "border-yellow-500" : "border-neutral-700"
-      )}
-      onClick={onClick}
-    >
-      {token === "bnb" ? (
-        <img src={BNBIcon} className="size-4 inline-block" />
-      ) : (
-        <img src={USDTIcon} className="size-4 inline-block rounded-full" />
-      )}
-      <span>{token.toUpperCase()}</span>
-    </button>
-  );
-};
 
 /** Split Page Component */
 const Split = () => {

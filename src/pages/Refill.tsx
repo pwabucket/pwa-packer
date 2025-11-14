@@ -18,6 +18,9 @@ const Refill = () => {
   /** Form */
   const { form } = useRefillForm();
 
+  /* Watch Token */
+  const token = form.watch("token");
+
   /** Mutation */
   const { mutation, target, progress } = useRefillMutation();
 
@@ -36,6 +39,7 @@ const Refill = () => {
     await mutation.mutateAsync({
       accounts: selectedAccounts,
       amount: data.amount,
+      token: data.token,
     });
 
     /* Show Summary Alert */
@@ -55,12 +59,7 @@ const Refill = () => {
             {mutation.data?.totalTransactions})
           </p>
           <p className="text-lime-300">
-            Total Amount:{" "}
-            {Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(mutation.data?.totalSentValue || 0)}{" "}
-            USDT
+            Total Amount: {mutation.data?.totalSentValue} {token.toUpperCase()}
           </p>
         </div>
       )}
@@ -71,7 +70,7 @@ const Refill = () => {
           className="flex flex-col gap-2"
         >
           {/* Refill Form Fields */}
-          <RefillFormFields disabled={mutation.isPending} />
+          <RefillFormFields token={token} disabled={mutation.isPending} />
 
           {/* Progress Bar */}
           {mutation.isPending && <Progress max={target} current={progress} />}
