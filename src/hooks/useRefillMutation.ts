@@ -6,7 +6,11 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
+import {
+  chunkArrayGenerator,
+  delayForSeconds,
+  getPrivateKey,
+} from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader } from "../lib/WalletReader";
@@ -71,6 +75,9 @@ const useRefillMutation = () => {
 
       await Promise.all(
         data.accounts.map(async (account) => {
+          /* Random Delay to avoid rate limiting */
+          await delayForSeconds(Math.floor(Math.random() * 5) + 1);
+
           const reader = new WalletReader(account.walletAddress);
           const balance = await reader.getUSDTBalance();
 
@@ -153,6 +160,9 @@ const useRefillMutation = () => {
                 console.log(
                   `Refilling ${task.to.title} (${task.to.walletAddress}) with ${task.amount} USDT from ${task.from.title} (${task.from.walletAddress})`
                 );
+
+                /* Random Delay to avoid rate limiting */
+                await delayForSeconds(Math.floor(Math.random() * 10) + 1);
 
                 const tx = await connectedToken.transfer(
                   task.to.walletAddress,

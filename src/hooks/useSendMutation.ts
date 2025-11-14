@@ -54,6 +54,9 @@ const useSendMutation = () => {
             const receiver = account.depositAddress;
 
             try {
+              /* Random Delay to avoid rate limiting */
+              await delayForSeconds(Math.floor(Math.random() * 5) + 1);
+
               const reader = new WalletReader(account.walletAddress);
               const balance = await reader.getUSDTBalance();
 
