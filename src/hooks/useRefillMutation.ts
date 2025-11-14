@@ -234,7 +234,7 @@ const useRefillMutation = () => {
                 });
               } catch (error) {
                 console.error(
-                  `Failed to refill account ${task.to.title} (${task.to.walletAddress}):`,
+                  `Failed to refill account ${task.to.title} (${task.to.walletAddress}) from ${task.from.title} (${task.from.walletAddress}):`,
                   error
                 );
 
