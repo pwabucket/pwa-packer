@@ -117,61 +117,80 @@ const useRefillMutation = () => {
       /* Total Transactions */
       totalTransactions = todo.length;
 
-      for (const chunk of chunkArrayGenerator(todo, 10)) {
+      /* Group tasks by sender to avoid nonce conflicts */
+      const tasksBySender = new Map<Account, RefillTodo[]>();
+      for (const task of todo) {
+        const sender = task.from;
+        if (!tasksBySender.has(sender)) {
+          tasksBySender.set(sender, []);
+        }
+        tasksBySender.get(sender)!.push(task);
+      }
+
+      /* Process each sender's tasks sequentially, but process different senders in parallel */
+      const senderGroups = Array.from(tasksBySender.entries());
+
+      const txGasPrice = BASE_GAS_PRICE;
+      const txGasLimit = GAS_LIMITS_TRANSFER["fast"];
+
+      for (const chunk of chunkArrayGenerator(senderGroups, 10)) {
         await Promise.all(
-          chunk.map(async (task) => {
-            try {
-              const reader = new WalletReader(task.from.walletAddress);
-              const provider = reader.getProvider();
-              const usdtToken = reader.getUsdtTokenContract();
+          chunk.map(async ([sender, senderTasks]) => {
+            const reader = new WalletReader(sender.walletAddress);
+            const provider = reader.getProvider();
+            const usdtToken = reader.getUsdtTokenContract();
 
-              const privateKey = await getPrivateKey(task.from.id, password);
-              const wallet = new ethers.Wallet(privateKey, provider);
+            const privateKey = await getPrivateKey(sender.id, password);
+            const wallet = new ethers.Wallet(privateKey, provider);
 
-              console.log(
-                `Refilling ${task.to.title} (${task.to.walletAddress}) with ${task.amount} USDT from ${task.from.title} (${task.from.walletAddress})`
-              );
+            const connectedToken = usdtToken.connect(
+              wallet
+            ) as typeof usdtToken;
 
-              const connectedToken = usdtToken.connect(
-                wallet
-              ) as typeof usdtToken;
+            /* Process this sender's tasks sequentially */
+            for (const task of senderTasks) {
+              try {
+                console.log(
+                  `Refilling ${task.to.title} (${task.to.walletAddress}) with ${task.amount} USDT from ${task.from.title} (${task.from.walletAddress})`
+                );
 
-              const txGasPrice = BASE_GAS_PRICE;
-              const txGasLimit = GAS_LIMITS_TRANSFER["fast"];
+                const tx = await connectedToken.transfer(
+                  task.to.walletAddress,
+                  ethers.parseUnits(task.amount.toString(), USDT_DECIMALS),
+                  {
+                    gasLimit: txGasLimit,
+                    gasPrice: txGasPrice,
+                  }
+                );
 
-              const tx = await connectedToken.transfer(
-                task.to.walletAddress,
-                ethers.parseUnits(task.amount.toString(), USDT_DECIMALS),
-                {
-                  gasLimit: txGasLimit,
-                  gasPrice: txGasPrice,
-                }
-              );
+                /* Wait for Transaction to be Mined */
+                const result = await tx.wait();
 
-              /* Wait for Transaction to be Mined */
-              const result = await tx.wait();
+                /* Log Result */
+                console.log(result);
 
-              /* Log Result */
-              console.log(result);
+                totalSentValue += task.amount;
+                successfulSends++;
 
-              totalSentValue += task.amount;
-              successfulSends++;
+                results.push({
+                  status: true,
+                  task,
+                  result,
+                });
+              } catch (error) {
+                console.error(
+                  `Failed to refill account ${task.to.title} (${task.to.walletAddress}):`,
+                  error
+                );
 
-              results.push({
-                status: true,
-                task,
-                result,
-              });
-            } catch (error) {
-              console.error(`Failed to refill account ${task.to.id}:`, error);
-
-              results.push({
-                status: false,
-                task,
-                error,
-              });
-            } finally {
-              incrementProgress();
+                results.push({
+                  status: false,
+                  task,
+                  error,
+                });
+              } finally {
+                incrementProgress();
+              }
             }
           })
         );
