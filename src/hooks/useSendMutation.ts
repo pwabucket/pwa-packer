@@ -164,7 +164,7 @@ const useSendMutation = () => {
             } catch (error: unknown) {
               /* Log Error */
               console.error(
-                `Failed to send from account ${account.id}:`,
+                `Failed to send from account ${account.title} (${account.walletAddress}):`,
                 error
               );
 
