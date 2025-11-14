@@ -62,7 +62,7 @@ const useRefillMutation = () => {
       const requiredBalance = parseFloat(data.amount);
 
       /* Analyze Accounts */
-      const excessAccounts: RefillItem[] = [];
+      const excessFundsAccounts: RefillItem[] = [];
       const insufficientFundsAccounts: RefillItem[] = [];
 
       await Promise.all(
@@ -71,7 +71,7 @@ const useRefillMutation = () => {
           const balance = await reader.getUSDTBalance();
 
           if (balance > requiredBalance) {
-            excessAccounts.push({
+            excessFundsAccounts.push({
               account,
               difference: balance - requiredBalance,
             });
@@ -87,7 +87,7 @@ const useRefillMutation = () => {
       for (const item of insufficientFundsAccounts) {
         let needed = item.difference;
 
-        for (const excessItem of excessAccounts) {
+        for (const excessItem of excessFundsAccounts) {
           if (excessItem.difference <= 0) continue;
 
           const transferAmount = Math.min(needed, excessItem.difference);
