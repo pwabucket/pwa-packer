@@ -208,16 +208,20 @@ const useRefillMutation = () => {
                 let tx: ethers.TransactionResponse | null = null;
 
                 if (data.token === "bnb") {
+                  /* Use toFixed to prevent scientific notation */
+                  const amountStr = task.amount.toFixed(18);
                   tx = await wallet.sendTransaction({
                     to: task.to.walletAddress,
-                    value: ethers.parseEther(task.amount.toString()),
+                    value: ethers.parseEther(amountStr),
                     gasPrice: BASE_GAS_PRICE,
                     gasLimit: GAS_LIMIT_NATIVE,
                   });
                 } else {
+                  /* Use toFixed to prevent scientific notation */
+                  const amountStr = task.amount.toFixed(USDT_DECIMALS);
                   tx = await connectedToken.transfer(
                     task.to.walletAddress,
-                    ethers.parseUnits(task.amount.toString(), USDT_DECIMALS),
+                    ethers.parseUnits(amountStr, USDT_DECIMALS),
                     {
                       gasPrice: BASE_GAS_PRICE,
                       gasLimit: GAS_LIMITS_TRANSFER["fast"],
