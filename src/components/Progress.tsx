@@ -14,7 +14,7 @@ const Progress = ({ current, max }: ProgressProps) => {
       >
         <ProgressPrimitive.Indicator
           className="bg-yellow-500 h-full transition-all duration-500"
-          style={{ width: `${(current / max) * 100}%` }}
+          style={{ width: `${current ? (current / max) * 100 : 0}%` }}
         />
       </ProgressPrimitive.Root>
       <p className="text-xs text-center text-yellow-500">
