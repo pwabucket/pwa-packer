@@ -33,6 +33,9 @@ class Packer {
   /* Static Map to Cache Custom Code per Origin */
   static customCodeMap = new Map<string, string>();
 
+  /* Static Map to Track Ongoing Initialization per Origin */
+  static initializationPromises = new Map<string, Promise<void>>();
+
   constructor(url: string) {
     /* Parse URL */
     this.url = new URL(url);
@@ -73,54 +76,80 @@ class Packer {
   }
 
   async initialize() {
+    const origin = this.url.origin;
+
     /* Check if Custom Code is Cached */
-    if (Packer.customCodeMap.has(this.url.origin)) {
+    if (Packer.customCodeMap.has(origin)) {
       this.api.defaults.headers.common["custom"] =
-        Packer.customCodeMap.get(this.url.origin) || "";
+        Packer.customCodeMap.get(origin) || "";
       return;
     }
 
-    /* Fetch HTML Content */
-    const html = await this.api.get(this.url.href).then((res) => res.data);
-
-    /* Parse HTML */
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-
-    /* Find Script Tag with type="module" and src containing "index" */
-    const scriptTag = [...doc.scripts].find(
-      (s) => s.type === "module" && s.getAttribute("src")?.includes("index")
-    );
-
-    if (scriptTag) {
-      /* Construct Script URL */
-      const scriptUrl = new URL(
-        scriptTag.getAttribute("src") || "",
-        this.url.origin
-      );
-
-      /* Fetch Script Content */
-      const scriptContent = await this.api
-        .get(scriptUrl.href)
-        .then((res) => res.data);
-
-      /* Extract Custom Header from Script Content */
-      const customHeader = scriptContent.match(
-        /headers\.custom\s*=\s*["']([^"']+)["']/
-      );
-
-      /* Set Custom Header if Found */
-      if (customHeader && customHeader[1]) {
-        /* Set Custom Header in Axios Instance */
-        this.api.defaults.headers.common["custom"] = customHeader[1];
-
-        /* Debug Log */
-        console.log("Custom Header Set:", customHeader[1]);
-
-        /* Cache Custom Header */
-        Packer.customCodeMap.set(this.url.origin, customHeader[1]);
-      }
+    /* Check if Initialization is Already in Progress for This Origin */
+    if (Packer.initializationPromises.has(origin)) {
+      /* Wait for Ongoing Initialization to Complete */
+      await Packer.initializationPromises.get(origin);
+      /* Set Header from Cache After Waiting */
+      this.api.defaults.headers.common["custom"] =
+        Packer.customCodeMap.get(origin) || "";
+      return;
     }
+
+    /* Create New Initialization Promise */
+    const initPromise = (async () => {
+      try {
+        /* Fetch HTML Content */
+        const html = await this.api.get(this.url.href).then((res) => res.data);
+
+        /* Parse HTML */
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        /* Find Script Tag with type="module" and src containing "index" */
+        const scriptTag = [...doc.scripts].find(
+          (s) => s.type === "module" && s.getAttribute("src")?.includes("index")
+        );
+
+        if (scriptTag) {
+          /* Construct Script URL */
+          const scriptUrl = new URL(
+            scriptTag.getAttribute("src") || "",
+            origin
+          );
+
+          /* Fetch Script Content */
+          const scriptContent = await this.api
+            .get(scriptUrl.href)
+            .then((res) => res.data);
+
+          /* Extract Custom Header from Script Content */
+          const customHeader = scriptContent.match(
+            /headers\.custom\s*=\s*["']([^"']+)["']/
+          );
+
+          /* Set Custom Header if Found */
+          if (customHeader && customHeader[1]) {
+            /* Set Custom Header in Axios Instance */
+            this.api.defaults.headers.common["custom"] = customHeader[1];
+
+            /* Debug Log */
+            console.log("Custom Header Set:", customHeader[1]);
+
+            /* Cache Custom Header */
+            Packer.customCodeMap.set(origin, customHeader[1]);
+          }
+        }
+      } finally {
+        /* Remove Promise from Map After Completion */
+        Packer.initializationPromises.delete(origin);
+      }
+    })();
+
+    /* Store Promise in Map */
+    Packer.initializationPromises.set(origin, initPromise);
+
+    /* Wait for Initialization to Complete */
+    await initPromise;
   }
 
   /* Validate User */
