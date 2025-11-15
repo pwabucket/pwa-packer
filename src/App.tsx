@@ -19,6 +19,7 @@ import { usePendingActivity } from "./hooks/usePendingActivity";
 import { UpdateURLs } from "./pages/UpdateURLs";
 import { Pack } from "./pages/Pack";
 import { Refill } from "./pages/Refill";
+import { Merge } from "./pages/Merge";
 
 const INACTIVITY_DURATION = 1 * 60 * 1000;
 
@@ -52,6 +53,7 @@ function App() {
           <Route path="withdraw" element={<Withdraw />} />
           <Route path="send" element={<Send />} />
           <Route path="split" element={<Split />} />
+          <Route path="merge" element={<Merge />} />
           <Route path="password" element={<Password />} />
           <Route path="update-urls" element={<UpdateURLs />} />
           <Route path="validate" element={<Validate />} />

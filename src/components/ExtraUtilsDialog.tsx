@@ -8,6 +8,7 @@ import {
   MdOutlineRestore,
   MdLink,
   MdWaterDrop,
+  MdOutlineMerge,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -87,6 +88,16 @@ const ExtraUtilsDialog = () => {
           icon={<HiOutlineCurrencyDollar className="size-5" />}
         >
           <Link to="/pack" />
+        </ActionButton>
+
+        {/* Merge */}
+        <ActionButton
+          asChild
+          title="Merge Accounts"
+          label="Merge"
+          icon={<MdOutlineMerge className="size-5" />}
+        >
+          <Link to="/merge" />
         </ActionButton>
 
         {/* Validate */}

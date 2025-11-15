@@ -7,8 +7,12 @@ import { HiOutlineXMark } from "react-icons/hi2";
 /** Parcel URL from Environment Variables */
 const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
 
+interface ParcelDialogProps extends Dialog.DialogProps {
+  path: string;
+}
+
 /** Parcel Dialog Component */
-const ParcelDialog = (props: Dialog.DialogProps) => {
+const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
   return (
     <Dialog.Root {...props}>
       <PopupDialog className="p-0 h-full max-h-[768px] overflow-hidden gap-0 max-w-md">
@@ -44,7 +48,7 @@ const ParcelDialog = (props: Dialog.DialogProps) => {
 
         {/* Iframe */}
         <iframe
-          src={new URL("/split", PARCEL_URL).href}
+          src={new URL(path, PARCEL_URL).href}
           title="Parcel"
           className="border-0 grow"
         ></iframe>
