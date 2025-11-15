@@ -193,13 +193,14 @@ const useRefillMutation = () => {
 
             /* Process this sender's tasks sequentially */
             for (const task of senderTasks) {
+              const amountStr = task.amount.toFixed(8);
               try {
                 console.log(
-                  `Refilling ${task.to.title} (${task.to.walletAddress}) with ${
-                    task.amount
-                  } ${data.token.toUpperCase()} from ${task.from.title} (${
-                    task.from.walletAddress
-                  })`
+                  `Refilling ${task.to.title} (${
+                    task.to.walletAddress
+                  }) with ${amountStr} ${data.token.toUpperCase()} from ${
+                    task.from.title
+                  } (${task.from.walletAddress})`
                 );
 
                 /* Random Delay to avoid rate limiting */
@@ -209,7 +210,6 @@ const useRefillMutation = () => {
 
                 if (data.token === "bnb") {
                   /* Use toFixed(8) for consistent 8 decimal precision */
-                  const amountStr = task.amount.toFixed(8);
                   tx = await wallet.sendTransaction({
                     to: task.to.walletAddress,
                     value: ethers.parseEther(amountStr),
@@ -218,7 +218,6 @@ const useRefillMutation = () => {
                   });
                 } else {
                   /* Use toFixed(8) for consistent 8 decimal precision */
-                  const amountStr = task.amount.toFixed(8);
                   tx = await connectedToken.transfer(
                     task.to.walletAddress,
                     ethers.parseUnits(amountStr, USDT_DECIMALS),

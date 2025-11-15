@@ -59,7 +59,8 @@ const Refill = () => {
             {mutation.data?.totalTransactions})
           </p>
           <p className="text-lime-300">
-            Total Amount: {mutation.data?.totalSentValue} {token.toUpperCase()}
+            Total Amount: {mutation.data?.totalSentValue?.toFixed(8)}{" "}
+            {token.toUpperCase()}
           </p>
         </div>
       )}
