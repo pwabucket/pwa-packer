@@ -44,9 +44,6 @@ const Refill = () => {
 
     /* Show Summary Alert */
     toast.success("Successfully refilled accounts");
-
-    /* Reset Form */
-    form.reset();
   };
 
   return (
