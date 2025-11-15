@@ -42,6 +42,16 @@ const ExtraUtilsDialog = () => {
 
       {/* Utilities Content */}
       <div className="flex flex-wrap justify-center items-center gap-6">
+        {/* Merge */}
+        <ActionButton
+          asChild
+          title="Merge Accounts"
+          label="Merge"
+          icon={<MdOutlineMerge className="size-5" />}
+        >
+          <Link to="/merge" />
+        </ActionButton>
+
         {/* Backup */}
         <ActionButton
           label="Backup"
@@ -88,16 +98,6 @@ const ExtraUtilsDialog = () => {
           icon={<HiOutlineCurrencyDollar className="size-5" />}
         >
           <Link to="/pack" />
-        </ActionButton>
-
-        {/* Merge */}
-        <ActionButton
-          asChild
-          title="Merge Accounts"
-          label="Merge"
-          icon={<MdOutlineMerge className="size-5" />}
-        >
-          <Link to="/merge" />
         </ActionButton>
 
         {/* Validate */}
