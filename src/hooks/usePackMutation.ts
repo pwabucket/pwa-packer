@@ -44,27 +44,14 @@ const usePackMutation = () => {
             }
 
             try {
-              /* Random Delay to avoid rate limiting */
-              await delayForSeconds(Math.floor(Math.random() * 30) + 1);
-
               /* Create Packer Instance */
               const packer = new Packer(account.url);
 
               /* Initialize Packer */
               await packer.initialize();
 
-              /* Get Time and Validate */
-              await packer.getTime();
-              await packer.validate();
-
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(1);
-
               /* Get Activity */
               const activity = await packer.getActivity();
-
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(1);
 
               /* Check Activity */
               const { data: withdrawActivity } =
@@ -82,9 +69,6 @@ const usePackMutation = () => {
                   withdrawActivity,
                 };
               }
-
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(10);
 
               /* Determine Withdrawal Address */
               const withdrawalAddress =
@@ -123,9 +107,6 @@ const usePackMutation = () => {
               /* Push Failed Result */
               return { status: false, account, error };
             } finally {
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(15);
-
               /* Increment Progress */
               incrementProgress();
             }
@@ -134,6 +115,9 @@ const usePackMutation = () => {
 
         /* Append Chunk Results */
         results.push(...chunkResults);
+
+        /* Delay to avoid rate limiting */
+        await delayForSeconds(2);
       }
 
       return { results, totalAccounts, packedAccounts, totalWithdrawn };

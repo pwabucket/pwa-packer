@@ -6,11 +6,7 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import {
-  chunkArrayGenerator,
-  delayForSeconds,
-  getPrivateKey,
-} from "../lib/utils";
+import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader } from "../lib/WalletReader";
@@ -61,9 +57,6 @@ const useWithdrawalMutation = () => {
         const chunkResults = await Promise.all<WithdrawalResult>(
           chunk.map(async (account) => {
             try {
-              /* Random Delay to avoid rate limiting */
-              await delayForSeconds(Math.floor(Math.random() * 30) + 1);
-
               /* Create Wallet Provider */
               const reader = new WalletReader(account.walletAddress);
 

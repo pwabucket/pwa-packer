@@ -7,11 +7,7 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import {
-  chunkArrayGenerator,
-  delayForSeconds,
-  getPrivateKey,
-} from "../lib/utils";
+import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader } from "../lib/WalletReader";
@@ -79,36 +75,36 @@ const useRefillMutation = () => {
         ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE)
       );
 
-      await Promise.all(
-        data.accounts.map(async (account) => {
-          /* Random Delay to avoid rate limiting */
-          await delayForSeconds(Math.floor(Math.random() * 5) + 1);
+      /* Fetch balances in chunks to avoid rate limiting */
+      for (const chunk of chunkArrayGenerator(data.accounts, 20)) {
+        await Promise.all(
+          chunk.map(async (account) => {
+            const reader = new WalletReader(account.walletAddress);
+            const balance =
+              data.token === "bnb"
+                ? await reader.getBNBBalance()
+                : await reader.getUSDTBalance();
 
-          const reader = new WalletReader(account.walletAddress);
-          const balance =
-            data.token === "bnb"
-              ? await reader.getBNBBalance()
-              : await reader.getUSDTBalance();
+            let balanceValue = balance;
 
-          let balanceValue = balance;
+            if (data.token === "bnb") {
+              balanceValue = balance - requiredGasInEther;
+            }
 
-          if (data.token === "bnb") {
-            balanceValue = balance - requiredGasInEther;
-          }
-
-          if (balanceValue > requiredBalance) {
-            excessFundsAccounts.push({
-              account,
-              difference: balanceValue - requiredBalance,
-            });
-          } else if (balanceValue < requiredBalance) {
-            insufficientFundsAccounts.push({
-              account,
-              difference: requiredBalance - balanceValue,
-            });
-          }
-        })
-      );
+            if (balanceValue > requiredBalance) {
+              excessFundsAccounts.push({
+                account,
+                difference: balanceValue - requiredBalance,
+              });
+            } else if (balanceValue < requiredBalance) {
+              insufficientFundsAccounts.push({
+                account,
+                difference: requiredBalance - balanceValue,
+              });
+            }
+          })
+        );
+      }
 
       console.log("Excess funds accounts:", excessFundsAccounts);
       console.log("Insufficient funds accounts:", insufficientFundsAccounts);
@@ -196,9 +192,6 @@ const useRefillMutation = () => {
                     task.from.title
                   } (${task.from.walletAddress})`
                 );
-
-                /* Random Delay to avoid rate limiting */
-                await delayForSeconds(Math.floor(Math.random() * 10) + 1);
 
                 let tx: ethers.TransactionResponse | null = null;
 

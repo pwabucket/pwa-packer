@@ -44,9 +44,6 @@ const useValidationMutation = () => {
               return { status: false, account, error: "No URL provided" };
             }
 
-            /* Random Delay to avoid rate limiting */
-            await delayForSeconds(Math.floor(Math.random() * 30) + 1);
-
             const packer = new Packer(account.url);
 
             try {
@@ -71,9 +68,6 @@ const useValidationMutation = () => {
               /* Push Failed Result */
               return { status: false, account, error };
             } finally {
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(5);
-
               /* Increment Progress */
               incrementProgress();
             }
@@ -82,6 +76,9 @@ const useValidationMutation = () => {
 
         /* Append Chunk Results */
         results.push(...chunkResults);
+
+        /* Delay to avoid rate limiting */
+        await delayForSeconds(2);
       }
 
       return {

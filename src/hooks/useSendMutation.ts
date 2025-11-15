@@ -58,9 +58,6 @@ const useSendMutation = () => {
             const receiver = account.depositAddress;
 
             try {
-              /* Random Delay to avoid rate limiting */
-              await delayForSeconds(Math.floor(Math.random() * 5) + 1);
-
               const reader = new WalletReader(account.walletAddress);
               const balance = await reader.getUSDTBalance();
 
@@ -79,9 +76,6 @@ const useSendMutation = () => {
                   hashResult: null,
                 };
               }
-
-              /* Random Delay to avoid rate limiting */
-              await delayForSeconds(Math.floor(Math.random() * 30) + 1);
 
               const privateKey = await getPrivateKey(account.id, password);
               const hashMaker = new HashMaker({
@@ -136,7 +130,7 @@ const useSendMutation = () => {
               let validation = null;
               if (data.validate && account.url) {
                 /* Delay for confirmation */
-                await delayForSeconds(10);
+                await delayForSeconds(5);
 
                 try {
                   const packer = new Packer(account.url);
@@ -192,9 +186,6 @@ const useSendMutation = () => {
             } finally {
               /* Increment Progress */
               incrementProgress();
-
-              /* Delay to avoid rate limiting */
-              await delayForSeconds(2);
             }
           })
         );
