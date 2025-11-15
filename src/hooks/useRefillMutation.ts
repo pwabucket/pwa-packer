@@ -79,7 +79,7 @@ const useRefillMutation = () => {
       );
 
       /* Fetch balances in chunks to avoid rate limiting */
-      for (const chunk of chunkArrayGenerator(data.accounts, 20)) {
+      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
         await Promise.all(
           chunk.map(async (account) => {
             const reader = new WalletReader(account.walletAddress);
@@ -247,6 +247,9 @@ const useRefillMutation = () => {
             }
           })
         );
+
+        /* Small delay between chunks to avoid rate limiting */
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       return { results, successfulSends, totalTransactions, totalSentValue };
