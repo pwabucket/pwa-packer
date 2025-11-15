@@ -208,8 +208,8 @@ const useRefillMutation = () => {
                 let tx: ethers.TransactionResponse | null = null;
 
                 if (data.token === "bnb") {
-                  /* Use toFixed to prevent scientific notation */
-                  const amountStr = task.amount.toFixed(18);
+                  /* Use toFixed(8) for consistent 8 decimal precision */
+                  const amountStr = task.amount.toFixed(8);
                   tx = await wallet.sendTransaction({
                     to: task.to.walletAddress,
                     value: ethers.parseEther(amountStr),
@@ -217,8 +217,8 @@ const useRefillMutation = () => {
                     gasLimit: GAS_LIMIT_NATIVE,
                   });
                 } else {
-                  /* Use toFixed to prevent scientific notation */
-                  const amountStr = task.amount.toFixed(USDT_DECIMALS);
+                  /* Use toFixed(8) for consistent 8 decimal precision */
+                  const amountStr = task.amount.toFixed(8);
                   tx = await connectedToken.transfer(
                     task.to.walletAddress,
                     ethers.parseUnits(amountStr, USDT_DECIMALS),
