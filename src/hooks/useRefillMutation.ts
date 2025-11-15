@@ -79,9 +79,6 @@ const useRefillMutation = () => {
         ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE)
       );
 
-      /* Determine decimal precision based on token */
-      const decimals = data.token === "bnb" ? 18 : USDT_DECIMALS;
-
       await Promise.all(
         data.accounts.map(async (account) => {
           /* Random Delay to avoid rate limiting */
@@ -99,24 +96,15 @@ const useRefillMutation = () => {
             balanceValue = balance - requiredGasInEther;
           }
 
-          /* Round to appropriate decimals to prevent precision issues */
-          balanceValue = parseFloat(balanceValue.toFixed(decimals));
-
           if (balanceValue > requiredBalance) {
-            const difference = parseFloat(
-              (balanceValue - requiredBalance).toFixed(decimals)
-            );
             excessFundsAccounts.push({
               account,
-              difference,
+              difference: balanceValue - requiredBalance,
             });
           } else if (balanceValue < requiredBalance) {
-            const difference = parseFloat(
-              (requiredBalance - balanceValue).toFixed(decimals)
-            );
             insufficientFundsAccounts.push({
               account,
-              difference,
+              difference: requiredBalance - balanceValue,
             });
           }
         })
@@ -142,9 +130,6 @@ const useRefillMutation = () => {
             transferAmount = Math.min(transferAmount, maxTransferableAmount);
           }
 
-          /* Round transfer amount to appropriate decimals */
-          transferAmount = parseFloat(transferAmount.toFixed(decimals));
-
           if (transferAmount <= 0) continue;
 
           todo.push({
@@ -159,10 +144,8 @@ const useRefillMutation = () => {
               ? transferAmount + requiredGasInEther
               : transferAmount;
 
-          excessItem.difference = parseFloat(
-            (excessItem.difference - totalCost).toFixed(decimals)
-          );
-          needed = parseFloat((needed - transferAmount).toFixed(decimals));
+          excessItem.difference -= totalCost;
+          needed -= transferAmount;
 
           if (needed <= 0) break;
         }
