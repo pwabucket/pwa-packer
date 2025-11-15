@@ -79,9 +79,6 @@ const useRefillMutation = () => {
         ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE)
       );
 
-      /* Helper to round to 8 decimals */
-      const round8 = (n: number) => parseFloat(n.toFixed(8));
-
       await Promise.all(
         data.accounts.map(async (account) => {
           /* Random Delay to avoid rate limiting */
@@ -96,18 +93,18 @@ const useRefillMutation = () => {
           let balanceValue = balance;
 
           if (data.token === "bnb") {
-            balanceValue = round8(balance - requiredGasInEther);
+            balanceValue = balance - requiredGasInEther;
           }
 
           if (balanceValue > requiredBalance) {
             excessFundsAccounts.push({
               account,
-              difference: round8(balanceValue - requiredBalance),
+              difference: balanceValue - requiredBalance,
             });
           } else if (balanceValue < requiredBalance) {
             insufficientFundsAccounts.push({
               account,
-              difference: round8(requiredBalance - balanceValue),
+              difference: requiredBalance - balanceValue,
             });
           }
         })
@@ -127,15 +124,11 @@ const useRefillMutation = () => {
           /* For BNB transfers, reserve gas for this specific transfer */
           if (data.token === "bnb") {
             /* Make sure we have enough to cover both the transfer amount AND gas */
-            const maxTransferableAmount = round8(
-              excessItem.difference - requiredGasInEther
-            );
+            const maxTransferableAmount =
+              excessItem.difference - requiredGasInEther;
             if (maxTransferableAmount <= 0) continue;
             transferAmount = Math.min(transferAmount, maxTransferableAmount);
           }
-
-          /* Round transfer amount to 8 decimals */
-          transferAmount = round8(transferAmount);
 
           if (transferAmount <= 0) continue;
 
@@ -148,11 +141,11 @@ const useRefillMutation = () => {
           /* For BNB, account for both the transfer and gas cost */
           const totalCost =
             data.token === "bnb"
-              ? round8(transferAmount + requiredGasInEther)
+              ? transferAmount + requiredGasInEther
               : transferAmount;
 
-          excessItem.difference = round8(excessItem.difference - totalCost);
-          needed = round8(needed - transferAmount);
+          excessItem.difference = excessItem.difference - totalCost;
+          needed = needed - transferAmount;
 
           if (needed <= 0) break;
         }
@@ -193,6 +186,7 @@ const useRefillMutation = () => {
 
             /* Process this sender's tasks sequentially */
             for (const task of senderTasks) {
+              /* Use toFixed(8) for consistent 8 decimal precision */
               const amountStr = task.amount.toFixed(8);
               try {
                 console.log(
@@ -209,7 +203,6 @@ const useRefillMutation = () => {
                 let tx: ethers.TransactionResponse | null = null;
 
                 if (data.token === "bnb") {
-                  /* Use toFixed(8) for consistent 8 decimal precision */
                   tx = await wallet.sendTransaction({
                     to: task.to.walletAddress,
                     value: ethers.parseEther(amountStr),
@@ -217,7 +210,6 @@ const useRefillMutation = () => {
                     gasLimit: GAS_LIMIT_NATIVE,
                   });
                 } else {
-                  /* Use toFixed(8) for consistent 8 decimal precision */
                   tx = await connectedToken.transfer(
                     task.to.walletAddress,
                     ethers.parseUnits(amountStr, USDT_DECIMALS),
