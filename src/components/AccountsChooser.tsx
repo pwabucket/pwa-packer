@@ -54,7 +54,7 @@ const AccountItem = ({
     <div
       className={cn(
         "dark:bg-neutral-900",
-        "flex items-center gap-2 p-1.5 rounded-full",
+        "flex items-center gap-1 p-1.5 rounded-full",
         "has-[input:disabled]:opacity-60"
       )}
     >
