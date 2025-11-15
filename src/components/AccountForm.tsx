@@ -6,12 +6,20 @@ import * as yup from "yup";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { TextArea } from "../components/TextArea";
-import { cn, getWalletAddressFromPrivateKey } from "../lib/utils";
+import {
+  cn,
+  copyToClipboard,
+  getWalletAddressFromPrivateKey,
+} from "../lib/utils";
 import { Packer } from "../lib/Packer";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
-import { MdOutlineAutorenew, MdAccountBalanceWallet } from "react-icons/md";
+import {
+  MdOutlineAutorenew,
+  MdAccountBalanceWallet,
+  MdOutlineContentCopy,
+} from "react-icons/md";
 
 /** Account Form Data */
 interface AccountFormData {
@@ -131,7 +139,26 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
           render={({ field, fieldState }) => (
             <>
               <Label htmlFor="url">URL</Label>
-              <Input {...field} id="url" autoComplete="off" placeholder="URL" />
+              <div className="flex gap-2 w-full">
+                <Input
+                  {...field}
+                  id="url"
+                  autoComplete="off"
+                  placeholder="URL"
+                  className="grow"
+                />
+                <button
+                  type="button"
+                  className={cn(
+                    "border border-neutral-700 cursor-pointer",
+                    "shrink-0 p-2 rounded-full size-10",
+                    "flex items-center justify-center"
+                  )}
+                  onClick={() => copyToClipboard(field.value)}
+                >
+                  <MdOutlineContentCopy className="size-4" />
+                </button>
+              </div>
               {field.value && (
                 <div className="flex justify-end">
                   <button
