@@ -49,6 +49,9 @@ const useRefillMutation = () => {
       /* Reset Progress */
       resetProgress();
 
+      /* Set Target for Progress */
+      setTarget(0);
+
       /* Total Accounts */
       let totalTransactions = 0;
 

@@ -45,7 +45,8 @@ const Merge = () => {
 
   const accountsChooser = useAccountsChooser();
 
-  const { target, progress, resetProgress } = useProgress();
+  const { target, progress, setTarget, resetProgress, incrementProgress } =
+    useProgress();
   const { selectedAccounts } = accountsChooser;
 
   const [showIframe, setShowIframe] = useState(false);
@@ -74,12 +75,20 @@ const Merge = () => {
         return;
       }
 
+      /* Set Target for Progress */
+      setTarget(selectedAccounts.length);
+
       /* Prepare Senders */
       const senders = await Promise.all(
         selectedAccounts.map(async (account) => {
           const privateKey = await getPrivateKey(account.id, password!);
+          const address = getWalletAddressFromPrivateKey(privateKey);
+
+          /* Increment Progress */
+          incrementProgress();
+
           return {
-            address: getWalletAddressFromPrivateKey(privateKey),
+            address,
             privateKey,
           };
         })
