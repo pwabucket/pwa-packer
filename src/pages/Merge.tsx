@@ -18,13 +18,7 @@ import { ParcelDialog } from "../components/ParcelDialog";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { TokenButton } from "../components/TokenButton";
 import { usePassword } from "../hooks/usePassword";
-
-/** Whether to Use Iframe for Parcel */
-const USE_IFRAME_FOR_PARCEL =
-  import.meta.env.VITE_USE_IFRAME_FOR_PARCEL === "true";
-
-/** Parcel URL from Environment Variables */
-const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
+import { launchParcel } from "../lib/parcel";
 
 /** Merge Form Schema */
 const MergeFormSchema = yup
@@ -51,7 +45,7 @@ const Merge = () => {
 
   const accountsChooser = useAccountsChooser();
 
-  const { progress, resetProgress } = useProgress();
+  const { target, progress, resetProgress } = useProgress();
   const { selectedAccounts } = accountsChooser;
 
   const [showIframe, setShowIframe] = useState(false);
@@ -92,11 +86,10 @@ const Merge = () => {
       );
 
       const result = await new Promise((resolve) => {
-        /** Handle Parcel Ready Message */
-        async function handleParcelReady(event: MessageEvent) {
-          console.log("Received message:", event);
-          if (event.origin !== new URL(PARCEL_URL).origin) return;
-          if (event.data === "ready") {
+        launchParcel({
+          path: "/merge",
+          enableIframe: (status) => setShowIframe(status),
+          onReady: (event) => {
             event.source!.postMessage(
               {
                 blockchain: "bsc",
@@ -106,37 +99,10 @@ const Merge = () => {
               },
               { targetOrigin: event.origin }
             );
-            window.removeEventListener("message", handleParcelReady);
 
             resolve({ status: true });
-          }
-        }
-
-        /** Listen for Parcel Ready Message */
-        window.addEventListener("message", handleParcelReady);
-
-        /* Open Parcel in New Window or Iframe */
-        if (USE_IFRAME_FOR_PARCEL) {
-          setShowIframe(true);
-        } else {
-          const isMobile = /Android|iPhone|iPad|iPod/i.test(
-            navigator.userAgent
-          );
-
-          if (isMobile) {
-            const link = document.createElement("a");
-            link.href = new URL("/merge", PARCEL_URL).href;
-            link.target = "_blank";
-            link.rel = "opener";
-            link.click();
-          } else {
-            window.open(
-              new URL("/merge", PARCEL_URL).href,
-              "_blank",
-              "popup,width=400,height=768"
-            );
-          }
-        }
+          },
+        });
       });
 
       return result;
@@ -215,9 +181,7 @@ const Merge = () => {
           </Button>
 
           {/* Progress Bar */}
-          {mutation.isPending && (
-            <Progress max={selectedAccounts.length} current={progress} />
-          )}
+          {mutation.isPending && <Progress max={target} current={progress} />}
 
           {/* Accounts Chooser */}
           <AccountsChooser {...accountsChooser} disabled={mutation.isPending} />
