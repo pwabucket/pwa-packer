@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { extractTgWebAppData } from "../lib/utils";
+import { copyToClipboard, extractTgWebAppData } from "../lib/utils";
+import { MdOutlineContentCopy } from "react-icons/md";
 
 interface AccountProfileProps {
   url: string;
@@ -23,6 +24,14 @@ const AccountProfile = ({ url }: AccountProfileProps) => {
         {user?.username && (
           <p className="text-neutral-400 truncate">@{user.username}</p>
         )}
+        <p className="text-purple-300">
+          <button
+            onClick={() => copyToClipboard(user?.id.toString() || "")}
+            className="text-xs cursor-pointer"
+          >
+            ID: {user?.id} <MdOutlineContentCopy className="inline-block" />
+          </button>
+        </p>
       </div>
     </div>
   );
