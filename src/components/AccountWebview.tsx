@@ -11,6 +11,7 @@ import { AccountDialogSendTab } from "./AccountDialogSendTab";
 import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { AccountSwitcher } from "./AccountSwitcher";
+import { AccountInfo } from "./AccountInfo";
 
 interface AccountWebviewProps {
   account: Account;
@@ -33,12 +34,13 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {account.url ? (
         <Tabs.Root defaultValue="main" className="h-full flex flex-col">
-          <Tabs.List className="grid grid-cols-2 shrink-0">
+          <Tabs.List className="grid grid-cols-3 shrink-0">
             <WebviewAsideTabTrigger title="Main" value="main" />
             <WebviewAsideTabTrigger title="Withdrawals" value="withdrawals" />
+            <WebviewAsideTabTrigger title="Info" value="info" />
           </Tabs.List>
 
           {/* Main */}
@@ -57,6 +59,13 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
               className="size-full bg-neutral-800/50"
               referrerPolicy="no-referrer"
             />
+          </Tabs.Content>
+
+          <Tabs.Content
+            value="info"
+            className="grow min-w-0 min-h-0 overflow-auto"
+          >
+            <AccountInfo account={account} />
           </Tabs.Content>
         </Tabs.Root>
       ) : (
