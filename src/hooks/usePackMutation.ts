@@ -7,6 +7,7 @@ import { delayForSeconds } from "../lib/utils";
 /** Parameters for Pack Mutation */
 interface PackMutationParams {
   accounts: Account[];
+  delay: number;
 }
 
 const usePackMutation = () => {
@@ -115,7 +116,7 @@ const usePackMutation = () => {
         }
 
         /* Delay to Avoid Rate Limiting */
-        await delayForSeconds(10);
+        await delayForSeconds(data.delay);
       }
 
       return { results, totalAccounts, packedAccounts, totalWithdrawn };

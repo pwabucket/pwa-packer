@@ -48,11 +48,8 @@ const Send = () => {
     }
 
     const { results } = await mutation.mutateAsync({
+      ...data,
       accounts: selectedAccounts,
-      amount: data.amount,
-      targetCharacters: data.targetCharacters,
-      gasLimit: data.gasLimit,
-      validate: data.validate,
     });
 
     /* Count Successful Sends */

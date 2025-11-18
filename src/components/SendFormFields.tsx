@@ -7,6 +7,7 @@ import { Controller } from "react-hook-form";
 import { FormFieldError } from "./FormFieldError";
 import { Select } from "./Select";
 import { LabelToggle } from "./LabelToggle";
+import { Slider } from "./Slider";
 
 interface SendFormFieldsProps {
   disabled?: boolean;
@@ -35,6 +36,74 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               autoComplete="off"
               placeholder="Amount"
             />
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Mode */}
+      <Controller
+        name="mode"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              {["single", "batch"].map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={cn(
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    "p-2 border rounded-full cursor-pointer",
+                    field.value === mode
+                      ? "border-yellow-500 text-yellow-500 font-bold"
+                      : "border-neutral-700"
+                  )}
+                  onClick={() => field.onChange(mode)}
+                  disabled={disabled}
+                >
+                  {mode === "single" ? "Single Mode" : "Batch Mode"}
+                </button>
+              ))}
+            </div>
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Delay */}
+      <Controller
+        name="delay"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <Label>Delay per transaction (seconds)</Label>
+            <Slider
+              min={0}
+              max={60}
+              step={5}
+              value={[field.value]}
+              onValueChange={([value]) => field.onChange(value)}
+              disabled={disabled}
+            />
+            <p className="text-xs text-center text-neutral-400">
+              {field.value} seconds
+            </p>
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Validate */}
+      <Controller
+        name="validate"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <LabelToggle
+              checked={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+            >
+              Validate Confirmation?
+            </LabelToggle>
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}
@@ -88,23 +157,6 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               ))}
             </div>
 
-            <FormFieldError message={fieldState.error?.message} />
-          </div>
-        )}
-      />
-
-      {/* Validate */}
-      <Controller
-        name="validate"
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-2">
-            <LabelToggle
-              checked={field.value}
-              onChange={field.onChange}
-              disabled={disabled}
-            >
-              Validate Confirmation?
-            </LabelToggle>
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}

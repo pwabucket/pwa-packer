@@ -6,6 +6,8 @@ import { HEXADECIMAL_CHARS } from "../lib/utils";
 /** Send Form Data Interface */
 interface SendFormData {
   amount: string;
+  mode: "single" | "batch";
+  delay: number;
   targetCharacters: string[];
   gasLimit: "average" | "fast" | "instant";
   validate: boolean;
@@ -23,6 +25,21 @@ const SendFormSchema = yup
       .min(1)
       .label("Target Characters"),
 
+    mode: yup
+      .string()
+      .required()
+      .oneOf<SendFormData["mode"]>(["single", "batch"])
+      .default("single")
+      .label("Mode"),
+
+    delay: yup
+      .number()
+      .required()
+      .min(5)
+      .max(60)
+      .default(5)
+      .label("Delay (seconds)"),
+
     gasLimit: yup
       .string()
       .required()
@@ -39,6 +56,8 @@ const useSendForm = () => {
   const form = useForm({
     defaultValues: {
       amount: "",
+      mode: "single" as const,
+      delay: 5 as const,
       gasLimit: "fast" as const,
       targetCharacters: ["a", "b", "c", "d", "e", "f"],
       validate: true,

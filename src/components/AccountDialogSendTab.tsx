@@ -32,11 +32,8 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
     }
 
     await mutation.mutateAsync({
+      ...data,
       accounts: [account],
-      amount: data.amount,
-      targetCharacters: data.targetCharacters,
-      gasLimit: data.gasLimit,
-      validate: data.validate,
     });
 
     /* Show Summary Alert */

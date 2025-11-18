@@ -9,10 +9,13 @@ import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 import { Dialog } from "radix-ui";
 import { PackResults } from "../components/PackResults";
 import { useState } from "react";
+import { Label } from "../components/Label";
+import { Slider } from "../components/Slider";
 
 /** Pack Page Component */
 const Pack = () => {
   const [showResults, setShowResults] = useState(false);
+  const [delay, setDelay] = useState(10);
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
@@ -28,6 +31,7 @@ const Pack = () => {
     /* Execute Pack Mutation */
     const { totalWithdrawn } = await mutation.mutateAsync({
       accounts: selectedAccounts,
+      delay,
     });
 
     /* Show Success Toast */
@@ -84,6 +88,20 @@ const Pack = () => {
 
       {/* Progress Bar */}
       {mutation.isPending && <Progress max={target} current={progress} />}
+
+      {/* Delay */}
+      <div className="flex flex-col gap-1">
+        <Label className="text-center">Delay per transaction (seconds)</Label>
+        <Slider
+          min={0}
+          max={60}
+          step={5}
+          value={[delay]}
+          onValueChange={([value]) => setDelay(value)}
+          disabled={mutation.isPending}
+        />
+        <p className="text-xs text-center text-neutral-400">{delay} seconds</p>
+      </div>
 
       {/* Accounts Chooser */}
       <AccountsChooser
