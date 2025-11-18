@@ -115,7 +115,7 @@ const usePackMutation = () => {
         }
 
         /* Delay to Avoid Rate Limiting */
-        await delayForSeconds(30);
+        await delayForSeconds(10);
       }
 
       return { results, totalAccounts, packedAccounts, totalWithdrawn };
