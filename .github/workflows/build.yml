@@ -82,11 +82,10 @@ jobs:
           fetch-depth: 0
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          generateReleaseNotes: true
+          generate_release_notes: true
+          make_latest: true
           draft: false
-          prerelease: false
-          makeLatest: true
