@@ -14,7 +14,7 @@ import {
 } from "react-icons/md";
 
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
-import { cn } from "../lib/utils";
+import { cn, extractTgWebAppData } from "../lib/utils";
 import { AccountItem } from "../components/AccountItem";
 import { Button } from "../components/Button";
 import { TotalBalanceCard } from "../components/TotalBalanceCard";
@@ -24,9 +24,10 @@ import { ActionButton } from "../components/ActionButton";
 import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
 import { NewAccountDialog } from "../components/NewAccountDialog";
 import useLocationToggle from "../hooks/useLocationToggle";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "../components/Input";
 import { useDebounce } from "react-use";
+import type { Account } from "../types";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -44,19 +45,41 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [tempSearch, setTempSearch] = useState("");
 
+  /* Function to Search User Info in Account */
+  const searchUser = useCallback((account: Account, searchTerm: string) => {
+    const user = account.url
+      ? extractTgWebAppData(account.url)["initDataUnsafe"]["user"]
+      : null;
+
+    if (!user) return false;
+
+    const userId = user.id.toString();
+    const userFullName = `${user.first_name} ${
+      user.last_name ?? ""
+    }`.toLowerCase();
+    const username = user.username ? user.username.toLowerCase() : null;
+
+    return (
+      userId.includes(searchTerm) ||
+      userFullName.includes(searchTerm) ||
+      username?.includes?.(searchTerm)
+    );
+  }, []);
+
   /* Filtered Accounts based on Search */
   const filteredAccounts = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
     return search
-      ? accounts.filter(
-          (account) =>
-            account.title.toLowerCase().includes(search.toLowerCase()) ||
-            account.walletAddress
-              .toLowerCase()
-              .includes(search.toLowerCase()) ||
-            account.depositAddress.toLowerCase().includes(search.toLowerCase())
-        )
+      ? accounts.filter((account) => {
+          return (
+            account.title.toLowerCase().includes(searchTerm) ||
+            account.walletAddress.toLowerCase().includes(searchTerm) ||
+            account.depositAddress.toLowerCase().includes(searchTerm) ||
+            searchUser(account, searchTerm)
+          );
+        })
       : accounts;
-  }, [accounts, search]);
+  }, [accounts, search, searchUser]);
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
