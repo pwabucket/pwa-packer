@@ -11,15 +11,16 @@ const Slider = ({
   trackClassName,
   rangeClassName,
   thumbClassName,
-  value,
   ...props
 }: SliderProps) => {
+  const value = props.value || props.defaultValue || [0];
+
   return (
     <SliderPrimitive.Slider
       {...props}
       className={cn(
         "relative flex items-center select-none touch-none",
-        "w-full h-6"
+        "w-full h-6 data-disabled:opacity-50 data-disabled:pointer-events-none"
       )}
     >
       <SliderPrimitive.Track
