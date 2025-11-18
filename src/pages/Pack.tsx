@@ -83,25 +83,29 @@ const Pack = () => {
             <HiOutlineCurrencyDollar className="size-5" />
             {mutation.isPending ? "Packing..." : "Pack Selected Accounts"}
           </Button>
+
+          {/* Delay */}
+          <div className="flex flex-col gap-1">
+            <Label className="text-center">
+              Delay per transaction (seconds)
+            </Label>
+            <Slider
+              min={0}
+              max={60}
+              step={5}
+              value={[delay]}
+              onValueChange={([value]) => setDelay(value)}
+              disabled={mutation.isPending}
+            />
+            <p className="text-xs text-center text-neutral-400">
+              {delay} seconds
+            </p>
+          </div>
         </>
       )}
 
       {/* Progress Bar */}
       {mutation.isPending && <Progress max={target} current={progress} />}
-
-      {/* Delay */}
-      <div className="flex flex-col gap-1">
-        <Label className="text-center">Delay per transaction (seconds)</Label>
-        <Slider
-          min={0}
-          max={60}
-          step={5}
-          value={[delay]}
-          onValueChange={([value]) => setDelay(value)}
-          disabled={mutation.isPending}
-        />
-        <p className="text-xs text-center text-neutral-400">{delay} seconds</p>
-      </div>
 
       {/* Accounts Chooser */}
       <AccountsChooser
