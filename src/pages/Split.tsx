@@ -133,7 +133,7 @@ const Split = () => {
   };
 
   /* Set Pending Activity */
-  usePendingActivity(true);
+  usePendingActivity(showIframe);
 
   return (
     <InnerPageLayout title="Split">
