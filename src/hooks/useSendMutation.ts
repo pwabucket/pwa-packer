@@ -52,7 +52,7 @@ const useSendMutation = () => {
       setTarget(totalAccounts);
 
       /* Function to Execute Send for a Single Account */
-      const execute = async (account: Account) => {
+      const execute = async (account: Account): Promise<SendResult> => {
         let hashResult: HashResult | null = null;
 
         /* Receiver Address */
