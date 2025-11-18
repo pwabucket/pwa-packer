@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import type { Account } from "../types";
 import { cn, copyToClipboard, extractTgWebAppData } from "../lib/utils";
-import { MdOutlineContentCopy } from "react-icons/md";
+import { MdChevronRight, MdOutlineContentCopy } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
+import { Packer } from "../lib/Packer";
+import { Collapsible } from "radix-ui";
 
 const InfoItem = ({
   title,
@@ -34,6 +37,32 @@ const AccountInfo = ({ account }: { account: Account }) => {
   const user = useMemo(() => {
     return extractTgWebAppData(account.url!)["initDataUnsafe"]["user"];
   }, [account.url]);
+
+  const statusQuery = useQuery({
+    queryKey: ["account-status", account.id],
+    queryFn: async () => {
+      const packer = new Packer(account.url!);
+      await packer.initialize();
+      const status = await packer.validate();
+      return status;
+    },
+  });
+
+  const status = useMemo(() => {
+    if (!statusQuery.data) return null;
+    const data = statusQuery.data.data;
+    const results = Object.fromEntries(
+      Object.entries(data).map(([key, value]) => {
+        const formattedKey = key
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())
+          .trim();
+        return [formattedKey, value];
+      })
+    );
+
+    return results;
+  }, [statusQuery.data]);
 
   return (
     <div className="flex flex-col divide-y divide-neutral-800 text-sm">
@@ -88,6 +117,44 @@ const AccountInfo = ({ account }: { account: Account }) => {
         value={account.depositAddress}
         className="text-orange-300"
       />
+
+      <InfoItem
+        title="Account Status"
+        value={statusQuery.data ? statusQuery.data.data.status : "Loading..."}
+        className="text-teal-300"
+      />
+
+      <Collapsible.Root>
+        <Collapsible.Trigger
+          className={cn(
+            "p-4 w-full text-left text-sm text-yellow-500",
+            "hover:bg-neutral-800 cursor-pointer",
+            "flex items-center gap-2 group"
+          )}
+        >
+          <MdChevronRight
+            className={cn(
+              "size-5  group-data-[state=open]:rotate-90",
+              "transition-transform"
+            )}
+          />
+          View Detailed Status
+        </Collapsible.Trigger>
+        <Collapsible.Content className="flex flex-col divide-y divide-neutral-800 bg-neutral-950">
+          {status ? (
+            Object.entries(status).map(([key, value]) => (
+              <InfoItem
+                key={key}
+                title={key}
+                value={String(value)}
+                className="text-rose-300"
+              />
+            ))
+          ) : (
+            <p className="p-4 text-sm text-neutral-500">Loading...</p>
+          )}
+        </Collapsible.Content>
+      </Collapsible.Root>
     </div>
   );
 };
