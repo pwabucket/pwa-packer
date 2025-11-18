@@ -1,5 +1,9 @@
 import { usePassword } from "./usePassword";
-import { delayForSeconds, getPrivateKey } from "../lib/utils";
+import {
+  chunkArrayGenerator,
+  delayForSeconds,
+  getPrivateKey,
+} from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type { Account, SendResult } from "../types";
@@ -45,144 +49,149 @@ const useSendMutation = () => {
       /* Set Target for Progress */
       setTarget(totalAccounts);
 
-      for (const account of data.accounts) {
-        let hashResult: HashResult | null = null;
+      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
+        const chunkResults = await Promise.all<SendResult>(
+          chunk.map(async (account) => {
+            let hashResult: HashResult | null = null;
 
-        /* Receiver Address */
-        const receiver = account.depositAddress;
-
-        try {
-          const reader = new WalletReader(account.walletAddress);
-          const balance = await reader.getUSDTBalance();
-
-          /* Log Balance */
-          console.log(
-            `USDT Balance for account ${account.title} (${account.walletAddress}):`,
-            balance
-          );
-
-          if (balance < parseFloat(data.amount)) {
-            results.push({
-              status: false,
-              skipped: true,
-              account,
-              receiver,
-              hashResult: null,
-            });
-            continue;
-          }
-
-          const privateKey = await getPrivateKey(account.id, password);
-          const hashMaker = new HashMaker({
-            privateKey,
-            provider: reader.getProvider(),
-          });
-
-          /* Initialize Hash Maker */
-          await hashMaker.initialize();
-
-          /* Log Sending Info */
-          console.log(
-            `Sending $${data.amount} from account ${account.title} (${
-              account.walletAddress
-            }) to ${receiver} with targeting characters ${data.targetCharacters.join(
-              ", "
-            )}`
-          );
-
-          /* Generate Transaction */
-          hashResult = (await hashMaker.generateTransaction({
-            amount: data.amount,
-            gasLimit: data.gasLimit,
-            targetCharacters: data.targetCharacters,
-            receiver,
-          })) as HashResult;
-
-          /* Log Hash Result */
-          console.log(
-            `Hash Result: ${account.title} (${account.walletAddress})`,
-            hashResult
-          );
-
-          /* Submit Transfer Transaction */
-          const result = await hashMaker.submitTransferTransaction(hashResult);
-
-          /* Log Submit Result */
-          console.log(
-            `Submit Result: ${account.title} (${account.walletAddress})`,
-            result
-          );
-
-          /* Increment Successful Sends */
-          successfulSends++;
-
-          /* Accumulate Total Amount Sent */
-          totalAmountSent += parseFloat(data.amount);
-
-          /* Optional Validation */
-          let validation = null;
-          if (data.validate && account.url) {
-            /* Delay for confirmation */
-            await delayForSeconds(5);
+            /* Receiver Address */
+            const receiver = account.depositAddress;
 
             try {
-              const packer = new Packer(account.url);
-              await packer.initialize();
-              await packer.getTime();
+              const reader = new WalletReader(account.walletAddress);
+              const balance = await reader.getUSDTBalance();
 
-              /* Check Validation */
-              validation = await packer.checkActivity();
+              /* Log Balance */
+              console.log(
+                `USDT Balance for account ${account.title} (${account.walletAddress}):`,
+                balance
+              );
 
-              /* If still not validated, try refreshing */
-              if (!validation.activity) {
+              if (balance < parseFloat(data.amount)) {
+                return {
+                  status: false,
+                  skipped: true,
+                  account,
+                  receiver,
+                  hashResult: null,
+                };
+              }
+
+              const privateKey = await getPrivateKey(account.id, password);
+              const hashMaker = new HashMaker({
+                privateKey,
+                provider: reader.getProvider(),
+              });
+
+              /* Initialize Hash Maker */
+              await hashMaker.initialize();
+
+              /* Log Sending Info */
+              console.log(
+                `Sending $${data.amount} from account ${account.title} (${
+                  account.walletAddress
+                }) to ${receiver} with targeting characters ${data.targetCharacters.join(
+                  ", "
+                )}`
+              );
+
+              /* Generate Transaction */
+              hashResult = (await hashMaker.generateTransaction({
+                amount: data.amount,
+                gasLimit: data.gasLimit,
+                targetCharacters: data.targetCharacters,
+                receiver,
+              })) as HashResult;
+
+              /* Log Hash Result */
+              console.log(
+                `Hash Result: ${account.title} (${account.walletAddress})`,
+                hashResult
+              );
+
+              /* Submit Transfer Transaction */
+              const result = await hashMaker.submitTransferTransaction(
+                hashResult
+              );
+
+              /* Log Submit Result */
+              console.log(
+                `Submit Result: ${account.title} (${account.walletAddress})`,
+                result
+              );
+
+              /* Increment Successful Sends */
+              successfulSends++;
+
+              /* Accumulate Total Amount Sent */
+              totalAmountSent += parseFloat(data.amount);
+
+              /* Optional Validation */
+              let validation = null;
+              if (data.validate && account.url) {
+                /* Delay for confirmation */
                 await delayForSeconds(5);
-                validation = await packer.checkActivity();
+
+                try {
+                  const packer = new Packer(account.url);
+                  await packer.initialize();
+                  await packer.getTime();
+
+                  /* Check Validation */
+                  validation = await packer.checkActivity();
+
+                  /* If still not validated, try refreshing */
+                  if (!validation.activity) {
+                    await delayForSeconds(5);
+                    validation = await packer.checkActivity();
+                  }
+
+                  /* Increment Successful Validations */
+                  if (validation.activity) {
+                    successfulValidations++;
+                  }
+                } catch (error) {
+                  /* Log Validation Error */
+                  console.error(
+                    `Validation failed for account ${account.id}:`,
+                    error
+                  );
+                }
               }
 
-              /* Increment Successful Validations */
-              if (validation.activity) {
-                successfulValidations++;
-              }
-            } catch (error) {
-              /* Log Validation Error */
+              /* Push Result */
+              return {
+                status: true,
+                account,
+                hashResult,
+                receiver,
+                result,
+                validation,
+              };
+            } catch (error: unknown) {
+              /* Log Error */
               console.error(
-                `Validation failed for account ${account.id}:`,
+                `Failed to send from account ${account.title} (${account.walletAddress}):`,
                 error
               );
+
+              /* Push Result */
+              return {
+                status: false,
+                account,
+                error,
+                receiver,
+                hashResult,
+              };
+            } finally {
+              /* Increment Progress */
+              incrementProgress();
             }
-          }
+          })
+        );
 
-          /* Push Result */
-          results.push({
-            status: true,
-            account,
-            hashResult,
-            receiver,
-            result,
-            validation,
-          });
-        } catch (error: unknown) {
-          /* Log Error */
-          console.error(
-            `Failed to send from account ${account.title} (${account.walletAddress}):`,
-            error
-          );
-
-          /* Push Result */
-          results.push({
-            status: false,
-            account,
-            error,
-            receiver,
-            hashResult,
-          });
-        } finally {
-          /* Increment Progress */
-          incrementProgress();
-        }
-
-        /* Delay to Avoid Rate Limiting */
-        await delayForSeconds(30);
+        /* Append Chunk Results */
+        results.push(...chunkResults);
       }
 
       return {
