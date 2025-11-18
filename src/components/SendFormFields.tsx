@@ -74,8 +74,10 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
       <Controller
         name="delay"
         render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-2">
-            <Label>Delay per transaction (seconds)</Label>
+          <div className="flex flex-col gap-1">
+            <Label className="text-center">
+              Delay per transaction (seconds)
+            </Label>
             <Slider
               min={0}
               max={60}
