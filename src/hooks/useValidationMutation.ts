@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Account, Activity } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
-import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
+import { delayForSeconds } from "../lib/utils";
 
 interface ValidationMutationParams {
   accounts: Account[];
@@ -35,50 +35,44 @@ const useValidationMutation = () => {
       /* Set Target for Progress */
       setTarget(totalAccounts);
 
-      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
-        const chunkResults = await Promise.all<ValidationResult>(
-          chunk.map(async (account) => {
-            /* Skip if no URL */
-            if (!account.url) {
-              incrementProgress();
-              return { status: false, account, error: "No URL provided" };
-            }
+      for (const account of data.accounts) {
+        /* Skip if no URL */
+        if (!account.url) {
+          incrementProgress();
+          results.push({ status: false, account, error: "No URL provided" });
+          continue;
+        }
 
-            const packer = new Packer(account.url);
+        const packer = new Packer(account.url);
 
-            try {
-              await packer.initialize();
-              await packer.getTime();
+        try {
+          await packer.initialize();
+          await packer.getTime();
 
-              /* Check Activity */
-              const activity = await packer.checkActivity();
+          /* Check Activity */
+          const activity = await packer.checkActivity();
 
-              /* Count Active Accounts */
-              if (activity.activity) {
-                activeAccounts++;
-                totalAmount += Number(activity.amount) || 0;
-              }
+          /* Count Active Accounts */
+          if (activity.activity) {
+            activeAccounts++;
+            totalAmount += Number(activity.amount) || 0;
+          }
 
-              /* Sum Available Balance */
-              availableBalance += Number(activity.activityBalance) || 0;
+          /* Sum Available Balance */
+          availableBalance += Number(activity.activityBalance) || 0;
 
-              /* Push Successful Result */
-              return { status: true, account, activity };
-            } catch (error) {
-              /* Push Failed Result */
-              return { status: false, account, error };
-            } finally {
-              /* Increment Progress */
-              incrementProgress();
-            }
-          })
-        );
-
-        /* Append Chunk Results */
-        results.push(...chunkResults);
+          /* Push Successful Result */
+          results.push({ status: true, account, activity });
+        } catch (error) {
+          /* Push Failed Result */
+          results.push({ status: false, account, error });
+        } finally {
+          /* Increment Progress */
+          incrementProgress();
+        }
 
         /* Delay to avoid rate limiting */
-        await delayForSeconds(2);
+        await delayForSeconds(20);
       }
 
       return {
