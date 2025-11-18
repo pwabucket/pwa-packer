@@ -77,6 +77,17 @@ const AccountInfo = ({ account }: { account: Account }) => {
         value={`${user?.last_name}`}
         className="text-neutral-300"
       />
+
+      <InfoItem
+        title="Wallet Address"
+        value={account.walletAddress}
+        className="text-lime-300"
+      />
+      <InfoItem
+        title="Deposit Address"
+        value={account.depositAddress}
+        className="text-orange-300"
+      />
     </div>
   );
 };
