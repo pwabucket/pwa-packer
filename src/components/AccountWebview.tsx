@@ -23,13 +23,13 @@ interface WebviewAreaProps {
 }
 
 const WebviewArea = ({ account }: WebviewAreaProps) => {
-  const getWithdrawalsUrl = (baseUrl: string) => {
+  const getHashUrl = (hash: string) => {
     try {
-      const url = new URL(baseUrl);
-      url.hash = "#/Withdrawal";
+      const url = new URL(account.url!);
+      url.hash = hash;
       return url.toString();
     } catch {
-      return baseUrl;
+      return account.url!;
     }
   };
 
@@ -37,8 +37,9 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
     <div className="flex flex-col h-full overflow-hidden">
       {account.url ? (
         <Tabs.Root defaultValue="main" className="h-full flex flex-col">
-          <Tabs.List className="grid grid-cols-3 shrink-0">
+          <Tabs.List className="grid grid-cols-4 shrink-0">
             <WebviewAsideTabTrigger title="Main" value="main" />
+            <WebviewAsideTabTrigger title="Activity" value="activity" />
             <WebviewAsideTabTrigger title="Withdrawals" value="withdrawals" />
             <WebviewAsideTabTrigger title="Info" value="info" />
           </Tabs.List>
@@ -52,10 +53,19 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
             />
           </Tabs.Content>
 
+          {/* Activity */}
+          <Tabs.Content value="activity" className="grow min-w-0 min-h-0">
+            <iframe
+              src={getHashUrl("#/Activity")}
+              className="size-full bg-neutral-800/50"
+              referrerPolicy="no-referrer"
+            />
+          </Tabs.Content>
+
           {/* Withdrawals */}
           <Tabs.Content value="withdrawals" className="grow min-w-0 min-h-0">
             <iframe
-              src={getWithdrawalsUrl(account.url)}
+              src={getHashUrl("#/Withdrawal")}
               className="size-full bg-neutral-800/50"
               referrerPolicy="no-referrer"
             />
@@ -88,7 +98,7 @@ const WebviewAsideTabTrigger = ({
     <Tabs.Trigger
       value={value}
       className={cn(
-        "px-4 py-2",
+        "px-4 py-2 truncate",
         "text-sm font-medium cursor-pointer",
         "text-neutral-400 hover:text-yellow-500",
         "data-[state=active]:text-yellow-500 border-b-2 border-b-transparent",
