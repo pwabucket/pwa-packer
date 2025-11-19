@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
-import { WalletReader } from "../lib/WalletReader";
+import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
 
 interface WithdrawMutationParams {
   accounts: Account[];
@@ -21,8 +21,15 @@ interface WithdrawalResult {
   status: boolean;
   skipped?: boolean;
   account: Account;
+  amount?: number;
   result?: ethers.ContractTransactionReceipt | null;
   error?: unknown;
+}
+
+interface WithdrawalStats {
+  totalAccounts: number;
+  successfulSends: number;
+  totalSentValue: number;
 }
 
 const useWithdrawalMutation = () => {
@@ -30,130 +37,188 @@ const useWithdrawalMutation = () => {
     useProgress();
   const password = useAppStore((state) => state.password)!;
 
-  /** Form */
+  /**
+   * Determine the amount to withdraw from an account
+   * If no amount specified, returns the entire balance
+   */
+  const determineWithdrawalAmount = async (
+    account: Account,
+    requestedAmount?: string
+  ): Promise<{ amount: string; balance: number } | null> => {
+    const reader = new WalletReader(account.walletAddress);
+    const balance = await reader.getUSDTBalance();
+
+    /* Use entire balance if no amount specified */
+    if (!requestedAmount || requestedAmount.trim() === "") {
+      console.log(
+        `Balance of ${account.title} (${
+          account.walletAddress
+        }): ${balance.toString()} USDT`
+      );
+      return { amount: balance.toString(), balance };
+    }
+
+    /* Check if sufficient balance */
+    const amountValue = parseFloat(requestedAmount);
+    if (balance < amountValue) {
+      return null; /* Insufficient balance */
+    }
+
+    return { amount: requestedAmount, balance };
+  };
+
+  /**
+   * Execute USDT withdrawal for a single account
+   */
+  const executeWithdrawal = async (
+    account: Account,
+    receiver: string,
+    amount: string
+  ): Promise<ethers.ContractTransactionReceipt | null> => {
+    const reader = new WalletReader(account.walletAddress);
+    const provider = reader.getProvider();
+    const usdtToken = reader.getUsdtTokenContract();
+
+    const privateKey = await getPrivateKey(account.id, password);
+    const wallet = new ethers.Wallet(privateKey, provider);
+
+    console.log(
+      `Withdrawing ${amount} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
+    );
+
+    /* Transfer USDT */
+    const connectedToken = usdtToken.connect(wallet) as UsdtTokenContract;
+    const tx = await connectedToken.transfer(
+      receiver,
+      ethers.parseUnits(amount, USDT_DECIMALS),
+      {
+        gasLimit: GAS_LIMITS_TRANSFER["fast"],
+        gasPrice: BASE_GAS_PRICE,
+      }
+    );
+
+    /* Wait for confirmation */
+    const result = await tx.wait();
+    console.log(
+      `Withdrawal successful for ${account.title} (${account.walletAddress}):`,
+      result
+    );
+
+    return result;
+  };
+
+  /**
+   * Process withdrawal for a single account
+   */
+  const processWithdrawal = async (
+    account: Account,
+    receiver: string,
+    requestedAmount?: string
+  ): Promise<WithdrawalResult> => {
+    try {
+      /* Determine amount */
+      const withdrawalInfo = await determineWithdrawalAmount(
+        account,
+        requestedAmount
+      );
+
+      /* Skip if insufficient balance */
+      if (!withdrawalInfo) {
+        return {
+          status: false,
+          skipped: true,
+          account,
+        };
+      }
+
+      /* Execute withdrawal */
+      const result = await executeWithdrawal(
+        account,
+        receiver,
+        withdrawalInfo.amount
+      );
+
+      return {
+        status: true,
+        account,
+        amount: parseFloat(withdrawalInfo.amount),
+        result,
+      };
+    } catch (error) {
+      console.error(
+        `Failed to send from account ${account.title} (${account.walletAddress}):`,
+        error
+      );
+
+      return {
+        status: false,
+        account,
+        error,
+      };
+    }
+  };
+
+  /**
+   * Process withdrawals in parallel chunks with rate limiting
+   */
+  const processWithdrawalsInChunks = async (
+    accounts: Account[],
+    receiver: string,
+    amount?: string,
+    chunkSize: number = 10
+  ): Promise<WithdrawalResult[]> => {
+    const results: WithdrawalResult[] = [];
+
+    for (const chunk of chunkArrayGenerator(accounts, chunkSize)) {
+      const chunkResults = await Promise.all(
+        chunk.map(async (account) => {
+          const result = await processWithdrawal(account, receiver, amount);
+          incrementProgress();
+          return result;
+        })
+      );
+
+      results.push(...chunkResults);
+    }
+
+    return results;
+  };
+
+  /**
+   * Calculate statistics from withdrawal results
+   */
+  const calculateStats = (results: WithdrawalResult[]): WithdrawalStats => {
+    const successfulSends = results.filter(
+      (r) => r.status && !r.skipped
+    ).length;
+    const totalSentValue = results
+      .filter((r) => r.status && r.amount)
+      .reduce((sum, r) => sum + (r.amount || 0), 0);
+
+    return {
+      totalAccounts: results.length,
+      successfulSends,
+      totalSentValue,
+    };
+  };
 
   const mutation = useMutation({
     mutationKey: ["withdrawal"],
     mutationFn: async (data: WithdrawMutationParams) => {
-      /* Reset Progress */
       resetProgress();
+      setTarget(data.accounts.length);
 
-      /* Get Total Accounts */
-      const totalAccounts = data.accounts.length;
+      /* Process all withdrawals */
+      const results = await processWithdrawalsInChunks(
+        data.accounts,
+        data.address,
+        data.amount
+      );
 
-      /* Successful Sends Counter */
-      let successfulSends = 0;
+      /* Calculate statistics */
+      const stats = calculateStats(results);
 
-      /* Total Sent Value */
-      let totalSentValue = 0;
-
-      const results: WithdrawalResult[] = [];
-
-      /* Set Target for Progress */
-      setTarget(totalAccounts);
-
-      /* Iterate Over Accounts and Send Funds */
-      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
-        const chunkResults = await Promise.all<WithdrawalResult>(
-          chunk.map(async (account) => {
-            try {
-              /* Create Wallet Provider */
-              const reader = new WalletReader(account.walletAddress);
-
-              /* Fetch USDT Balance */
-              const balance = await reader.getUSDTBalance();
-
-              /* Determine Amount to Send */
-              let amountToSend = data.amount;
-
-              if (!amountToSend || amountToSend.trim() === "") {
-                /* If amount is not specified, send the entire balance */
-                amountToSend = balance.toString();
-                /* Log Balance */
-                console.log(
-                  `Balance of ${account.walletAddress}: ${amountToSend} USDT`
-                );
-              }
-
-              /* Skip if Balance is Less Than Amount to Send */
-              if (balance < parseFloat(amountToSend)) {
-                return {
-                  status: false,
-                  skipped: true,
-                  account,
-                };
-              }
-
-              const provider = reader.getProvider();
-              const usdtToken = reader.getUsdtTokenContract();
-
-              const privateKey = await getPrivateKey(account.id, password);
-              const wallet = new ethers.Wallet(privateKey, provider);
-
-              /* Receiver Address */
-              const receiver = data.address;
-
-              /* Log Withdrawal Info */
-              console.log(
-                `Withdrawing ${amountToSend} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
-              );
-
-              const txGasPrice = BASE_GAS_PRICE;
-              const txGasLimit = GAS_LIMITS_TRANSFER["fast"];
-
-              /* Perform Transfer */
-              const connectedToken = usdtToken.connect(
-                wallet
-              ) as typeof usdtToken;
-              const tx = await connectedToken.transfer(
-                receiver,
-                ethers.parseUnits(amountToSend, USDT_DECIMALS),
-                {
-                  gasLimit: txGasLimit,
-                  gasPrice: txGasPrice,
-                }
-              );
-
-              /* Wait for Transaction to be Mined */
-              const result = await tx.wait();
-
-              /* Log Result */
-              console.log(result);
-
-              totalSentValue += parseFloat(amountToSend);
-              successfulSends++;
-
-              /* Push Success Result */
-              return {
-                status: true,
-                account,
-                result,
-              };
-            } catch (error) {
-              /* Log Error */
-              console.error(
-                `Failed to send from account ${account.id}:`,
-                error
-              );
-
-              /* Push Failure Result */
-              return {
-                status: false,
-                account,
-                error,
-              };
-            } finally {
-              /* Increment Progress */
-              incrementProgress();
-            }
-          })
-        );
-
-        /* Append Chunk Results */
-        results.push(...chunkResults);
-      }
-
-      return { results, successfulSends, totalAccounts, totalSentValue };
+      return { results, ...stats };
     },
   });
 
