@@ -10,116 +10,125 @@ interface PackMutationParams {
   delay: number;
 }
 
+interface PackStats {
+  totalAccounts: number;
+  packedAccounts: number;
+  totalWithdrawn: number;
+}
+
 const usePackMutation = () => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
+  /**
+   * Process a single account pack operation
+   */
+  const processAccount = async (account: Account): Promise<PackResult> => {
+    /* Validate account has URL */
+    if (!account.url) {
+      return {
+        status: false,
+        skipped: true,
+        account,
+        error: "No URL provided",
+      };
+    }
+
+    try {
+      /* Initialize packer and fetch data */
+      const packer = new Packer(account.url);
+      await packer.initialize();
+
+      const activity = await packer.getActivity();
+      const { data: withdrawActivity } = await packer.getWithdrawActivity();
+      const amount = Number(withdrawActivity.activityBalance || 0);
+
+      /* Skip if no balance */
+      if (amount <= 0) {
+        return {
+          status: false,
+          skipped: true,
+          account,
+          amount,
+          activity,
+          withdrawActivity,
+        };
+      }
+
+      /* Determine withdrawal address */
+      const withdrawalAddress =
+        withdrawActivity.withdrawalAddress || account.walletAddress;
+
+      /* Perform withdrawal */
+      const packResponse = await packer.withdrawActivity(withdrawalAddress);
+
+      /* Validate response */
+      if (packResponse.code !== 200) {
+        return {
+          status: false,
+          account,
+          error: `Pack failed with message: ${packResponse.msg}`,
+        };
+      }
+
+      /* Return success */
+      return {
+        status: true,
+        account,
+        amount,
+        activity,
+        withdrawActivity,
+        response: packResponse,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        account,
+        error,
+      };
+    }
+  };
+
+  /**
+   * Calculate statistics from results
+   */
+  const calculateStats = (results: PackResult[]): PackStats => {
+    const packedAccounts = results.filter((r) => r.status && !r.skipped).length;
+    const totalWithdrawn = results.reduce(
+      (sum, r) => sum + (r.status && r.amount ? r.amount : 0),
+      0
+    );
+
+    return {
+      totalAccounts: results.length,
+      packedAccounts,
+      totalWithdrawn,
+    };
+  };
+
   const mutation = useMutation({
     mutationKey: ["pack-accounts"],
     mutationFn: async (data: PackMutationParams) => {
-      /* Reset Progress */
       resetProgress();
+      setTarget(data.accounts.length);
 
-      /* Initialize Results Array */
       const results: PackResult[] = [];
 
-      /* Get Total Accounts */
-      const totalAccounts = data.accounts.length;
-
-      /* Initialize Total Withdrawn */
-      let totalWithdrawn = 0;
-
-      /* Packed Accounts Counter */
-      let packedAccounts = 0;
-
-      /* Set Target for Progress */
-      setTarget(totalAccounts);
-
+      /* Process accounts sequentially */
       for (const account of data.accounts) {
-        /* Skip if no URL */
-        if (!account.url) {
-          results.push({
-            status: false,
-            skipped: true,
-            account,
-            error: "No URL provided",
-          });
-          incrementProgress();
-          continue;
+        const result = await processAccount(account);
+        results.push(result);
+        incrementProgress();
+
+        /* Delay between operations (skip on last account) */
+        if (account !== data.accounts[data.accounts.length - 1]) {
+          await delayForSeconds(data.delay);
         }
-
-        try {
-          /* Create Packer Instance */
-          const packer = new Packer(account.url);
-
-          /* Initialize Packer */
-          await packer.initialize();
-
-          /* Get Activity */
-          const activity = await packer.getActivity();
-
-          /* Check Activity */
-          const { data: withdrawActivity } = await packer.getWithdrawActivity();
-          const amount = Number(withdrawActivity.activityBalance || 0);
-
-          /* Skip if No Activity Balance */
-          if (amount <= 0) {
-            results.push({
-              status: false,
-              skipped: true,
-              account,
-              amount,
-              activity,
-              withdrawActivity,
-            });
-            continue;
-          }
-
-          /* Determine Withdrawal Address */
-          const withdrawalAddress =
-            withdrawActivity.withdrawalAddress || account.walletAddress;
-
-          /* Perform Pack Operation */
-          const packResponse = await packer.withdrawActivity(withdrawalAddress);
-
-          /* Check Pack Response */
-          if (packResponse.code !== 200) {
-            results.push({
-              status: false,
-              account,
-              error: `Pack failed with message: ${packResponse.msg}`,
-            });
-            continue;
-          }
-
-          /* Increment Packed Accounts */
-          packedAccounts++;
-
-          /* Update Total Withdrawn */
-          totalWithdrawn += amount;
-
-          /* Push Successful Result */
-          results.push({
-            status: true,
-            account,
-            amount,
-            activity,
-            withdrawActivity,
-            response: packResponse,
-          });
-        } catch (error) {
-          /* Push Failed Result */
-          results.push({ status: false, account, error });
-        } finally {
-          /* Increment Progress */
-          incrementProgress();
-        }
-
-        /* Delay to Avoid Rate Limiting */
-        await delayForSeconds(data.delay);
       }
 
-      return { results, totalAccounts, packedAccounts, totalWithdrawn };
+      /* Calculate and return statistics */
+      const stats = calculateStats(results);
+      return { results, ...stats };
     },
   });
 
