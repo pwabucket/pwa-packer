@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
-import { WalletReader } from "../lib/WalletReader";
+import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
 
 interface RefillMutationParams {
   accounts: Account[];
@@ -36,223 +36,346 @@ interface RefillResult {
   error?: unknown;
 }
 
+interface RefillStats {
+  successfulSends: number;
+  totalTransactions: number;
+  totalSentValue: number;
+}
+
 const useRefillMutation = () => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
   const password = useAppStore((state) => state.password)!;
 
-  /** Form */
+  /**
+   * Fetch account balance for given token
+   */
+  const fetchBalance = async (
+    account: Account,
+    token: "bnb" | "usdt"
+  ): Promise<number> => {
+    const reader = new WalletReader(account.walletAddress);
+    return token === "bnb"
+      ? await reader.getBNBBalance()
+      : await reader.getUSDTBalance();
+  };
+
+  /**
+   * Analyze accounts and categorize into excess/insufficient funds
+   */
+  const analyzeAccounts = async (
+    accounts: Account[],
+    token: "bnb" | "usdt",
+    requiredBalance: number,
+    requiredGasInEther: number
+  ): Promise<{
+    excessFundsAccounts: RefillItem[];
+    insufficientFundsAccounts: RefillItem[];
+  }> => {
+    const excessFundsAccounts: RefillItem[] = [];
+    const insufficientFundsAccounts: RefillItem[] = [];
+
+    /* Fetch balances in chunks to avoid rate limiting */
+    for (const chunk of chunkArrayGenerator(accounts, 10)) {
+      await Promise.all(
+        chunk.map(async (account) => {
+          const balance = await fetchBalance(account, token);
+
+          /* Adjust balance for BNB (reserve gas) */
+          const balanceValue =
+            token === "bnb" ? balance - requiredGasInEther : balance;
+
+          /* Categorize account */
+          if (balanceValue > requiredBalance) {
+            excessFundsAccounts.push({
+              account,
+              difference: balanceValue - requiredBalance,
+            });
+          } else if (balanceValue < requiredBalance) {
+            insufficientFundsAccounts.push({
+              account,
+              difference: requiredBalance - balanceValue,
+            });
+          }
+        })
+      );
+    }
+
+    console.log("Excess funds accounts:", excessFundsAccounts);
+    console.log("Insufficient funds accounts:", insufficientFundsAccounts);
+
+    return { excessFundsAccounts, insufficientFundsAccounts };
+  };
+
+  /**
+   * Calculate optimal transfer amount considering gas costs
+   */
+  const calculateTransferAmount = (
+    needed: number,
+    available: number,
+    token: "bnb" | "usdt",
+    requiredGasInEther: number
+  ): number => {
+    let transferAmount = Math.min(needed, available);
+
+    /* For BNB, reserve gas for the transfer */
+    if (token === "bnb") {
+      const maxTransferable = available - requiredGasInEther;
+      if (maxTransferable <= 0) return 0;
+      transferAmount = Math.min(transferAmount, maxTransferable);
+    }
+
+    return transferAmount > 0 ? transferAmount : 0;
+  };
+
+  /**
+   * Plan refill transactions by matching excess with insufficient accounts
+   */
+  const planRefillTransactions = (
+    excessFundsAccounts: RefillItem[],
+    insufficientFundsAccounts: RefillItem[],
+    token: "bnb" | "usdt",
+    requiredGasInEther: number
+  ): RefillTodo[] => {
+    const todo: RefillTodo[] = [];
+
+    for (const insufficientItem of insufficientFundsAccounts) {
+      let needed = insufficientItem.difference;
+
+      for (const excessItem of excessFundsAccounts) {
+        if (excessItem.difference <= 0 || needed <= 0) continue;
+
+        /* Calculate transfer amount */
+        const transferAmount = calculateTransferAmount(
+          needed,
+          excessItem.difference,
+          token,
+          requiredGasInEther
+        );
+
+        if (transferAmount <= 0) continue;
+
+        /* Add to todo list */
+        todo.push({
+          from: excessItem.account,
+          to: insufficientItem.account,
+          amount: transferAmount,
+        });
+
+        /* Update remaining amounts */
+        const totalCost =
+          token === "bnb"
+            ? transferAmount + requiredGasInEther
+            : transferAmount;
+
+        excessItem.difference -= totalCost;
+        needed -= transferAmount;
+      }
+    }
+
+    return todo;
+  };
+
+  /**
+   * Group tasks by sender to avoid nonce conflicts
+   */
+  const groupTasksBySender = (
+    tasks: RefillTodo[]
+  ): Map<Account, RefillTodo[]> => {
+    const tasksBySender = new Map<Account, RefillTodo[]>();
+
+    for (const task of tasks) {
+      if (!tasksBySender.has(task.from)) {
+        tasksBySender.set(task.from, []);
+      }
+      tasksBySender.get(task.from)!.push(task);
+    }
+
+    return tasksBySender;
+  };
+
+  /**
+   * Execute a single transfer transaction
+   */
+  const executeTransfer = async (
+    task: RefillTodo,
+    token: "bnb" | "usdt",
+    wallet: ethers.Wallet,
+    usdtToken?: UsdtTokenContract
+  ): Promise<ethers.TransactionReceipt | null> => {
+    const amountStr = task.amount.toFixed(8);
+
+    console.log(
+      `Refilling ${task.to.title} (${
+        task.to.walletAddress
+      }) with ${amountStr} ${token.toUpperCase()} from ${task.from.title} (${
+        task.from.walletAddress
+      })`
+    );
+
+    let tx: ethers.TransactionResponse;
+
+    if (token === "bnb") {
+      tx = await wallet.sendTransaction({
+        to: task.to.walletAddress,
+        value: ethers.parseEther(amountStr),
+        gasPrice: BASE_GAS_PRICE,
+        gasLimit: GAS_LIMIT_NATIVE,
+      });
+    } else {
+      tx = await usdtToken!.transfer(
+        task.to.walletAddress,
+        ethers.parseUnits(amountStr, USDT_DECIMALS),
+        {
+          gasPrice: BASE_GAS_PRICE,
+          gasLimit: GAS_LIMITS_TRANSFER["fast"],
+        }
+      );
+    }
+
+    return await tx.wait();
+  };
+
+  /**
+   * Process all tasks for a single sender sequentially
+   */
+  const processSenderTasks = async (
+    sender: Account,
+    tasks: RefillTodo[],
+    token: "bnb" | "usdt"
+  ): Promise<RefillResult[]> => {
+    const results: RefillResult[] = [];
+    const reader = new WalletReader(sender.walletAddress);
+    const provider = reader.getProvider();
+    const usdtToken = reader.getUsdtTokenContract();
+
+    const privateKey = await getPrivateKey(sender.id, password);
+    const wallet = new ethers.Wallet(privateKey, provider);
+    const connectedToken = usdtToken.connect(wallet) as UsdtTokenContract;
+
+    /* Process tasks sequentially to avoid nonce conflicts */
+    for (const task of tasks) {
+      try {
+        const result = await executeTransfer(
+          task,
+          token,
+          wallet,
+          connectedToken
+        );
+
+        console.log(
+          `Refill successful for ${task.to.title} (${task.to.walletAddress}) from ${task.from.title} (${task.from.walletAddress}):`,
+          result
+        );
+
+        results.push({
+          status: true,
+          task,
+          result,
+        });
+      } catch (error) {
+        console.error(
+          `Failed to refill ${task.to.title} (${task.to.walletAddress}) from ${task.from.title} (${task.from.walletAddress}):`,
+          error
+        );
+
+        results.push({
+          status: false,
+          task,
+          error,
+        });
+      } finally {
+        incrementProgress();
+      }
+    }
+
+    return results;
+  };
+
+  /**
+   * Execute all refill transactions in parallel chunks
+   */
+  const executeRefillTransactions = async (
+    tasksBySender: Map<Account, RefillTodo[]>,
+    token: "bnb" | "usdt"
+  ): Promise<RefillResult[]> => {
+    const results: RefillResult[] = [];
+    const senderGroups = Array.from(tasksBySender.entries());
+
+    /* Process senders in parallel chunks */
+    for (const chunk of chunkArrayGenerator(senderGroups, 10)) {
+      const chunkResults = await Promise.all(
+        chunk.map(([sender, tasks]) => processSenderTasks(sender, tasks, token))
+      );
+
+      results.push(...chunkResults.flat());
+
+      /* Small delay between chunks to avoid rate limiting */
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    return results;
+  };
+
+  /**
+   * Calculate statistics from results
+   */
+  const calculateStats = (results: RefillResult[]): RefillStats => {
+    const successfulSends = results.filter((r) => r.status).length;
+    const totalSentValue = results
+      .filter((r) => r.status)
+      .reduce((sum, r) => sum + r.task.amount, 0);
+
+    return {
+      successfulSends,
+      totalTransactions: results.length,
+      totalSentValue,
+    };
+  };
 
   const mutation = useMutation({
     mutationKey: ["refill"],
     mutationFn: async (data: RefillMutationParams) => {
-      /* Reset Progress */
       resetProgress();
-
-      /* Set Target for Progress */
       setTarget(0);
 
-      /* Total Accounts */
-      let totalTransactions = 0;
-
-      /* Successful Sends Counter */
-      let successfulSends = 0;
-
-      /* Total Sent Value */
-      let totalSentValue = 0;
-
-      /* Refill Todo List */
-      const todo: RefillTodo[] = [];
-
-      /* Refill Results */
-      const results: RefillResult[] = [];
-
-      /* Required Balance */
       const requiredBalance = parseFloat(data.amount);
-
-      /* Analyze Accounts */
-      const excessFundsAccounts: RefillItem[] = [];
-      const insufficientFundsAccounts: RefillItem[] = [];
-
       const requiredGasInEther = parseFloat(
         ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE)
       );
 
-      /* Fetch balances in chunks to avoid rate limiting */
-      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
-        await Promise.all(
-          chunk.map(async (account) => {
-            const reader = new WalletReader(account.walletAddress);
-            const balance =
-              data.token === "bnb"
-                ? await reader.getBNBBalance()
-                : await reader.getUSDTBalance();
-
-            let balanceValue = balance;
-
-            if (data.token === "bnb") {
-              balanceValue = balance - requiredGasInEther;
-            }
-
-            if (balanceValue > requiredBalance) {
-              excessFundsAccounts.push({
-                account,
-                difference: balanceValue - requiredBalance,
-              });
-            } else if (balanceValue < requiredBalance) {
-              insufficientFundsAccounts.push({
-                account,
-                difference: requiredBalance - balanceValue,
-              });
-            }
-          })
+      /* Step 1: Analyze accounts */
+      const { excessFundsAccounts, insufficientFundsAccounts } =
+        await analyzeAccounts(
+          data.accounts,
+          data.token,
+          requiredBalance,
+          requiredGasInEther
         );
-      }
 
-      console.log("Excess funds accounts:", excessFundsAccounts);
-      console.log("Insufficient funds accounts:", insufficientFundsAccounts);
+      /* Step 2: Plan transactions */
+      const todo = planRefillTransactions(
+        excessFundsAccounts,
+        insufficientFundsAccounts,
+        data.token,
+        requiredGasInEther
+      );
 
-      for (const item of insufficientFundsAccounts) {
-        let needed = item.difference;
-
-        for (const excessItem of excessFundsAccounts) {
-          if (excessItem.difference <= 0) continue;
-
-          let transferAmount = Math.min(needed, excessItem.difference);
-
-          /* For BNB transfers, reserve gas for this specific transfer */
-          if (data.token === "bnb") {
-            /* Make sure we have enough to cover both the transfer amount AND gas */
-            const maxTransferableAmount =
-              excessItem.difference - requiredGasInEther;
-            if (maxTransferableAmount <= 0) continue;
-            transferAmount = Math.min(transferAmount, maxTransferableAmount);
-          }
-
-          if (transferAmount <= 0) continue;
-
-          todo.push({
-            from: excessItem.account,
-            to: item.account,
-            amount: transferAmount,
-          });
-
-          /* For BNB, account for both the transfer and gas cost */
-          const totalCost =
-            data.token === "bnb"
-              ? transferAmount + requiredGasInEther
-              : transferAmount;
-
-          excessItem.difference = excessItem.difference - totalCost;
-          needed = needed - transferAmount;
-
-          if (needed <= 0) break;
-        }
-      }
-
-      /* Set Max Progress */
       setTarget(todo.length);
 
-      /* Total Transactions */
-      totalTransactions = todo.length;
+      /* Step 3: Group by sender */
+      const tasksBySender = groupTasksBySender(todo);
 
-      /* Group tasks by sender to avoid nonce conflicts */
-      const tasksBySender = new Map<Account, RefillTodo[]>();
-      for (const task of todo) {
-        const sender = task.from;
-        if (!tasksBySender.has(sender)) {
-          tasksBySender.set(sender, []);
-        }
-        tasksBySender.get(sender)!.push(task);
-      }
+      /* Step 4: Execute transactions */
+      const results = await executeRefillTransactions(
+        tasksBySender,
+        data.token
+      );
 
-      /* Process each sender's tasks sequentially, but process different senders in parallel */
-      const senderGroups = Array.from(tasksBySender.entries());
+      /* Step 5: Calculate statistics */
+      const stats = calculateStats(results);
 
-      for (const chunk of chunkArrayGenerator(senderGroups, 10)) {
-        await Promise.all(
-          chunk.map(async ([sender, senderTasks]) => {
-            const reader = new WalletReader(sender.walletAddress);
-            const provider = reader.getProvider();
-            const usdtToken = reader.getUsdtTokenContract();
-
-            const privateKey = await getPrivateKey(sender.id, password);
-            const wallet = new ethers.Wallet(privateKey, provider);
-
-            const connectedToken = usdtToken.connect(
-              wallet
-            ) as typeof usdtToken;
-
-            /* Process this sender's tasks sequentially */
-            for (const task of senderTasks) {
-              /* Use toFixed(8) for consistent 8 decimal precision */
-              const amountStr = task.amount.toFixed(8);
-              try {
-                console.log(
-                  `Refilling ${task.to.title} (${
-                    task.to.walletAddress
-                  }) with ${amountStr} ${data.token.toUpperCase()} from ${
-                    task.from.title
-                  } (${task.from.walletAddress})`
-                );
-
-                let tx: ethers.TransactionResponse | null = null;
-
-                if (data.token === "bnb") {
-                  tx = await wallet.sendTransaction({
-                    to: task.to.walletAddress,
-                    value: ethers.parseEther(amountStr),
-                    gasPrice: BASE_GAS_PRICE,
-                    gasLimit: GAS_LIMIT_NATIVE,
-                  });
-                } else {
-                  tx = await connectedToken.transfer(
-                    task.to.walletAddress,
-                    ethers.parseUnits(amountStr, USDT_DECIMALS),
-                    {
-                      gasPrice: BASE_GAS_PRICE,
-                      gasLimit: GAS_LIMITS_TRANSFER["fast"],
-                    }
-                  );
-                }
-
-                /* Wait for Transaction to be Mined */
-                const result = await tx.wait();
-
-                /* Log Result */
-                console.log(result);
-
-                totalSentValue += task.amount;
-                successfulSends++;
-
-                results.push({
-                  status: true,
-                  task,
-                  result,
-                });
-              } catch (error) {
-                console.error(
-                  `Failed to refill account ${task.to.title} (${task.to.walletAddress}) from ${task.from.title} (${task.from.walletAddress}):`,
-                  error
-                );
-
-                results.push({
-                  status: false,
-                  task,
-                  error,
-                });
-              } finally {
-                incrementProgress();
-              }
-            }
-          })
-        );
-
-        /* Small delay between chunks to avoid rate limiting */
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      return { results, successfulSends, totalTransactions, totalSentValue };
+      return { results, ...stats };
     },
   });
 

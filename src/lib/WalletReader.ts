@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { USDT_ABI, USDT_CONTRACT_ADDRESS, USDT_DECIMALS } from "./transaction";
 import { providers } from "../services/providers";
 
-type UsdtTokenContract = ethers.Contract & {
+export type UsdtTokenContract = ethers.Contract & {
   decimals: () => Promise<number>;
   symbol: () => Promise<string>;
   balanceOf: (address: string) => Promise<bigint>;
