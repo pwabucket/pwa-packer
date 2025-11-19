@@ -6,6 +6,7 @@ import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 
 interface ValidationMutationParams {
   accounts: Account[];
+  delay?: number;
 }
 
 interface ValidationResult {
@@ -15,79 +16,117 @@ interface ValidationResult {
   error?: unknown;
 }
 
+interface ValidationStats {
+  totalAccounts: number;
+  activeAccounts: number;
+  totalAmount: number;
+  availableBalance: number;
+}
+
 const useValidationMutation = () => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
+  /**
+   * Validate a single account
+   */
+  const validateAccount = async (
+    account: Account
+  ): Promise<ValidationResult> => {
+    /* Skip if no URL */
+    if (!account.url) {
+      return { status: false, account, error: "No URL provided" };
+    }
+
+    try {
+      const packer = new Packer(account.url);
+      await packer.initialize();
+      await packer.getTime();
+
+      /* Check activity */
+      const activity = await packer.checkActivity();
+
+      return { status: true, account, activity };
+    } catch (error) {
+      return { status: false, account, error };
+    }
+  };
+
+  /**
+   * Calculate statistics from validation results
+   */
+  const calculateStats = (results: ValidationResult[]): ValidationStats => {
+    let activeAccounts = 0;
+    let totalAmount = 0;
+    let availableBalance = 0;
+
+    for (const result of results) {
+      if (result.status && result.activity) {
+        /* Count active accounts */
+        if (result.activity.activity) {
+          activeAccounts++;
+          totalAmount += Number(result.activity.amount) || 0;
+        }
+
+        /* Sum available balance */
+        availableBalance += Number(result.activity.activityBalance) || 0;
+      }
+    }
+
+    return {
+      totalAccounts: results.length,
+      activeAccounts,
+      totalAmount,
+      availableBalance,
+    };
+  };
+
+  /**
+   * Process accounts in chunks with rate limiting
+   */
+  const processAccountsInChunks = async (
+    accounts: Account[],
+    chunkSize: number = 10,
+    delayBetweenChunks: number = 2
+  ): Promise<ValidationResult[]> => {
+    const results: ValidationResult[] = [];
+
+    for (const chunk of chunkArrayGenerator(accounts, chunkSize)) {
+      /* Process chunk in parallel */
+      const chunkResults = await Promise.all(
+        chunk.map(async (account) => {
+          const result = await validateAccount(account);
+          incrementProgress();
+          return result;
+        })
+      );
+
+      results.push(...chunkResults);
+
+      /* Delay between chunks to avoid rate limiting */
+      await delayForSeconds(delayBetweenChunks);
+    }
+
+    return results;
+  };
+
   const mutation = useMutation({
     mutationKey: ["validate"],
     mutationFn: async (data: ValidationMutationParams) => {
-      /* Reset Progress */
       resetProgress();
+      setTarget(data.accounts.length);
 
-      const results: ValidationResult[] = [];
+      /* Process all accounts */
+      const results = await processAccountsInChunks(
+        data.accounts,
+        10,
+        data.delay ?? 2
+      );
 
-      const totalAccounts = data.accounts.length;
-      let activeAccounts = 0;
-      let totalAmount = 0;
-      let availableBalance = 0;
+      /* Calculate statistics */
+      const stats = calculateStats(results);
 
-      /* Set Target for Progress */
-      setTarget(totalAccounts);
-
-      for (const chunk of chunkArrayGenerator(data.accounts, 10)) {
-        const chunkResults = await Promise.all<ValidationResult>(
-          chunk.map(async (account) => {
-            /* Skip if no URL */
-            if (!account.url) {
-              incrementProgress();
-              return { status: false, account, error: "No URL provided" };
-            }
-
-            const packer = new Packer(account.url);
-
-            try {
-              await packer.initialize();
-              await packer.getTime();
-
-              /* Check Activity */
-              const activity = await packer.checkActivity();
-
-              /* Count Active Accounts */
-              if (activity.activity) {
-                activeAccounts++;
-                totalAmount += Number(activity.amount) || 0;
-              }
-
-              /* Sum Available Balance */
-              availableBalance += Number(activity.activityBalance) || 0;
-
-              /* Push Successful Result */
-              return { status: true, account, activity };
-            } catch (error) {
-              /* Push Failed Result */
-              return { status: false, account, error };
-            } finally {
-              /* Increment Progress */
-              incrementProgress();
-            }
-          })
-        );
-
-        /* Append Chunk Results */
-        results.push(...chunkResults);
-
-        /* Delay to avoid rate limiting */
-        await delayForSeconds(2);
-      }
-
-      return {
-        results,
-        totalAccounts,
-        activeAccounts,
-        totalAmount,
-        availableBalance,
-      };
+      return { results, ...stats };
     },
   });
 
