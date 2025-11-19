@@ -242,7 +242,11 @@ class Packer {
   }
 
   /* Check and Refresh Activity if Not Participated */
-  async checkActivity(): Promise<{ activity: boolean }> {
+  async checkActivity(): Promise<{
+    activity: boolean;
+    amount: number;
+    activityBalance: number;
+  }> {
     /* Get Current Activity Status */
     const status = await this.getActivity();
 
