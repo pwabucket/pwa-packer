@@ -8,6 +8,17 @@ export interface Account {
   url?: string;
 }
 
+export interface SendStats {
+  totalAccounts: number;
+  successfulSends: number;
+  successfulValidations: number;
+  totalAmountSent: number;
+}
+
+export interface ValidationResult {
+  activity: boolean;
+}
+
 export interface SendResult {
   status: boolean;
   skipped?: boolean;
@@ -18,11 +29,9 @@ export interface SendResult {
     receipt: TransactionReceipt | null;
     signedRawTx: string;
     txHash: string;
-  };
+  } | null;
+  validation?: ValidationResult | null;
   error?: unknown;
-  validation?: {
-    activity: boolean;
-  };
 }
 
 export interface BackupData {
