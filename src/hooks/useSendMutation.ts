@@ -598,18 +598,21 @@ const useSendMutation = () => {
           `Refilled accounts ready to send: ${refilledToProcess.length}`
         );
 
-        /* Set target for refilled accounts */
-        toast.loading(
-          `Sending from ${refilledToProcess.length} refilled accounts...`
-        );
-        resetProgress();
-        setTarget(refilledToProcess.length);
+        if (refilledToProcess.length > 0) {
+          /* Set target for refilled accounts */
+          toast.loading(
+            `Sending from ${refilledToProcess.length} refilled accounts...`
+          );
 
-        /* Process using same mode as phase 1 */
-        phase2Results =
-          data.mode === "single"
-            ? await processSingle(refilledToProcess, data)
-            : await processBatch(refilledToProcess, data);
+          resetProgress();
+          setTarget(refilledToProcess.length);
+
+          /* Process using same mode as phase 1 */
+          phase2Results =
+            data.mode === "single"
+              ? await processSingle(refilledToProcess, data)
+              : await processBatch(refilledToProcess, data);
+        }
       }
 
       /* Combine all results */
