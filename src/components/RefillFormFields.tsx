@@ -80,10 +80,9 @@ const RefillFormFields = ({ token, disabled }: RefillFormFieldsProps) => {
             >
               Greedy
             </LabelToggle>
-            <p className="text-xs text-neutral-400 text-center">
+            <p className="text-xs text-neutral-400 text-center px-4">
               In Greedy mode, accounts will be refilled to their maximum
-              capacity, utilizing all available funds even if it means taking
-              from other insufficient accounts.
+              capacity even if it means taking from other insufficient accounts.
             </p>
             <FormFieldError message={fieldState.error?.message} />
           </div>
