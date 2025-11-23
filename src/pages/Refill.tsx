@@ -38,8 +38,7 @@ const Refill = () => {
 
     await mutation.mutateAsync({
       accounts: selectedAccounts,
-      amount: data.amount,
-      token: data.token,
+      ...data,
     });
 
     /* Show Summary Alert */
