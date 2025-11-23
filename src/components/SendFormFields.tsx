@@ -51,6 +51,10 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               placeholder="Amount"
             />
             <FormFieldError message={fieldState.error?.message} />
+            <p className="text-xs text-neutral-400 text-center px-4">
+              The maximum amount of USDT to send from each account. Accounts
+              with less than this amount will send their entire balance.
+            </p>
           </div>
         )}
       />
@@ -76,7 +80,9 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               <FormControlButton
                 type="button"
                 onClick={() =>
-                  field.onChange((parseFloat(field.value) || 0) - 1)
+                  field.onChange(
+                    Math.max((parseFloat(field.value) || 0) - 1, 0)
+                  )
                 }
                 disabled={disabled}
               >
@@ -94,6 +100,11 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               </FormControlButton>
             </div>
             <FormFieldError message={fieldState.error?.message} />
+            <p className="text-xs text-neutral-400 text-center px-4">
+              If set to {field.value} and amount is 100, accounts will send
+              between {100 - field.value} and 100 USDT randomly. The remaining
+              balance will be refilled into other accounts.
+            </p>
           </div>
         )}
       />
