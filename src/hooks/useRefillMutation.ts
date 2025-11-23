@@ -16,11 +16,13 @@ interface RefillMutationParams {
   accounts: Account[];
   token: "bnb" | "usdt";
   amount: string;
+  greedy: boolean;
 }
 
 interface RefillItem {
   account: Account;
-  difference: number;
+  balance: number /* Actual balance */;
+  difference: number /* Positive for excess, negative for insufficient */;
 }
 
 interface RefillTodo {
@@ -66,8 +68,7 @@ const useRefillMutation = () => {
   const analyzeAccounts = async (
     accounts: Account[],
     token: "bnb" | "usdt",
-    requiredBalance: number,
-    requiredGasInEther: number
+    requiredBalance: number
   ): Promise<{
     excessFundsAccounts: RefillItem[];
     insufficientFundsAccounts: RefillItem[];
@@ -81,19 +82,20 @@ const useRefillMutation = () => {
         chunk.map(async (account) => {
           const balance = await fetchBalance(account, token);
 
-          /* Adjust balance for BNB (reserve gas) */
-          const balanceValue =
-            token === "bnb" ? balance - requiredGasInEther : balance;
+          /* Don't deduct gas here - it's handled per-transaction in calculateTransferAmount */
+          const balanceValue = balance;
 
           /* Categorize account */
           if (balanceValue > requiredBalance) {
             excessFundsAccounts.push({
               account,
+              balance: balanceValue,
               difference: balanceValue - requiredBalance,
             });
           } else if (balanceValue < requiredBalance) {
             insufficientFundsAccounts.push({
               account,
+              balance: balanceValue,
               difference: requiredBalance - balanceValue,
             });
           }
@@ -109,6 +111,9 @@ const useRefillMutation = () => {
 
   /**
    * Calculate optimal transfer amount considering gas costs
+   * Note: For BNB, when a donor sends, they need gas for that send transaction.
+   * The 'available' amount is the donor's difference (excess or balance), which is already
+   * gas-adjusted in analyzeAccounts. But EACH send needs gas, so we deduct per transaction.
    */
   const calculateTransferAmount = (
     needed: number,
@@ -118,8 +123,9 @@ const useRefillMutation = () => {
   ): number => {
     let transferAmount = Math.min(needed, available);
 
-    /* For BNB, reserve gas for the transfer */
+    /* For BNB, each send transaction consumes gas from the sender */
     if (token === "bnb") {
+      /* The sender needs gas to execute this transfer */
       const maxTransferable = available - requiredGasInEther;
       if (maxTransferable <= 0) return 0;
       transferAmount = Math.min(transferAmount, maxTransferable);
@@ -130,46 +136,101 @@ const useRefillMutation = () => {
 
   /**
    * Plan refill transactions by matching excess with insufficient accounts
+   * In greedy mode, insufficient accounts can also donate to prioritize filling some accounts completely
    */
   const planRefillTransactions = (
+    token: "bnb" | "usdt",
+    greedy: boolean = false,
     excessFundsAccounts: RefillItem[],
     insufficientFundsAccounts: RefillItem[],
-    token: "bnb" | "usdt",
     requiredGasInEther: number
   ): RefillTodo[] => {
     const todo: RefillTodo[] = [];
 
-    for (const insufficientItem of insufficientFundsAccounts) {
-      let needed = insufficientItem.difference;
+    if (greedy) {
+      /* GREEDY MODE: Prioritize filling accounts completely */
+      /* Sort insufficient by how close they are to the target (least needed first) */
+      const sortedRecipients = [...insufficientFundsAccounts].sort(
+        (a, b) => a.difference - b.difference
+      );
 
-      for (const excessItem of excessFundsAccounts) {
-        if (excessItem.difference <= 0 || needed <= 0) continue;
+      /* All accounts can be donors in greedy mode */
+      /* Insufficient accounts can donate their balance (even if below target) */
+      const allPotentialDonors = [
+        ...excessFundsAccounts,
+        ...insufficientFundsAccounts.map((item) => ({
+          account: item.account,
+          balance: item.balance,
+          difference: item.balance,
+        })),
+      ];
 
-        /* Calculate transfer amount */
-        const transferAmount = calculateTransferAmount(
-          needed,
-          excessItem.difference,
-          token,
-          requiredGasInEther
-        );
+      for (const recipient of sortedRecipients) {
+        let needed = recipient.difference;
 
-        if (transferAmount <= 0) continue;
+        /* Sort donors by available funds (most available first) */
+        const availableDonors = allPotentialDonors
+          .filter((d) => d.account.id !== recipient.account.id)
+          .sort((a, b) => b.difference - a.difference);
 
-        /* Add to todo list */
-        todo.push({
-          from: excessItem.account,
-          to: insufficientItem.account,
-          amount: transferAmount,
-        });
+        for (const donor of availableDonors) {
+          if (donor.difference <= 0 || needed <= 0) continue;
 
-        /* Update remaining amounts */
-        const totalCost =
-          token === "bnb"
-            ? transferAmount + requiredGasInEther
-            : transferAmount;
+          const transferAmount = calculateTransferAmount(
+            needed,
+            donor.difference,
+            token,
+            requiredGasInEther
+          );
 
-        excessItem.difference -= totalCost;
-        needed -= transferAmount;
+          if (transferAmount <= 0) continue;
+
+          todo.push({
+            from: donor.account,
+            to: recipient.account,
+            amount: transferAmount,
+          });
+
+          const totalCost =
+            token === "bnb"
+              ? transferAmount + requiredGasInEther
+              : transferAmount;
+
+          donor.difference -= totalCost;
+          needed -= transferAmount;
+        }
+      }
+    } else {
+      /* NORMAL MODE: Only excess accounts donate to insufficient accounts */
+      for (const insufficientItem of insufficientFundsAccounts) {
+        let needed = insufficientItem.difference;
+
+        for (const excessItem of excessFundsAccounts) {
+          if (excessItem.difference <= 0 || needed <= 0) continue;
+
+          const transferAmount = calculateTransferAmount(
+            needed,
+            excessItem.difference,
+            token,
+            requiredGasInEther
+          );
+
+          if (transferAmount <= 0) continue;
+
+          todo.push({
+            from: excessItem.account,
+            to: insufficientItem.account,
+            amount: transferAmount,
+          });
+
+          const totalCost =
+            token === "bnb"
+              ? transferAmount + requiredGasInEther
+              : transferAmount;
+
+          excessItem.difference -= totalCost;
+          needed -= transferAmount;
+        }
       }
     }
 
@@ -346,18 +407,14 @@ const useRefillMutation = () => {
 
       /* Step 1: Analyze accounts */
       const { excessFundsAccounts, insufficientFundsAccounts } =
-        await analyzeAccounts(
-          data.accounts,
-          data.token,
-          requiredBalance,
-          requiredGasInEther
-        );
+        await analyzeAccounts(data.accounts, data.token, requiredBalance);
 
       /* Step 2: Plan transactions */
       const todo = planRefillTransactions(
+        data.token,
+        data.greedy,
         excessFundsAccounts,
         insufficientFundsAccounts,
-        data.token,
         requiredGasInEther
       );
 

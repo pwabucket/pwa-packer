@@ -6,6 +6,7 @@ import { FormFieldError } from "./FormFieldError";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { TokenButton } from "./TokenButton";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
+import { LabelToggle } from "./LabelToggle";
 
 interface RefillFormFieldsProps {
   token: "bnb" | "usdt";
@@ -60,6 +61,30 @@ const RefillFormFields = ({ token, disabled }: RefillFormFieldsProps) => {
               placeholder="Amount"
             />
 
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Greedy */}
+      <Controller
+        name="greedy"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="greedy">Mode</Label>
+            <LabelToggle
+              id="greedy"
+              checked={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+            >
+              Greedy
+            </LabelToggle>
+            <p className="text-xs text-neutral-400 text-center">
+              In Greedy mode, accounts will be refilled to their maximum
+              capacity, utilizing all available funds even if it means taking
+              from other insufficient accounts.
+            </p>
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}

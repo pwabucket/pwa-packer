@@ -12,6 +12,7 @@ const RefillFormSchema = yup
       .default("bnb")
       .label("Token"),
     amount: yup.string().required().label("Amount"),
+    greedy: yup.boolean().required().label("Greedy"),
   })
   .required();
 
@@ -19,6 +20,7 @@ const RefillFormSchema = yup
 interface RefillFormData {
   token: "bnb" | "usdt";
   amount: string;
+  greedy: boolean;
 }
 
 const useRefillForm = () => {
@@ -28,6 +30,7 @@ const useRefillForm = () => {
     defaultValues: {
       token: "bnb" as const,
       amount: "",
+      greedy: false,
     },
   });
 
