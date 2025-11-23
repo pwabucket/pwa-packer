@@ -24,6 +24,9 @@ export interface SendResult {
   skipped?: boolean;
   account: Account;
   receiver: string;
+  balance?: number;
+  amount: number;
+  amountNeeded?: number;
   hashResult?: HashResult | null;
   result?: {
     receipt: TransactionReceipt | null;

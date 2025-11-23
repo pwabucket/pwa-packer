@@ -21,7 +21,7 @@ import { Pack } from "./pages/Pack";
 import { Refill } from "./pages/Refill";
 import { Merge } from "./pages/Merge";
 
-const INACTIVITY_DURATION = 1 * 60 * 1000;
+const INACTIVITY_DURATION = 2 * 60 * 1000;
 
 function App() {
   const isProcessing = useAppStore((state) => state.isProcessing);

@@ -8,12 +8,26 @@ import { FormFieldError } from "./FormFieldError";
 import { Select } from "./Select";
 import { LabelToggle } from "./LabelToggle";
 import { Slider } from "./Slider";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 interface SendFormFieldsProps {
   disabled?: boolean;
   append: (char: string) => void;
   remove: (index: number) => void;
 }
+
+const FormControlButton = (props: React.ComponentProps<"button">) => (
+  <button
+    {...props}
+    type="button"
+    className={cn(
+      "border border-neutral-700 cursor-pointer",
+      "shrink-0 p-2 rounded-full size-10",
+      "flex items-center justify-center",
+      props.className
+    )}
+  />
+);
 
 const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
   return (
@@ -24,8 +38,8 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
         render={({ field, fieldState }) => (
           <div className="flex flex-col gap-2">
             <Label htmlFor="amount">
-              <img src={USDTIcon} className="size-4 inline-block" /> Amount to
-              Send
+              <img src={USDTIcon} className="size-4 inline-block" /> Max amount
+              to send
             </Label>
             <Input
               {...field}
@@ -36,6 +50,49 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               autoComplete="off"
               placeholder="Amount"
             />
+            <FormFieldError message={fieldState.error?.message} />
+          </div>
+        )}
+      />
+
+      {/* Difference */}
+      <Controller
+        name="difference"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="difference">Difference</Label>
+            <div className="flex gap-2 items-center">
+              <Input
+                {...field}
+                disabled={disabled}
+                id="difference"
+                type="number"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="Maximum difference allowed"
+                className="grow min-w-0"
+              />
+
+              <FormControlButton
+                type="button"
+                onClick={() =>
+                  field.onChange((parseFloat(field.value) || 0) - 1)
+                }
+                disabled={disabled}
+              >
+                <MdChevronLeft className="size-5" />
+              </FormControlButton>
+
+              <FormControlButton
+                type="button"
+                onClick={() =>
+                  field.onChange((parseFloat(field.value) || 0) + 1)
+                }
+                disabled={disabled}
+              >
+                <MdChevronRight className="size-5" />
+              </FormControlButton>
+            </div>
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}

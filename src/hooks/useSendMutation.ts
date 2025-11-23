@@ -19,11 +19,22 @@ import { WalletReader } from "../lib/WalletReader";
 interface SendMutationData {
   accounts: Account[];
   amount: string;
+  difference: string;
   delay: number;
   mode: "single" | "batch";
   gasLimit: "average" | "fast" | "instant";
   targetCharacters: string[];
   validate: boolean;
+}
+
+interface PreparedAccount {
+  status: boolean;
+  skipped?: boolean;
+  account: Account;
+  balance?: number;
+  amount: number;
+  amountNeeded?: number;
+  error?: unknown;
 }
 
 const useSendMutation = () => {
@@ -35,8 +46,7 @@ const useSendMutation = () => {
    * Check if account has sufficient balance
    */
   const checkBalance = async (
-    account: Account,
-    amount: string
+    account: Account
   ): Promise<{ hasBalance: boolean; balance: number }> => {
     const reader = new WalletReader(account.walletAddress);
     const balance = await reader.getUSDTBalance();
@@ -46,7 +56,7 @@ const useSendMutation = () => {
     );
 
     return {
-      hasBalance: balance >= parseFloat(amount),
+      hasBalance: balance >= 1,
       balance,
     };
   };
@@ -54,11 +64,18 @@ const useSendMutation = () => {
   /**
    * Generate and submit transaction
    */
-  const sendTransaction = async (
-    account: Account,
-    receiver: string,
-    data: SendMutationData
-  ) => {
+  const sendTransaction = async ({
+    account,
+    amount,
+    receiver,
+    data,
+  }: {
+    account: Account;
+    amount: number;
+    receiver: string;
+    data: SendMutationData;
+  }) => {
+    const amountStr = amount.toFixed(2);
     const reader = new WalletReader(account.walletAddress);
     const privateKey = await getPrivateKey(account.id, password);
     const hashMaker = new HashMaker({
@@ -66,17 +83,18 @@ const useSendMutation = () => {
       provider: reader.getProvider(),
     });
 
+    /* Initialize Hash Maker */
     await hashMaker.initialize();
 
     console.log(
-      `Sending $${data.amount} from ${account.title} (${
+      `Sending $${amountStr} from ${account.title} (${
         account.walletAddress
       }) to ${receiver} targeting [${data.targetCharacters.join(", ")}]`
     );
 
     /* Generate transaction */
     const hashResult = (await hashMaker.generateTransaction({
-      amount: data.amount,
+      amount: amountStr,
       gasLimit: data.gasLimit,
       targetCharacters: data.targetCharacters,
       receiver,
@@ -89,13 +107,23 @@ const useSendMutation = () => {
       const result = await hashMaker.submitTransferTransaction(hashResult);
 
       console.log(`Submit Result: ${account.title}`, result);
-      return { hashResult, result };
+      return {
+        status: true,
+        amount: parseFloat(amountStr),
+        hashResult,
+        result,
+      };
     } catch (error) {
       console.error(
         `Transaction submission failed for ${account.title} (${account.walletAddress}):`,
         error
       );
-      return { hashResult, result: null };
+      return {
+        status: false,
+        amount: parseFloat(amountStr),
+        hashResult,
+        result: null,
+      };
     }
   };
 
@@ -134,44 +162,107 @@ const useSendMutation = () => {
     }
   };
 
-  /**
-   * Process a single account send operation
-   */
-  const processAccount = async (
+  /** Prepare account by checking balance and determining amount to send */
+  const prepareAccount = async (
     account: Account,
     data: SendMutationData
-  ): Promise<SendResult> => {
-    const receiver = account.depositAddress;
-    let hashResult: HashResult | null = null;
-
+  ): Promise<PreparedAccount> => {
     try {
       /* Check balance */
-      const { hasBalance } = await checkBalance(account, data.amount);
+      const { hasBalance, balance } = await checkBalance(account);
       if (!hasBalance) {
         return {
           status: false,
           skipped: true,
           account,
-          receiver,
-          hashResult,
+          balance,
+          amount: 0,
+          amountNeeded: 0,
+          error: "Insufficient balance",
         };
       }
 
+      const maxDifference = Math.floor(parseFloat(data.difference));
+      const maxAmount = Math.floor(parseFloat(data.amount));
+      const minAmount = maxAmount - maxDifference;
+
+      // If balance >= minAmount, send random amount between minAmount and maxAmount
+      // If balance < minAmount, send whatever balance is available
+      let amount: number;
+      if (balance >= minAmount) {
+        const randomAmount = Math.random() * maxDifference + minAmount;
+        // Floor to whole number (no decimals)
+        amount = Math.floor(Math.min(randomAmount, balance));
+      } else {
+        amount = Math.floor(balance);
+      }
+
+      // Calculate how much is needed to reach maxAmount
+      // For accounts with balance < minAmount: 0
+      // For others: difference between maxAmount and amount sent
+      const amountNeeded = balance >= minAmount ? maxAmount - amount : 0;
+
+      return {
+        status: true,
+        skipped: false,
+        account,
+        amount,
+        balance,
+        amountNeeded,
+      };
+    } catch (error: unknown) {
+      console.error(
+        `Failed to prepare ${account.title} (${account.walletAddress}):`,
+        error
+      );
+
+      return {
+        status: false,
+        skipped: false,
+        account,
+        error,
+        amount: 0,
+        balance: 0,
+        amountNeeded: 0,
+      };
+    }
+  };
+
+  /**
+   * Process a single account send operation
+   */
+  const processAccount = async (
+    prepared: PreparedAccount,
+    data: SendMutationData
+  ): Promise<SendResult> => {
+    const { account, amount, balance, amountNeeded } = prepared;
+    const receiver = account.depositAddress;
+    let hashResult: HashResult | null = null;
+
+    try {
       /* Send transaction */
-      const txResult = await sendTransaction(account, receiver, data);
+      const txResult = await sendTransaction({
+        account,
+        amount,
+        receiver,
+        data,
+      });
       hashResult = txResult.hashResult;
 
       /* Validate if enabled */
       let validation: ValidationResult | null = null;
-      if (data.validate && account.url) {
+      if (data.validate && account.url && txResult.status) {
         validation = await validateTransaction(account, data.delay);
       }
 
       return {
-        status: true,
+        status: txResult.status,
         account,
         hashResult,
         receiver,
+        amount,
+        balance,
+        amountNeeded,
         result: txResult.result,
         validation,
       };
@@ -183,6 +274,10 @@ const useSendMutation = () => {
 
       return {
         status: false,
+        skipped: false,
+        amount,
+        balance,
+        amountNeeded,
         account,
         error,
         receiver,
@@ -196,19 +291,20 @@ const useSendMutation = () => {
   /**
    * Calculate statistics from results
    */
-  const calculateStats = (results: SendResult[], amount: string): SendStats => {
-    const successfulSends = results.filter(
-      (r) => r.status && !r.skipped
-    ).length;
+  const calculateStats = (results: SendResult[]): SendStats => {
+    const successfulSends = results.filter((r) => r.status && !r.skipped);
     const successfulValidations = results.filter(
       (r) => r.status && r.validation?.activity
-    ).length;
-    const totalAmountSent = successfulSends * parseFloat(amount);
+    );
+    const totalAmountSent = successfulSends.reduce(
+      (sum, r) => sum + r.amount,
+      0
+    );
 
     return {
       totalAccounts: results.length,
-      successfulSends,
-      successfulValidations,
+      successfulSends: successfulSends.length,
+      successfulValidations: successfulValidations.length,
       totalAmountSent,
     };
   };
@@ -217,7 +313,7 @@ const useSendMutation = () => {
    * Process accounts in single mode (sequential)
    */
   const processSingle = async (
-    accounts: Account[],
+    accounts: PreparedAccount[],
     data: SendMutationData
   ): Promise<SendResult[]> => {
     const results: SendResult[] = [];
@@ -232,7 +328,7 @@ const useSendMutation = () => {
    * Process accounts in batch mode (parallel chunks)
    */
   const processBatch = async (
-    accounts: Account[],
+    accounts: PreparedAccount[],
     data: SendMutationData
   ): Promise<SendResult[]> => {
     const results: SendResult[] = [];
@@ -245,6 +341,20 @@ const useSendMutation = () => {
     return results;
   };
 
+  /**
+   * Prepare accounts by checking balances and determining amounts
+   */
+  const getAmounts = async (accounts: Account[], data: SendMutationData) => {
+    const preparedAccounts = [];
+    for (const chunk of chunkArrayGenerator(accounts, 10)) {
+      const chunkResults = await Promise.all(
+        chunk.map((account) => prepareAccount(account, data))
+      );
+      preparedAccounts.push(...chunkResults);
+    }
+    return preparedAccounts;
+  };
+
   /* Mutation for Sending Funds */
   const mutation = useMutation({
     mutationKey: ["sendFunds"],
@@ -252,14 +362,24 @@ const useSendMutation = () => {
       resetProgress();
       setTarget(data.accounts.length);
 
+      const preparedAccounts = await getAmounts(data.accounts, data);
+      const accountsToProcess = preparedAccounts.filter(
+        (acc) => acc.status && !acc.skipped
+      );
+
+      const skippedAccounts = preparedAccounts.filter((acc) => acc.skipped);
+
+      /* Update target to only accounts that will be processed */
+      setTarget(accountsToProcess.length);
+
       /* Process accounts based on mode */
       const results =
         data.mode === "single"
-          ? await processSingle(data.accounts, data)
-          : await processBatch(data.accounts, data);
+          ? await processSingle(accountsToProcess, data)
+          : await processBatch(accountsToProcess, data);
 
       /* Calculate statistics */
-      const stats = calculateStats(results, data.amount);
+      const stats = calculateStats(results);
 
       return { results, ...stats };
     },

@@ -6,6 +6,7 @@ import { HEXADECIMAL_CHARS } from "../lib/utils";
 /** Send Form Data Interface */
 interface SendFormData {
   amount: string;
+  difference: string;
   mode: "single" | "batch";
   delay: number;
   targetCharacters: string[];
@@ -17,6 +18,7 @@ interface SendFormData {
 const SendFormSchema = yup
   .object({
     amount: yup.string().required().label("Amount"),
+    difference: yup.string().required().label("Difference"),
 
     targetCharacters: yup
       .array()
@@ -56,6 +58,7 @@ const useSendForm = () => {
   const form = useForm({
     defaultValues: {
       amount: "",
+      difference: "5",
       mode: "single" as const,
       delay: 5 as const,
       gasLimit: "fast" as const,
