@@ -21,6 +21,7 @@ import {
   GAS_LIMITS_TRANSFER,
   USDT_DECIMALS,
 } from "../lib/transaction";
+import toast from "react-hot-toast";
 
 interface SendMutationData {
   accounts: Account[];
@@ -454,7 +455,8 @@ const useSendMutation = () => {
   };
 
   /**
-   * Execute refill transactions
+   * Execute refill transactions in chunks
+   * Groups by sender to avoid nonce collisions
    */
   const executeRefillTransactions = async (
     transactions: RefillTransaction[]
@@ -462,16 +464,51 @@ const useSendMutation = () => {
     let success = 0;
     let failed = 0;
 
+    /* Group transactions by sender to avoid nonce collisions */
+    const groupedBySender = new Map<string, RefillTransaction[]>();
     for (const tx of transactions) {
-      try {
-        await sendUSDTDirect(tx.from, tx.to.walletAddress, tx.amount);
-        success++;
-      } catch (error) {
-        console.error(
-          `Refill failed from ${tx.from.title} to ${tx.to.title}:`,
-          error
-        );
-        failed++;
+      const senderKey = tx.from.walletAddress;
+      if (!groupedBySender.has(senderKey)) {
+        groupedBySender.set(senderKey, []);
+      }
+      groupedBySender.get(senderKey)!.push(tx);
+    }
+
+    /* Process each sender's transactions sequentially, but senders in parallel (chunks) */
+    const senderGroups = Array.from(groupedBySender.values());
+
+    for (const chunk of chunkArrayGenerator(senderGroups, 10)) {
+      const results = await Promise.all(
+        chunk.map(async (senderTxs) => {
+          let senderSuccess = 0;
+          let senderFailed = 0;
+
+          /* Execute this sender's transactions sequentially to maintain nonce order */
+          for (const tx of senderTxs) {
+            try {
+              await sendUSDTDirect(tx.from, tx.to.walletAddress, tx.amount);
+              senderSuccess++;
+            } catch (error) {
+              console.error(
+                `Refill failed from ${tx.from.title} to ${tx.to.title}:`,
+                error
+              );
+              senderFailed++;
+            } finally {
+              incrementProgress();
+            }
+          }
+
+          return { success: senderSuccess, failed: senderFailed };
+        })
+      );
+
+      success += results.reduce((sum, r) => sum + r.success, 0);
+      failed += results.reduce((sum, r) => sum + r.failed, 0);
+
+      /* Small delay between chunks */
+      if (chunk.length === 10) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
@@ -480,7 +517,7 @@ const useSendMutation = () => {
 
   /* Mutation for Sending Funds */
   const mutation = useMutation({
-    mutationKey: ["sendFunds"],
+    mutationKey: ["send-funds"],
     mutationFn: async (data: SendMutationData) => {
       /* Reset progress */
       resetProgress();
@@ -504,9 +541,7 @@ const useSendMutation = () => {
       console.log(`Skipped accounts: ${skippedAccounts.length}`);
 
       /* Set initial target (will be updated) */
-      const totalTransactions =
-        accountsToProcess.length + skippedAccounts.length;
-      setTarget(totalTransactions);
+      setTarget(accountsToProcess.length);
 
       /* PHASE 2: Send from accounts with sufficient balance */
       console.log("=== PHASE 2: Sending from funded accounts ===");
@@ -529,6 +564,11 @@ const useSendMutation = () => {
         console.log(`Planned ${refillTransactions.length} refill transactions`);
 
         if (refillTransactions.length > 0) {
+          toast.loading(
+            `Refilling ${refillTransactions.length} transactions...`
+          );
+          resetProgress();
+          setTarget(refillTransactions.length);
           refillStats = await executeRefillTransactions(refillTransactions);
           console.log(
             `Refill complete: ${refillStats.success} success, ${refillStats.failed} failed`
@@ -557,6 +597,13 @@ const useSendMutation = () => {
         console.log(
           `Refilled accounts ready to send: ${refilledToProcess.length}`
         );
+
+        /* Set target for refilled accounts */
+        toast.loading(
+          `Sending from ${refilledToProcess.length} refilled accounts...`
+        );
+        resetProgress();
+        setTarget(refilledToProcess.length);
 
         /* Process using same mode as phase 1 */
         phase2Results =
