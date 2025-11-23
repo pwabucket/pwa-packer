@@ -26,7 +26,7 @@ export interface SendResult {
   receiver: string;
   balance?: number;
   amount: number;
-  amountNeeded?: number;
+  amountNeeded: number;
   hashResult?: HashResult | null;
   result?: {
     receipt: TransactionReceipt | null;

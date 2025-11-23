@@ -12,6 +12,7 @@ import { useSendMutation } from "../hooks/useSendMutation";
 import { Progress } from "../components/Progress";
 import { useState } from "react";
 import { Button } from "../components/Button";
+import { usePendingActivity } from "../hooks/usePendingActivity";
 
 /** Send Page Component */
 const Send = () => {
@@ -65,6 +66,9 @@ const Send = () => {
 
     return results;
   };
+
+  /** Prevent auto-logout when viewing results */
+  usePendingActivity(showResults);
 
   return (
     <InnerPageLayout title="Send" className="gap-2">

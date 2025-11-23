@@ -66,6 +66,14 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
             />
           ) : null}
 
+          {/* Amount */}
+          <ResultInfo
+            title="Amount Sent (Needed)"
+            value={res.amount ? `${res.amount} (${res.amountNeeded})` : "0"}
+            icon={<span>💰</span>}
+            valueClassName="text-yellow-300"
+          />
+
           {/* Receiver */}
           <ResultInfo
             title="Receiver"

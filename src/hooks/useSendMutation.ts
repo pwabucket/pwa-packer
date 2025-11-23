@@ -36,11 +36,11 @@ interface SendMutationData {
 
 interface PreparedAccount {
   status: boolean;
-  skipped?: boolean;
+  skipped: boolean;
   account: Account;
   balance: number;
   amount: number;
-  amountNeeded?: number;
+  amountNeeded: number;
   error?: unknown;
 }
 

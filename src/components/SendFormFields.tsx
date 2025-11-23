@@ -46,6 +46,7 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               disabled={disabled}
               id="amount"
               type="number"
+              min={1}
               inputMode="decimal"
               autoComplete="off"
               placeholder="Amount"

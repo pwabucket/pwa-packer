@@ -11,6 +11,7 @@ import { PackResults } from "../components/PackResults";
 import { useState } from "react";
 import { Label } from "../components/Label";
 import { Slider } from "../components/Slider";
+import { usePendingActivity } from "../hooks/usePendingActivity";
 
 /** Pack Page Component */
 const Pack = () => {
@@ -42,6 +43,9 @@ const Pack = () => {
       }).format(totalWithdrawn)} USDT`
     );
   };
+
+  /** Prevent auto-logout when viewing results */
+  usePendingActivity(showResults);
 
   return (
     <InnerPageLayout title="Pack" className="gap-2">
