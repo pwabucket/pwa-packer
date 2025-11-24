@@ -230,6 +230,15 @@ class Packer {
       .then((res) => res.data.data);
   }
 
+  /* Get Withdraw Activity List */
+  getWithdrawActivityList() {
+    return this.api
+      .post("/api/withdrawActivityList", {
+        ["tg_id"]: this.getTgId(),
+      })
+      .then((res) => res.data.data);
+  }
+
   /* Withdraw Activity */
   withdrawActivity(withdrawalAddress: string) {
     return this.api

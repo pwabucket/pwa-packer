@@ -12,6 +12,7 @@ import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { AccountSwitcher } from "./AccountSwitcher";
 import { AccountInfo } from "./AccountInfo";
+import { AccountDialogHistoryTab } from "./AccountDialogHistoryTab";
 
 interface AccountWebviewProps {
   account: Account;
@@ -117,9 +118,10 @@ const WebviewAside = ({ account }: { account: Account }) => {
       defaultValue="send"
       className="flex flex-col size-full overflow-hidden"
     >
-      <Tabs.List className="grid grid-cols-2 shrink-0">
+      <Tabs.List className="grid grid-cols-3 shrink-0">
         <WebviewAsideTabTrigger title="Send" value="send" />
         <WebviewAsideTabTrigger title="Withdraw" value="withdraw" />
+        <WebviewAsideTabTrigger title="History" value="history" />
       </Tabs.List>
 
       <div className="grow overflow-auto p-4">
@@ -129,6 +131,9 @@ const WebviewAside = ({ account }: { account: Account }) => {
 
         <Tabs.Content value="withdraw">
           <AccountDialogWithdrawTab account={account} />
+        </Tabs.Content>
+        <Tabs.Content value="history">
+          <AccountDialogHistoryTab account={account} />
         </Tabs.Content>
       </div>
     </Tabs.Root>
