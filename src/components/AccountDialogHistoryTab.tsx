@@ -5,6 +5,7 @@ import { MdOutlineOpenInNew } from "react-icons/md";
 import { cn } from "../lib/utils";
 import { format } from "date-fns";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
+  /* Query for withdrawal activity list */
   const query = useQuery({
     enabled: Boolean(account.url),
     queryKey: ["withdraw-activity-list", account.id],
@@ -16,6 +17,7 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
     },
   });
 
+  /* Extract activities from query data */
   const activities: {
     ["id"]: number;
     ["status"]: number;
@@ -23,8 +25,6 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
     ["create_time"]: string;
     ["hashId"]: string | null;
   }[] = query.data?.data?.list || [];
-
-  console.log("Activities:", activities);
 
   return query.data ? (
     <div className="flex flex-col divide-y divide-neutral-700">
