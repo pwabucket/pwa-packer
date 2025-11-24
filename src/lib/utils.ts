@@ -206,6 +206,16 @@ export function truncateDecimals(value: number, decimals: number = 8): string {
   return str.slice(0, dotIndex + decimals + 1);
 }
 
+/** Format number as currency string */
+export function formatCurrency(value: number, decimals: number = 2): string {
+  return Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(parseFloat(truncateDecimals(value, decimals)));
+}
+
 /** Delay Options */
 interface DelayOptions {
   precised?: boolean;

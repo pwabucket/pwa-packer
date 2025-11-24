@@ -3,7 +3,7 @@ import { useTotalBalanceQueries } from "../hooks/useTotalBalanceQueries";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import { MdOutlineRefresh } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
-import { cn, truncateDecimals } from "../lib/utils";
+import { cn, formatCurrency, truncateDecimals } from "../lib/utils";
 const TotalBalanceCard = () => {
   const queryClient = useQueryClient();
   const queries = useTotalBalanceQueries();
@@ -38,11 +38,7 @@ const TotalBalanceCard = () => {
 
         {/* USDT Balance */}
         <span className="min-w-0 text-5xl font-bold font-protest-guerrilla">
-          {Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-            maximumFractionDigits: 2,
-          }).format(totalBalance.usdt)}
+          {formatCurrency(totalBalance.usdt)}
         </span>
 
         {/* Refresh Button */}

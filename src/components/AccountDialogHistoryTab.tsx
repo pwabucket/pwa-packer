@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Packer } from "../lib/Packer";
 import type { Account } from "../types";
 import { MdOutlineOpenInNew } from "react-icons/md";
-import { cn } from "../lib/utils";
+import { cn, formatCurrency } from "../lib/utils";
 import { format } from "date-fns";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
   /* Query for withdrawal activity list */
@@ -38,10 +38,7 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
                 activity.status === 3 ? "text-lime-400" : "text-orange-400"
               )}
             >
-              {Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(Number(activity.tp))}
+              {formatCurrency(Number(activity.tp))}
             </p>
 
             {/* Status */}

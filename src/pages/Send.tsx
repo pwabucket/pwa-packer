@@ -13,6 +13,7 @@ import { Progress } from "../components/Progress";
 import { useState } from "react";
 import { Button } from "../components/Button";
 import { usePendingActivity } from "../hooks/usePendingActivity";
+import { formatCurrency } from "../lib/utils";
 
 /** Send Page Component */
 const Send = () => {
@@ -90,11 +91,7 @@ const Send = () => {
 
             <p className="text-lime-300">
               Total Amount:{" "}
-              {Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(mutation.data?.totalAmountSent || 0)}{" "}
-              USDT
+              {formatCurrency(mutation.data?.totalAmountSent || 0, 3)} USDT
             </p>
           </div>
 

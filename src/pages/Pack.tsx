@@ -12,6 +12,7 @@ import { useState } from "react";
 import { Label } from "../components/Label";
 import { Slider } from "../components/Slider";
 import { usePendingActivity } from "../hooks/usePendingActivity";
+import { formatCurrency } from "../lib/utils";
 
 /** Pack Page Component */
 const Pack = () => {
@@ -37,10 +38,10 @@ const Pack = () => {
 
     /* Show Success Toast */
     toast.success(
-      `Packing completed! Total withdrawn: ${Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(totalWithdrawn)} USDT`
+      `Packing completed! Total withdrawn: ${formatCurrency(
+        totalWithdrawn,
+        3
+      )} USDT`
     );
   };
 
@@ -59,11 +60,7 @@ const Pack = () => {
             </p>
             <p className="text-lime-300">
               Total Withdrawn:{" "}
-              {Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(mutation.data?.totalWithdrawn)}{" "}
-              USDT
+              {formatCurrency(mutation.data?.totalWithdrawn, 3)} USDT
             </p>
           </div>
 

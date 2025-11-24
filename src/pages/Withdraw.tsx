@@ -11,6 +11,7 @@ import {
 } from "../hooks/useWithdrawalForm";
 import { useWithdrawalMutation } from "../hooks/useWithdrawalMutation";
 import { Progress } from "../components/Progress";
+import { formatCurrency } from "../lib/utils";
 
 const Withdraw = () => {
   const password = useAppStore((state) => state.password);
@@ -62,11 +63,7 @@ const Withdraw = () => {
           </p>
           <p className="text-lime-300">
             Total Amount:{" "}
-            {Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(mutation.data?.totalSentValue || 0)}{" "}
-            USDT
+            {formatCurrency(mutation.data?.totalSentValue || 0, 3)} USDT
           </p>
         </div>
       )}

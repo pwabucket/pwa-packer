@@ -10,6 +10,7 @@ import { ValidationResults } from "../components/ValidationResults";
 import { useState } from "react";
 import { MdSearch } from "react-icons/md";
 import { usePendingActivity } from "../hooks/usePendingActivity";
+import { formatCurrency } from "../lib/utils";
 
 /** Validate Page Component */
 const Validate = () => {
@@ -46,20 +47,12 @@ const Validate = () => {
               {mutation.data?.totalAccounts})
             </p>
             <p className="text-orange-300">
-              Total Amount:{" "}
-              {Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(mutation.data?.totalAmount || 0)}{" "}
+              Total Amount: {formatCurrency(mutation.data?.totalAmount || 0, 3)}{" "}
               USDT
             </p>
             <p className="text-lime-300">
               Available Balance:{" "}
-              {Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(mutation.data?.availableBalance || 0)}{" "}
-              USDT
+              {formatCurrency(mutation.data?.availableBalance || 0, 3)} USDT
             </p>
           </div>
 

@@ -24,7 +24,7 @@ import { usePendingActivity } from "../hooks/usePendingActivity";
 import { TokenButton } from "../components/TokenButton";
 import { launchParcel } from "../lib/parcel";
 
-/** Parse Amount to Smallest Unit (18 Decimals) */
+/** Parse Amount to Smallest Unit */
 const parseToSmallUnit = (amount: number) => {
   return truncateDecimals(amount, 8);
 };
