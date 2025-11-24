@@ -1,4 +1,4 @@
-import { cn } from "../lib/utils";
+import { cn, truncateDecimals } from "../lib/utils";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { useAccountBalanceQuery } from "../hooks/useAccountBalanceQuery";
@@ -7,12 +7,6 @@ import type { Account } from "../types";
 interface AccountBalanceProps extends React.ComponentProps<"span"> {
   account: Account;
 }
-
-const floorToDecimals = (value: number, decimals: number) => {
-  const factor = Math.pow(10, decimals);
-  const floored = Math.floor(value * factor) / factor;
-  return floored.toFixed(decimals);
-};
 
 const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
   const query = useAccountBalanceQuery(account.walletAddress);
@@ -29,13 +23,13 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
       {/* USDT Balance */}
       <span className="flex items-center gap-1">
         <img src={USDTIcon} alt="USDT" className="size-3" />
-        {floorToDecimals(balance.usdtBalance, 3)}
+        {truncateDecimals(balance.usdtBalance, 3)}
       </span>
 
       {/* BNB Balance */}
       <span className="flex items-center gap-1">
         <img src={BNBIcon} alt="BNB" className="size-3" />
-        {floorToDecimals(balance.bnbBalance, 6)}
+        {truncateDecimals(balance.bnbBalance, 6)}
       </span>
     </span>
   ) : (

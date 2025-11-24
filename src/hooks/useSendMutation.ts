@@ -3,6 +3,7 @@ import {
   chunkArrayGenerator,
   delayForSeconds,
   getPrivateKey,
+  truncateDecimals,
 } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
@@ -70,7 +71,7 @@ const useSendMutation = () => {
 
     return {
       hasBalance: balance >= 1,
-      balance: Math.floor(balance),
+      balance,
     };
   };
 
@@ -88,7 +89,7 @@ const useSendMutation = () => {
     receiver: string;
     data: SendMutationData;
   }) => {
-    const amountStr = amount.toFixed(2);
+    const amountStr = truncateDecimals(amount, 8);
     const reader = new WalletReader(account.walletAddress);
     const privateKey = await getPrivateKey(account.id, password);
     const hashMaker = new HashMaker({
@@ -144,7 +145,7 @@ const useSendMutation = () => {
    * Send USDT directly (without hash targeting) for refill operations
    */
   const sendUSDTDirect = async (from: Account, to: string, amount: number) => {
-    const amountStr = amount.toFixed(2);
+    const amountStr = truncateDecimals(amount, 8);
     const reader = new WalletReader(from.walletAddress);
     const provider = reader.getProvider();
     const usdtToken = reader.getUsdtTokenContract();
@@ -228,24 +229,23 @@ const useSendMutation = () => {
         };
       }
 
-      const maxAmount = Math.floor(parseFloat(data.amount));
+      const maxAmount = parseFloat(data.amount);
 
       let amount: number;
       let amountNeeded: number;
 
       if (applyDifference) {
         /* Initial phase: Apply difference for randomization */
-        const maxDifference = Math.floor(parseFloat(data.difference));
+        const maxDifference = parseFloat(data.difference);
         const minAmount = maxAmount - maxDifference;
 
         /* If balance >= minAmount, send random amount between minAmount and maxAmount */
         /* If balance < minAmount, send whatever balance is available */
         if (balance >= minAmount) {
           const randomAmount = Math.random() * maxDifference + minAmount;
-          /* Floor to whole number (no decimals) */
-          amount = Math.floor(Math.min(randomAmount, balance));
+          amount = Math.min(randomAmount, balance);
         } else {
-          amount = Math.floor(balance);
+          amount = balance;
         }
 
         /* Calculate how much is needed to reach maxAmount */
@@ -253,7 +253,7 @@ const useSendMutation = () => {
         amountNeeded = balance >= minAmount ? maxAmount - amount : 0;
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
-        amount = Math.floor(Math.min(balance, maxAmount));
+        amount = Math.min(balance, maxAmount);
         amountNeeded = 0;
       }
 
@@ -523,7 +523,7 @@ const useSendMutation = () => {
       resetProgress();
 
       /* Max amount to send */
-      const maxAmount = Math.floor(parseFloat(data.amount));
+      const maxAmount = parseFloat(data.amount);
 
       /* PHASE 1: Prepare all accounts and determine amounts */
       console.log("=== PHASE 1: Preparing accounts ===");

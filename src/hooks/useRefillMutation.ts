@@ -7,7 +7,11 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
+import {
+  chunkArrayGenerator,
+  getPrivateKey,
+  truncateDecimals,
+} from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
@@ -275,7 +279,7 @@ const useRefillMutation = () => {
     wallet: ethers.Wallet,
     usdtToken?: UsdtTokenContract
   ): Promise<ethers.TransactionReceipt | null> => {
-    const amountStr = task.amount.toFixed(8);
+    const amountStr = truncateDecimals(task.amount, 8);
 
     console.log(
       `Refilling ${task.to.title} (${

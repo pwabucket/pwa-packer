@@ -46,15 +46,13 @@ class WalletReader {
   /** Get BNB Balance */
   getBNBBalance = async (): Promise<number> => {
     const balance = await this.provider.getBalance(this.address);
-    const formatted = parseFloat(ethers.formatEther(balance));
-    return parseFloat(formatted.toFixed(8));
+    return parseFloat(ethers.formatEther(balance));
   };
 
   /** Get USDT Balance */
   getUSDTBalance = async (): Promise<number> => {
     const balance = await this.usdtToken.balanceOf(this.address);
-    const formatted = parseFloat(ethers.formatUnits(balance, USDT_DECIMALS));
-    return parseFloat(formatted.toFixed(8));
+    return parseFloat(ethers.formatUnits(balance, USDT_DECIMALS));
   };
 }
 

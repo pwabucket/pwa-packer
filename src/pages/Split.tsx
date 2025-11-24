@@ -8,7 +8,7 @@ import { Input } from "../components/Input";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import { TextArea } from "../components/TextArea";
-import { getWalletAddressFromPrivateKey } from "../lib/utils";
+import { getWalletAddressFromPrivateKey, truncateDecimals } from "../lib/utils";
 import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
@@ -26,7 +26,7 @@ import { launchParcel } from "../lib/parcel";
 
 /** Parse Amount to Smallest Unit (18 Decimals) */
 const parseToSmallUnit = (amount: number) => {
-  return parseFloat(amount.toFixed(18));
+  return truncateDecimals(amount, 8);
 };
 
 /** Calculate Required BNB for Split and Transaction Fees */

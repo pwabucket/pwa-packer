@@ -8,6 +8,7 @@ import { RefillFormFields } from "../components/RefillFormFields";
 import { useRefillForm, type RefillFormData } from "../hooks/useRefillForm";
 import { useRefillMutation } from "../hooks/useRefillMutation";
 import { Progress } from "../components/Progress";
+import { truncateDecimals } from "../lib/utils";
 
 const Refill = () => {
   const password = useAppStore((state) => state.password);
@@ -55,7 +56,7 @@ const Refill = () => {
             {mutation.data?.totalTransactions})
           </p>
           <p className="text-lime-300">
-            Total Amount: {mutation.data?.totalSentValue?.toFixed(8)}{" "}
+            Total Amount: {truncateDecimals(mutation.data?.totalSentValue, 8)}{" "}
             {token.toUpperCase()}
           </p>
         </div>

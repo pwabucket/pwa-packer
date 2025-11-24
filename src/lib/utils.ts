@@ -183,6 +183,17 @@ export function truncateAddress(address: string, length = 6) {
   return `${address.slice(0, length)}...${address.slice(-4)}`;
 }
 
+/**
+ * Truncate a number to a specified number of decimal places without rounding
+ * @param value - The number to truncate
+ * @param decimals - Number of decimal places (default: 8)
+ * @returns Truncated number as string
+ */
+export function truncateDecimals(value: number, decimals: number = 8): string {
+  const multiplier = Math.pow(10, decimals);
+  return (Math.trunc(value * multiplier) / multiplier).toString();
+}
+
 /** Delay Options */
 interface DelayOptions {
   precised?: boolean;

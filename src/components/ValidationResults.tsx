@@ -7,7 +7,7 @@ import {
   MdOutlineSearch,
   MdRemoveCircle,
 } from "react-icons/md";
-import { cn } from "../lib/utils";
+import { cn, truncateDecimals } from "../lib/utils";
 import type { Account, Activity } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
@@ -76,12 +76,15 @@ const ValidationResults = ({ results }: ValidationResultsProps) => {
               {/* Deposited Amount */}
               <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">IN:</span> $
-                {Number(result.activity?.amount || 0).toFixed?.(2)}
+                {truncateDecimals(Number(result.activity?.amount || 0), 2)}
               </span>{" "}
               {/* Available Amount */}
               <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">AV:</span> $
-                {Number(result.activity?.activityBalance || 0).toFixed?.(2)}
+                {truncateDecimals(
+                  Number(result.activity?.activityBalance || 0),
+                  2
+                )}
               </span>
             </p>
 
