@@ -160,12 +160,20 @@ const useRefillMutation = () => {
         })),
       ];
 
+      /* Track which accounts have already been recipients to prevent draining them */
+      const processedRecipients = new Set<string>();
+
       for (const recipient of insufficientFundsAccounts) {
         let needed = recipient.difference;
 
         /* Sort donors by available funds (most available first) */
+        /* Exclude accounts that have already been filled as recipients */
         const availableDonors = allPotentialDonors
-          .filter((d) => d.account.id !== recipient.account.id)
+          .filter(
+            (d) =>
+              d.account.id !== recipient.account.id &&
+              !processedRecipients.has(d.account.id)
+          )
           .sort((a, b) => b.difference - a.difference);
 
         for (const donor of availableDonors) {
@@ -194,6 +202,9 @@ const useRefillMutation = () => {
           donor.difference -= totalCost;
           needed -= transferAmount;
         }
+
+        /* Mark this recipient as processed so it won't be drained by future recipients */
+        processedRecipients.add(recipient.account.id);
       }
     } else {
       /* NORMAL MODE: Only excess accounts donate to insufficient accounts */
