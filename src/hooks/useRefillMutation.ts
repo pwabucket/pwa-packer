@@ -197,10 +197,15 @@ const useRefillMutation = () => {
       }
     } else {
       /* NORMAL MODE: Only excess accounts donate to insufficient accounts */
+      /* Sort excess accounts by available funds (most available first) */
+      const sortedDonors = [...excessFundsAccounts].sort(
+        (a, b) => b.difference - a.difference
+      );
+
       for (const insufficientItem of insufficientFundsAccounts) {
         let needed = insufficientItem.difference;
 
-        for (const excessItem of excessFundsAccounts) {
+        for (const excessItem of sortedDonors) {
           if (excessItem.difference <= 0 || needed <= 0) continue;
 
           const transferAmount = calculateTransferAmount(
