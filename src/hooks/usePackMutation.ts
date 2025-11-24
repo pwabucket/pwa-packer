@@ -120,8 +120,10 @@ const usePackMutation = () => {
         results.push(result);
         incrementProgress();
 
-        /* Delay between operations (skip on last account) */
-        if (account !== data.accounts[data.accounts.length - 1]) {
+        /* Delay between operations only if not skipped and not last account */
+        const isLastAccount =
+          account === data.accounts[data.accounts.length - 1];
+        if (!result.skipped && !isLastAccount) {
           await delayForSeconds(data.delay);
         }
       }
