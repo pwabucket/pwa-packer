@@ -9,6 +9,7 @@ import { Dialog } from "radix-ui";
 import { ValidationResults } from "../components/ValidationResults";
 import { useState } from "react";
 import { MdSearch } from "react-icons/md";
+import { usePendingActivity } from "../hooks/usePendingActivity";
 
 /** Validate Page Component */
 const Validate = () => {
@@ -29,6 +30,9 @@ const Validate = () => {
       accounts: selectedAccounts,
     });
   };
+
+  /** Prevent auto-logout when viewing results */
+  usePendingActivity(showResults);
 
   return (
     <InnerPageLayout title="Validate" className="gap-2">
