@@ -185,16 +185,25 @@ export function truncateAddress(address: string, length = 6) {
 
 /**
  * Truncate a number to a specified number of decimal places without rounding
+ * Uses string manipulation to avoid floating-point precision issues and scientific notation
  * @param value - The number to truncate
  * @param decimals - Number of decimal places (default: 8)
- * @returns Truncated number as string (avoids scientific notation)
+ * @returns Truncated number as string (no rounding, no scientific notation)
  */
 export function truncateDecimals(value: number, decimals: number = 8): string {
-  const multiplier = Math.pow(10, decimals);
-  const truncated = Math.trunc(value * multiplier) / multiplier;
+  /* Convert to string with extra precision to avoid scientific notation */
+  const str = value.toFixed(Math.max(decimals + 5, 20));
 
-  /* Use toFixed to avoid scientific notation */
-  return truncated.toFixed(decimals);
+  /* Find decimal point position */
+  const dotIndex = str.indexOf(".");
+
+  /* If no decimal point or decimals is 0, return integer part only */
+  if (dotIndex === -1 || decimals === 0) {
+    return Math.trunc(value).toString();
+  }
+
+  /* Slice string to desired decimal places (pure truncation, no rounding) */
+  return str.slice(0, dotIndex + decimals + 1);
 }
 
 /** Delay Options */
