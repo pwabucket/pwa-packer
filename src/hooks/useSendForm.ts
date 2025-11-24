@@ -58,7 +58,7 @@ const useSendForm = () => {
   const form = useForm({
     defaultValues: {
       amount: "",
-      difference: "5",
+      difference: "0",
       mode: "single" as const,
       delay: 5 as const,
       gasLimit: "fast" as const,
