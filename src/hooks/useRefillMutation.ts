@@ -149,11 +149,6 @@ const useRefillMutation = () => {
 
     if (greedy) {
       /* GREEDY MODE: Prioritize filling accounts completely */
-      /* Sort insufficient by how close they are to the target (least needed first) */
-      const sortedRecipients = [...insufficientFundsAccounts].sort(
-        (a, b) => a.difference - b.difference
-      );
-
       /* All accounts can be donors in greedy mode */
       /* Insufficient accounts can donate their balance (even if below target) */
       const allPotentialDonors = [
@@ -165,7 +160,7 @@ const useRefillMutation = () => {
         })),
       ];
 
-      for (const recipient of sortedRecipients) {
+      for (const recipient of insufficientFundsAccounts) {
         let needed = recipient.difference;
 
         /* Sort donors by available funds (most available first) */
