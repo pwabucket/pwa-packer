@@ -16,7 +16,7 @@ import { usePendingActivity } from "../hooks/usePendingActivity";
 /** Pack Page Component */
 const Pack = () => {
   const [showResults, setShowResults] = useState(false);
-  const [delay, setDelay] = useState(10);
+  const [delay, setDelay] = useState(20);
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
