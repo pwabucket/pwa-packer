@@ -37,6 +37,9 @@ const Dashboard = () => {
   const [showNewAccountDialog, setShowNewAccountDialog] =
     useLocationToggle("new-account-dialog");
 
+  const [showExtraUtilsDialog, setShowExtraUtilsDialog] =
+    useLocationToggle("extra-utils-dialog");
+
   const dashboardStyle = useAppStore((state) => state.dashboardStyle);
   const setDashboardStyle = useAppStore((state) => state.setDashboardStyle);
 
@@ -196,7 +199,10 @@ const Dashboard = () => {
             </ActionButton>
 
             {/* More Tools */}
-            <Dialog.Root>
+            <Dialog.Root
+              open={showExtraUtilsDialog}
+              onOpenChange={setShowExtraUtilsDialog}
+            >
               <ActionButton
                 icon={<MdOutlineMenu className="size-5" />}
                 label="More"

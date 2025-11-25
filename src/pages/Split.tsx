@@ -18,11 +18,11 @@ import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
-import { useState } from "react";
 import { ParcelDialog } from "../components/ParcelDialog";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { TokenButton } from "../components/TokenButton";
 import { launchParcel } from "../lib/parcel";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Parse Amount to Smallest Unit */
 const parseToSmallUnit = (amount: number) => {
@@ -72,7 +72,7 @@ const Split = () => {
   const { target, progress, resetProgress } = useProgress();
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
-  const [showIframe, setShowIframe] = useState(false);
+  const [showIframe, setShowIframe] = useLocationToggle("split-iframe-dialog");
 
   /** Form */
   const form = useForm<SplitFormData>({

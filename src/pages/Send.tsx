@@ -10,14 +10,16 @@ import { SendFormFields } from "../components/SendFormFields";
 import { useSendForm, type SendFormData } from "../hooks/useSendForm";
 import { useSendMutation } from "../hooks/useSendMutation";
 import { Progress } from "../components/Progress";
-import { useState } from "react";
 import { Button } from "../components/Button";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { formatCurrency } from "../lib/utils";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Send Page Component */
 const Send = () => {
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useLocationToggle(
+    "send-results-dialog"
+  );
   const password = usePassword();
 
   const accountsChooser = useAccountsChooser();

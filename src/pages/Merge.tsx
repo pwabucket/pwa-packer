@@ -13,12 +13,12 @@ import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
-import { useState } from "react";
 import { ParcelDialog } from "../components/ParcelDialog";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { TokenButton } from "../components/TokenButton";
 import { usePassword } from "../hooks/usePassword";
 import { launchParcel } from "../lib/parcel";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Merge Form Schema */
 const MergeFormSchema = yup
@@ -49,7 +49,7 @@ const Merge = () => {
     useProgress();
   const { selectedAccounts } = accountsChooser;
 
-  const [showIframe, setShowIframe] = useState(false);
+  const [showIframe, setShowIframe] = useLocationToggle("merge-iframe-dialog");
 
   /** Form */
   const form = useForm<MergeFormData>({

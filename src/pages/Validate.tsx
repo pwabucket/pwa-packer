@@ -7,14 +7,16 @@ import { Progress } from "../components/Progress";
 import { toast } from "react-hot-toast";
 import { Dialog } from "radix-ui";
 import { ValidationResults } from "../components/ValidationResults";
-import { useState } from "react";
 import { MdSearch } from "react-icons/md";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { formatCurrency } from "../lib/utils";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Validate Page Component */
 const Validate = () => {
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useLocationToggle(
+    "validate-results-dialog"
+  );
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 

@@ -13,10 +13,13 @@ import { Label } from "../components/Label";
 import { Slider } from "../components/Slider";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { formatCurrency } from "../lib/utils";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Pack Page Component */
 const Pack = () => {
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useLocationToggle(
+    "pack-results-dialog"
+  );
   const [delay, setDelay] = useState(20);
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
