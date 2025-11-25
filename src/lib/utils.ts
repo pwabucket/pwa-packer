@@ -261,3 +261,18 @@ export function walletAddressLink(address: string) {
 export function transactionHashLink(txHash: string) {
   return `https://bscscan.com/tx/${txHash}`;
 }
+
+export function downloadFile(content: Blob | File, filename: string) {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(content);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+export function downloadJsonFile(data: unknown, filename: string) {
+  const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  return downloadFile(jsonBlob, filename);
+}

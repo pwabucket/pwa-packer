@@ -3,8 +3,8 @@ import { PopupDialog } from "../components/PopupDialog";
 import { Dialog } from "radix-ui";
 import { Button } from "../components/Button";
 import { SendResultsAccordion } from "../components/SendResultsAccordion";
-import { MdOutlineClose, MdReceiptLong } from "react-icons/md";
-import { cn } from "../lib/utils";
+import { MdDownload, MdOutlineClose, MdReceiptLong } from "react-icons/md";
+import { cn, downloadJsonFile } from "../lib/utils";
 
 /** Send Results Props Interface */
 interface SendResultsProps {
@@ -13,6 +13,11 @@ interface SendResultsProps {
 
 /** Send Results Component */
 const SendResults = ({ results }: SendResultsProps) => {
+  /** Download Results as JSON File */
+  const downloadResults = () => {
+    downloadJsonFile(results, `send-results-${new Date().toISOString()}.json`);
+  };
+
   return (
     <PopupDialog onInteractOutside={(e) => e.preventDefault()}>
       <div className="flex items-center gap-4">
@@ -34,6 +39,10 @@ const SendResults = ({ results }: SendResultsProps) => {
       <Dialog.Description className="text-neutral-400 text-sm text-center">
         Click each item to view detailed information about the send results.
       </Dialog.Description>
+
+      <Button className="mx-auto" onClick={downloadResults}>
+        <MdDownload className="size-4" /> Download Results JSON
+      </Button>
 
       <div className="flex flex-col overflow-auto max-h-96 px-2 -mx-2">
         {/* Send Results Accordion */}

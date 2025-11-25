@@ -2,6 +2,7 @@ import { usePassword } from "./usePassword";
 import {
   chunkArrayGenerator,
   delayForSeconds,
+  downloadJsonFile,
   getPrivateKey,
   truncateDecimals,
 } from "../lib/utils";
@@ -620,6 +621,17 @@ const useSendMutation = () => {
 
       /* Calculate statistics */
       const stats = calculateStats(allResults);
+
+      /* Download results as JSON */
+      downloadJsonFile(
+        {
+          timestamp: new Date().toISOString(),
+          parameters: data,
+          stats,
+          results: allResults,
+        },
+        `send-results-${new Date().toISOString()}.json`
+      );
 
       return {
         results: allResults,
