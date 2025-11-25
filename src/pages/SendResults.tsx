@@ -15,7 +15,7 @@ interface SendResultsProps {
 const SendResults = ({ results }: SendResultsProps) => {
   /** Download Results as JSON File */
   const downloadResults = () => {
-    downloadJsonFile(results, `send-results-${new Date().toISOString()}.json`);
+    downloadJsonFile("send-results", results);
   };
 
   return (

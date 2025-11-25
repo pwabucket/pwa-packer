@@ -622,15 +622,12 @@ const useSendMutation = () => {
       const stats = calculateStats(allResults);
 
       /* Download results as JSON */
-      downloadJsonFile(
-        {
-          timestamp: new Date().toISOString(),
-          parameters: data,
-          stats,
-          results: allResults,
-        },
-        `send-results-${new Date().toISOString()}.json`
-      );
+      downloadJsonFile("send-results", {
+        timestamp: new Date().toISOString(),
+        parameters: data,
+        stats,
+        results: allResults,
+      });
 
       return {
         results: allResults,

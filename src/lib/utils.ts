@@ -8,6 +8,7 @@ import { useAppStore } from "../store/useAppStore";
 import type { BackupData } from "../types";
 import { encryption } from "../services/encryption";
 import { WalletReader } from "./WalletReader";
+import { format } from "date-fns";
 
 export { v4 as uuid } from "uuid";
 
@@ -142,10 +143,7 @@ export function getBackupData() {
 export async function createAndDownloadBackup() {
   const backupData = getBackupData();
 
-  return downloadJsonFile(
-    backupData,
-    `backup-${new Date().toISOString()}.json`
-  );
+  return downloadJsonFile("backup-data", backupData);
 }
 
 export async function restoreBackupData(data: BackupData["data"]) {
@@ -258,14 +256,16 @@ export function transactionHashLink(txHash: string) {
 export function downloadFile(content: Blob | File, filename: string) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(content);
-  link.download = `packer-${filename}`;
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
 }
 
-export function downloadJsonFile(data: unknown, filename: string) {
+export function downloadJsonFile(id: string, data: unknown) {
+  const timestamp = format(new Date(), "yyyy-MM-dd_HH-mm-ss");
   const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json",
   });
-  return downloadFile(jsonBlob, filename);
+
+  return downloadFile(jsonBlob, `packer-${id}-${timestamp}.json`);
 }
