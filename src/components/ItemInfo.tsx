@@ -1,5 +1,5 @@
 import { cn, copyToClipboard } from "../lib/utils";
-import { MdOutlineCopyAll } from "react-icons/md";
+import { MdOutlineCopyAll, MdOutlineOpenInNew } from "react-icons/md";
 
 /** Item Information Props */
 interface ItemInfoProps {
@@ -9,6 +9,7 @@ interface ItemInfoProps {
   containerClassName?: string;
   valueClassName?: string;
   rightContent?: React.ReactNode;
+  href?: string;
   canCopy?: boolean;
 }
 
@@ -20,6 +21,7 @@ const ItemInfo = ({
   containerClassName,
   valueClassName,
   rightContent,
+  href,
   canCopy = true,
 }: ItemInfoProps) => (
   <div
@@ -38,7 +40,19 @@ const ItemInfo = ({
 
       {/* Value */}
       <p className={cn("font-bold wrap-break-word text-sm", valueClassName)}>
-        {value}
+        {href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
+          >
+            {value}{" "}
+            <MdOutlineOpenInNew className="inline-block size-3 opacity-30" />
+          </a>
+        ) : (
+          value
+        )}
       </p>
     </div>
 

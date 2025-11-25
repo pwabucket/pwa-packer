@@ -1,7 +1,7 @@
 import type { SendResult } from "../types";
 import { Accordion } from "radix-ui";
 import { AccountAddresses } from "./AccountAddresses";
-import { cn } from "../lib/utils";
+import { cn, transactionHashLink, walletAddressLink } from "../lib/utils";
 import { AccountBalance } from "./AccountBalance";
 import { ItemInfo, type ItemInfoProps } from "./ItemInfo";
 import { MdCheckCircle, MdOutlineClose, MdRemoveCircle } from "react-icons/md";
@@ -80,6 +80,7 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
             value={res.receiver}
             icon={<span>🏦</span>}
             valueClassName="text-orange-300"
+            href={walletAddressLink(res.receiver)}
           />
 
           {/* Target Character */}
@@ -96,6 +97,7 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
             value={res.hashResult?.txHash || ""}
             icon={<span>🔗</span>}
             valueClassName="text-lime-300"
+            href={transactionHashLink(res.hashResult?.txHash || "")}
           />
 
           {/* Wallet */}
@@ -107,6 +109,7 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
                 value={res.hashResult?.wallet?.address || ""}
                 icon={<span>💼</span>}
                 valueClassName="text-cyan-300"
+                href={walletAddressLink(res.hashResult?.wallet?.address || "")}
               />
 
               {/* Private Key */}

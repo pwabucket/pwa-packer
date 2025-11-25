@@ -253,3 +253,11 @@ export function* chunkArrayGenerator<T>(arr: T[], size: number) {
     yield arr.slice(i, i + size);
   }
 }
+
+export function walletAddressLink(address: string) {
+  return `https://bscscan.com/address/${address}`;
+}
+
+export function transactionHashLink(txHash: string) {
+  return `https://bscscan.com/tx/${txHash}`;
+}

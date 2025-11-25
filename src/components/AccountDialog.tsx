@@ -2,7 +2,7 @@ import type { Account } from "../types";
 
 import { Dialog } from "radix-ui";
 import { Button } from "./Button";
-import { cn, getPrivateKey } from "../lib/utils";
+import { cn, getPrivateKey, walletAddressLink } from "../lib/utils";
 import { useState } from "react";
 import { HiOutlineEye } from "react-icons/hi2";
 import { usePassword } from "../hooks/usePassword";
@@ -55,6 +55,7 @@ const AccountDetailsDialog = ({ account }: AccountDetailsDialogProps) => {
           value={account.walletAddress}
           icon={<>💰</>}
           valueClassName="text-lime-300"
+          href={walletAddressLink(account.walletAddress)}
         />
 
         {/* Deposit Address */}
@@ -63,6 +64,7 @@ const AccountDetailsDialog = ({ account }: AccountDetailsDialogProps) => {
           value={account.depositAddress}
           icon={<span>🏦</span>}
           valueClassName="text-orange-300"
+          href={walletAddressLink(account.depositAddress)}
         />
 
         {/* Private Key */}

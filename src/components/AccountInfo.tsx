@@ -1,7 +1,16 @@
 import { useMemo } from "react";
 import type { Account } from "../types";
-import { cn, copyToClipboard, extractTgWebAppData } from "../lib/utils";
-import { MdChevronRight, MdOutlineContentCopy } from "react-icons/md";
+import {
+  cn,
+  copyToClipboard,
+  extractTgWebAppData,
+  walletAddressLink,
+} from "../lib/utils";
+import {
+  MdChevronRight,
+  MdOutlineContentCopy,
+  MdOutlineOpenInNew,
+} from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { Packer } from "../lib/Packer";
 import { Collapsible } from "radix-ui";
@@ -10,18 +19,35 @@ const InfoItem = ({
   title,
   value,
   className,
+  href,
 }: {
   title: string;
   value?: string;
   className?: string;
+  href?: string;
 }) => {
   return (
     <div className="flex gap-2 p-4">
       <div className="flex flex-col grow min-w-0">
         <h4 className="text-xs text-neutral-400">{title}</h4>
-        <p className={cn("break-all", className)}>{value || "N/A"}</p>
+        <p className={cn("break-all", className)}>
+          {href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline"
+            >
+              {value || "N/A"}{" "}
+              <MdOutlineOpenInNew className="inline-block size-3 opacity-30" />
+            </a>
+          ) : (
+            value || "N/A"
+          )}
+        </p>
       </div>
 
+      {/* Copy button */}
       <button
         onClick={() => copyToClipboard(value || "")}
         className="text-xl text-neutral-500 hover:text-neutral-300 shrink-0 cursor-pointer"
@@ -111,11 +137,13 @@ const AccountInfo = ({ account }: { account: Account }) => {
         title="Wallet Address"
         value={account.walletAddress}
         className="text-lime-300"
+        href={walletAddressLink(account.walletAddress)}
       />
       <InfoItem
         title="Deposit Address"
         value={account.depositAddress}
         className="text-orange-300"
+        href={walletAddressLink(account.depositAddress)}
       />
 
       <InfoItem
@@ -148,6 +176,11 @@ const AccountInfo = ({ account }: { account: Account }) => {
                 title={key}
                 value={String(value)}
                 className="text-rose-300"
+                href={
+                  key.includes("Address")
+                    ? walletAddressLink(String(value))
+                    : undefined
+                }
               />
             ))
           ) : (
