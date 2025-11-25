@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Packer } from "../lib/Packer";
 import type { Account } from "../types";
 import { MdOutlineOpenInNew } from "react-icons/md";
-import { cn, formatCurrency } from "../lib/utils";
+import { cn, formatCurrency, transactionHashLink } from "../lib/utils";
 import { format } from "date-fns";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
   /* Query for withdrawal activity list */
@@ -61,7 +61,7 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
           <div className="size-10 flex items-center justify-center">
             {activity.hashId && (
               <a
-                href={`https://bscscan.com/tx/${activity.hashId}`}
+                href={transactionHashLink(activity.hashId)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View on Blockchain Explorer"
