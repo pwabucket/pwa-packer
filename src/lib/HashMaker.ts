@@ -10,17 +10,23 @@ import {
   RPC,
 } from "./transaction";
 
+export interface HashWallet {
+  address: string;
+  privateKey: string;
+  phrase?: string;
+}
+
 /** Hash Result Interface */
 export interface HashResult {
   signedRawTx: string;
   txHash: string;
   nonce: number;
   initialNonce: number;
-  gasPrice: bigint;
+  gasPrice: string;
   amount: string;
   attempts: number;
   character: string;
-  wallet?: ethers.HDNodeWallet;
+  wallet?: HashWallet;
 }
 
 class HashMaker {
@@ -97,12 +103,16 @@ class HashMaker {
         console.log("Target Hash:", txHash);
 
         return {
-          wallet: randomWallet,
+          wallet: {
+            address: randomWallet.address,
+            privateKey: randomWallet.privateKey,
+            phrase: randomWallet.mnemonic?.phrase,
+          },
           signedRawTx: signed,
           txHash,
           nonce: 0,
           initialNonce: 0,
-          gasPrice,
+          gasPrice: gasPrice.toString(),
           amount,
           attempts,
           character: actualSuffix,
@@ -153,7 +163,7 @@ class HashMaker {
           txHash,
           nonce,
           initialNonce,
-          gasPrice,
+          gasPrice: gasPrice.toString(),
           amount,
           attempts,
           character: actualSuffix,
@@ -202,7 +212,7 @@ class HashMaker {
         txHash,
         nonce,
         initialNonce,
-        gasPrice,
+        gasPrice: gasPrice.toString(),
         amount,
         character: actualSuffix,
         attempts: 1,
@@ -348,7 +358,7 @@ class HashMaker {
     wallet,
     amount,
   }: {
-    wallet: ethers.HDNodeWallet;
+    wallet: HashWallet;
     amount: string;
   }) {
     if (!this.address) {
@@ -405,7 +415,7 @@ class HashMaker {
    * Refunds the wallet's BNB balance back to the main wallet.
    * @param param0 - The refund parameters.
    */
-  private async _refundWallet({ wallet }: { wallet: ethers.HDNodeWallet }) {
+  private async _refundWallet({ wallet }: { wallet: HashWallet }) {
     if (!this.address) {
       throw new Error("Wallet address is not initialized.");
     }
@@ -459,7 +469,8 @@ class HashMaker {
       nonce,
     };
 
-    const signedTx = await wallet.signTransaction(tx);
+    const refundWallet = new ethers.Wallet(wallet.privateKey, this.provider);
+    const signedTx = await refundWallet.signTransaction(tx);
     const txResponse = await this.provider.broadcastTransaction(signedTx);
 
     await txResponse.wait();
@@ -649,15 +660,15 @@ class HashMaker {
     /** Submit nonce fillers if needed */
     if (nonce > initialNonce) {
       /** Log filler submission start */
-      console.log(
-        `\n⚠️ ${nonce - initialNonce} nonces skipped. Submitting fillers now...`
+      console.warn(
+        `\n${nonce - initialNonce} nonces skipped. Submitting fillers now...`
       );
 
       /** Submit filler transactions for skipped nonces */
       await this.submitFillerTransactions({
         startNonce: initialNonce,
         endNonce: nonce,
-        baseGasPrice: gasPrice,
+        baseGasPrice: BigInt(gasPrice),
       });
     }
 
@@ -680,7 +691,7 @@ class HashMaker {
       await this._refundWallet({ wallet });
     }
 
-    return { receipt, signedRawTx, txHash };
+    return { signedRawTx, txHash };
   }
 }
 

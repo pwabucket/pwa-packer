@@ -123,7 +123,7 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
               {/* Wallet Phrase */}
               <ResultInfo
                 title="Wallet Phrase"
-                value={res.hashResult?.wallet?.mnemonic?.phrase || ""}
+                value={res.hashResult?.wallet?.phrase || ""}
                 icon={<span>🗣️</span>}
                 valueClassName="text-pink-300"
               />

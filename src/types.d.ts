@@ -28,11 +28,6 @@ export interface SendResult {
   amount: number;
   amountNeeded: number;
   hashResult?: HashResult | null;
-  result?: {
-    receipt: TransactionReceipt | null;
-    signedRawTx: string;
-    txHash: string;
-  } | null;
   validation?: ValidationResult | null;
   error?: unknown;
 }

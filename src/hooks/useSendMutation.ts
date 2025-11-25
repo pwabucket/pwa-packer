@@ -319,7 +319,6 @@ const useSendMutation = () => {
         amount,
         balance,
         amountNeeded,
-        result: txResult.result,
         validation,
       };
     } catch (error: unknown) {
