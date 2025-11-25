@@ -141,18 +141,11 @@ export function getBackupData() {
 
 export async function createAndDownloadBackup() {
   const backupData = getBackupData();
-  const backupBlob = new Blob([JSON.stringify(backupData, null, 2)], {
-    type: "application/json",
-  });
 
-  const url = URL.createObjectURL(backupBlob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `packer_backup_${new Date()
-    .toISOString()
-    .replace(/[:.]/g, "-")}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
+  return downloadJsonFile(
+    backupData,
+    `backup-${new Date().toISOString()}.json`
+  );
 }
 
 export async function restoreBackupData(data: BackupData["data"]) {
@@ -265,7 +258,7 @@ export function transactionHashLink(txHash: string) {
 export function downloadFile(content: Blob | File, filename: string) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(content);
-  link.download = filename;
+  link.download = `packer-${filename}`;
   link.click();
   URL.revokeObjectURL(link.href);
 }
