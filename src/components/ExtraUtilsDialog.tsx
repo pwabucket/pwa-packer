@@ -9,6 +9,7 @@ import {
   MdLink,
   MdWaterDrop,
   MdOutlineMerge,
+  MdRadar,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -90,14 +91,14 @@ const ExtraUtilsDialog = () => {
           <Link to="/update-urls" />
         </ActionButton>
 
-        {/* Pack */}
+        {/* Status Check */}
         <ActionButton
           asChild
-          title="Pack Accounts"
-          label="Pack"
-          icon={<HiOutlineCurrencyDollar className="size-5" />}
+          title="Check Account Status"
+          label="Status"
+          icon={<MdRadar className="size-5" />}
         >
-          <Link to="/pack" />
+          <Link to="/status-check" />
         </ActionButton>
 
         {/* Validate */}
@@ -118,6 +119,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdWaterDrop className="size-5" />}
         >
           <Link to="/refill" />
+        </ActionButton>
+
+        {/* Pack */}
+        <ActionButton
+          asChild
+          title="Pack Accounts"
+          label="Pack"
+          icon={<HiOutlineCurrencyDollar className="size-5" />}
+        >
+          <Link to="/pack" />
         </ActionButton>
       </div>
     </PopupDialog>
