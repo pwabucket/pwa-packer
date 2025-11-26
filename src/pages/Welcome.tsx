@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import AppIcon from "../assets/icon.svg";
 import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { PasswordInput } from "../components/Input";
 import * as yup from "yup";
 import { useAppStore } from "../store/useAppStore";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
 import toast from "react-hot-toast";
@@ -17,6 +17,13 @@ import { SiGithub } from "react-icons/si";
 const Welcome = () => {
   const passwordHash = useAppStore((state) => state.passwordHash);
   const isNewUser = !passwordHash;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const fromLocation = location.state?.from?.pathname || "/dashboard";
+
+  const onSuccessfulLogin = useCallback(() => {
+    navigate(fromLocation, { replace: true });
+  }, [fromLocation, navigate]);
 
   return (
     <div className="flex flex-col min-h-dvh items-center justify-center gap-4 p-4">
@@ -30,9 +37,9 @@ const Welcome = () => {
         </p>
 
         {isNewUser ? (
-          <NewUserPasswordCreation />
+          <NewUserPasswordCreation onSuccessfulLogin={onSuccessfulLogin} />
         ) : (
-          <ExistingUserPasswordEntry />
+          <ExistingUserPasswordEntry onSuccessfulLogin={onSuccessfulLogin} />
         )}
 
         <div className="flex flex-col items-center justify-center gap-2">
@@ -56,8 +63,11 @@ const Welcome = () => {
 };
 
 /** Existing User Password Entry Component */
-const ExistingUserPasswordEntry = () => {
-  const navigate = useNavigate();
+const ExistingUserPasswordEntry = ({
+  onSuccessfulLogin,
+}: {
+  onSuccessfulLogin: () => void;
+}) => {
   const verifyPassword = useAppStore((state) => state.verifyPassword);
   const resetApp = useAppStore((state) => state.resetApp);
 
@@ -69,7 +79,7 @@ const ExistingUserPasswordEntry = () => {
       toast.error("Incorrect Password. Please try again.");
       return;
     }
-    navigate("/dashboard", { replace: true });
+    onSuccessfulLogin();
   };
 
   return (
@@ -94,15 +104,18 @@ const ExistingUserPasswordEntry = () => {
 };
 
 /** New User Password Creation Component */
-const NewUserPasswordCreation = () => {
+const NewUserPasswordCreation = ({
+  onSuccessfulLogin,
+}: {
+  onSuccessfulLogin: () => void;
+}) => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const navigate = useNavigate();
   const setPassword = useAppStore((state) => state.setPassword);
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: { password: string }) => {
     await setPassword(data.password);
-    navigate("/dashboard", { replace: true });
+    onSuccessfulLogin();
   };
 
   return (

@@ -1,9 +1,14 @@
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { usePassword } from "../hooks/usePassword";
 
 const ProtectedRoutes = () => {
   const isAuthenticated = usePassword() !== null;
-  return isAuthenticated ? <Outlet /> : <Navigate to="/" />;
+  const location = useLocation();
+  return isAuthenticated ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/" state={{ from: location }} replace />
+  );
 };
 
 export { ProtectedRoutes };
