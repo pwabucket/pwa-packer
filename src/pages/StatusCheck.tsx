@@ -13,7 +13,7 @@ import type { Account } from "../types";
 import { useProgress } from "../hooks/useProgress";
 import { Packer } from "../lib/Packer";
 import { useMutation } from "@tanstack/react-query";
-import { chunkArrayGenerator } from "../lib/utils";
+import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 import { Progress } from "../components/Progress";
 
 interface StatusCheckResult {
@@ -55,9 +55,11 @@ const StatusCheck = () => {
     mutationFn: async ({
       accounts,
       expectedValue,
+      delayBetweenChunks = 2,
     }: {
       accounts: Account[];
       expectedValue: number;
+      delayBetweenChunks?: number;
     }) => {
       /* Setup Progress */
       resetProgress();
@@ -79,6 +81,9 @@ const StatusCheck = () => {
 
         /* Append chunk results to main results */
         results.push(...chunkResults);
+
+        /* Small delay between chunks to avoid rate limiting */
+        await delayForSeconds(delayBetweenChunks);
       }
 
       /* Calculate statistics */
@@ -127,6 +132,14 @@ const StatusCheck = () => {
       const packer = new Packer(account.url!);
       await packer.initialize();
       const status = await packer.validate();
+
+      console.log(
+        "Status Check:",
+        account.title,
+        status.data.status,
+        expectedValue
+      );
+
       return {
         account,
         status: status.data.status === expectedValue,
