@@ -115,7 +115,11 @@ const AccountInfo = ({ account }: { account: Account }) => {
           </p>
         </div>
       </div>
-
+      <InfoItem
+        title="Account Status"
+        value={statusQuery.data ? statusQuery.data.data.status : "Loading..."}
+        className="text-teal-300"
+      />
       <InfoItem title="ID" value={`${user?.id}`} className="text-purple-300" />
       <InfoItem
         title="Username"
@@ -144,12 +148,6 @@ const AccountInfo = ({ account }: { account: Account }) => {
         value={account.depositAddress}
         className="text-orange-300"
         href={walletAddressLink(account.depositAddress)}
-      />
-
-      <InfoItem
-        title="Account Status"
-        value={statusQuery.data ? statusQuery.data.data.status : "Loading..."}
-        className="text-teal-300"
       />
 
       <Collapsible.Root>
