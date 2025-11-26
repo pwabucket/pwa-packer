@@ -58,6 +58,13 @@ const useSendMutation = () => {
   const password = usePassword()!;
 
   /**
+   * Floor amount to whole number for final sends
+   */
+  const floorToWholeNumber = (value: number): number => {
+    return Math.floor(value);
+  };
+
+  /**
    * Check if account has sufficient balance
    */
   const checkBalance = async (
@@ -240,21 +247,30 @@ const useSendMutation = () => {
         const maxDifference = parseFloat(data.difference);
         const minAmount = maxAmount - maxDifference;
 
-        /* If balance >= minAmount, send random amount between minAmount and maxAmount */
+        /* If balance >= minAmount, send random amount between minAmount and maxAmount (inclusive) */
         /* If balance < minAmount, send whatever balance is available */
         if (balance >= minAmount) {
+          /* Generate random value between minAmount and maxAmount */
           const randomAmount = Math.random() * maxDifference + minAmount;
-          amount = Math.min(randomAmount, balance);
-        } else {
-          amount = balance;
-        }
+          const cappedAmount = Math.min(randomAmount, balance);
 
-        /* Calculate how much is needed to reach maxAmount */
-        /* For accounts with balance < minAmount: 0 */
-        amountNeeded = balance >= minAmount ? maxAmount - amount : 0;
+          /* Floor to whole number for final send */
+          amount = floorToWholeNumber(cappedAmount);
+
+          /* amountNeeded = leftover decimals that can be used for refilling others */
+          amountNeeded = balance - amount;
+        } else {
+          /* Floor to whole number for final send */
+          amount = floorToWholeNumber(balance);
+
+          /* amountNeeded = leftover decimals that can be used for refilling others */
+          amountNeeded = balance - amount;
+        }
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
-        amount = Math.min(balance, maxAmount);
+        const cappedAmount = Math.min(balance, maxAmount);
+        /* Floor to whole number for final send */
+        amount = floorToWholeNumber(cappedAmount);
         amountNeeded = 0;
       }
 
