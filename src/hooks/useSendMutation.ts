@@ -507,7 +507,9 @@ const useSendMutation = () => {
 
     /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
-      let needed = maxAmount - recipient.balance;
+      let needed = parseFloat(
+        truncateDecimals(maxAmount - recipient.balance, 4)
+      );
 
       /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
@@ -524,8 +526,10 @@ const useSendMutation = () => {
           amount: transferAmount,
         });
 
-        donor.remainingToGive -= transferAmount;
-        needed -= transferAmount;
+        donor.remainingToGive = parseFloat(
+          truncateDecimals(donor.remainingToGive - transferAmount, 4)
+        );
+        needed = parseFloat(truncateDecimals(needed - transferAmount, 4));
       }
 
       /* Only move to next recipient after trying to fill this one completely */
