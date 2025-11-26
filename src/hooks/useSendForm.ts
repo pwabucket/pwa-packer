@@ -12,6 +12,7 @@ interface SendFormData {
   targetCharacters: string[];
   gasLimit: "average" | "fast" | "instant";
   validate: boolean;
+  skipValidated: boolean;
 }
 
 /** Send Form Schema */
@@ -50,6 +51,7 @@ const SendFormSchema = yup
       .label("Gas Fee"),
 
     validate: yup.boolean().required().label("Validate"),
+    skipValidated: yup.boolean().required().label("Skip Validated"),
   })
   .required();
 
@@ -64,6 +66,7 @@ const useSendForm = () => {
       gasLimit: "fast" as const,
       targetCharacters: ["a", "b", "c", "d", "e", "f"],
       validate: true,
+      skipValidated: true,
     },
     resolver: yupResolver(SendFormSchema),
   });

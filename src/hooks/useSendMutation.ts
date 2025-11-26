@@ -10,6 +10,7 @@ import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type {
   Account,
+  Activity,
   SendResult,
   SendStats,
   ValidationResult,
@@ -34,6 +35,7 @@ interface SendMutationData {
   gasLimit: "average" | "fast" | "instant";
   targetCharacters: string[];
   validate: boolean;
+  skipValidated: boolean;
 }
 
 interface PreparedAccount {
@@ -44,6 +46,7 @@ interface PreparedAccount {
   amount: number;
   amountNeeded: number;
   error?: unknown;
+  validation: Activity | null;
 }
 
 interface RefillTransaction {
@@ -181,6 +184,25 @@ const useSendMutation = () => {
     return result;
   };
 
+  /** Get account validation */
+  const getValidation = async (account: Account): Promise<Activity | null> => {
+    if (!account.url) return null;
+
+    try {
+      const packer = new Packer(account.url);
+      await packer.initialize();
+
+      /* Check activity */
+      return await packer.getActivity();
+    } catch (error) {
+      console.error(
+        `Validation check failed for ${account.title} (W:${account.walletAddress}) (D:${account.depositAddress}):`,
+        error
+      );
+      return null;
+    }
+  };
+
   /**
    * Validate transaction if enabled
    */
@@ -220,11 +242,13 @@ const useSendMutation = () => {
   const prepareAccount = async (
     account: Account,
     data: SendMutationData,
-    applyDifference: boolean = true
+    applyDifference: boolean = true,
+    checkValidation: boolean = true
   ): Promise<PreparedAccount> => {
     try {
       /* Check balance */
       const { hasBalance, balance } = await checkBalance(account);
+
       if (!hasBalance) {
         return {
           status: false,
@@ -233,6 +257,7 @@ const useSendMutation = () => {
           balance,
           amount: 0,
           amountNeeded: 0,
+          validation: null,
           error: "Insufficient balance",
         };
       }
@@ -241,6 +266,12 @@ const useSendMutation = () => {
 
       let amount: number;
       let amountNeeded: number;
+      let validation: Activity | null = null;
+
+      /* Check if already validated */
+      if (checkValidation) {
+        validation = await getValidation(account);
+      }
 
       if (applyDifference) {
         /* Initial phase: Apply difference for randomization */
@@ -281,6 +312,7 @@ const useSendMutation = () => {
         amount,
         balance,
         amountNeeded,
+        validation,
       };
     } catch (error: unknown) {
       console.error(
@@ -296,6 +328,7 @@ const useSendMutation = () => {
         amount: 0,
         balance: 0,
         amountNeeded: 0,
+        validation: null,
       };
     }
   };
@@ -418,12 +451,15 @@ const useSendMutation = () => {
   const getAmounts = async (
     accounts: Account[],
     data: SendMutationData,
-    applyDifference: boolean = true
+    applyDifference: boolean = true,
+    checkValidation: boolean = true
   ) => {
     const preparedAccounts = [];
     for (const chunk of chunkArrayGenerator(accounts, 10)) {
       const chunkResults = await Promise.all(
-        chunk.map((account) => prepareAccount(account, data, applyDifference))
+        chunk.map((account) =>
+          prepareAccount(account, data, applyDifference, checkValidation)
+        )
       );
       preparedAccounts.push(...chunkResults);
     }
@@ -545,16 +581,37 @@ const useSendMutation = () => {
       console.log("=== PHASE 1: Preparing accounts ===");
       const preparedAccounts = await getAmounts(data.accounts, data);
 
+      /* Apply skipValidated filter */
+      const availableAccounts = preparedAccounts.filter((item) => {
+        if (data.skipValidated && item.validation?.activity) {
+          return false;
+        }
+        return true;
+      });
+
+      /* Debug log for available accounts after filtering */
+      console.log(
+        `Available accounts after skipValidated filter: ${availableAccounts.length}`,
+        availableAccounts
+      );
+
       /* Filter accounts that are ready to send */
-      const accountsToProcess = preparedAccounts.filter(
+      const accountsToProcess = availableAccounts.filter(
         (acc) => acc.status && !acc.skipped
       );
 
       /* Filter skipped accounts for refill */
-      const skippedAccounts = preparedAccounts.filter((acc) => acc.skipped);
+      const skippedAccounts = availableAccounts.filter((acc) => acc.skipped);
 
-      console.log(`Accounts to process: ${accountsToProcess.length}`);
-      console.log(`Skipped accounts: ${skippedAccounts.length}`);
+      /* Debug logs */
+      console.log(
+        `Accounts to process: ${accountsToProcess.length}`,
+        accountsToProcess
+      );
+      console.log(
+        `Skipped accounts: ${skippedAccounts.length}`,
+        skippedAccounts
+      );
 
       /* Set initial target (will be updated) */
       setTarget(accountsToProcess.length);
@@ -577,7 +634,11 @@ const useSendMutation = () => {
           maxAmount
         );
 
-        console.log(`Planned ${refillTransactions.length} refill transactions`);
+        /* Debug log for planned refill transactions */
+        console.log(
+          `Planned ${refillTransactions.length} refill transactions`,
+          refillTransactions
+        );
 
         if (refillTransactions.length > 0) {
           toast.loading(
@@ -602,6 +663,7 @@ const useSendMutation = () => {
         const refilledPrepared = await getAmounts(
           skippedAccountList,
           data,
+          false,
           false
         );
 

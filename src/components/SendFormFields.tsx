@@ -176,6 +176,31 @@ const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
               Validate Confirmation?
             </LabelToggle>
             <FormFieldError message={fieldState.error?.message} />
+            <p className="text-xs text-neutral-400 text-center px-4">
+              If enabled, after sending funds, the tool will check if the
+              transaction was confirmed successfully.
+            </p>
+          </div>
+        )}
+      />
+
+      {/* Skip Validated  */}
+      <Controller
+        name="skipValidated"
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-2">
+            <LabelToggle
+              checked={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+            >
+              Skip Already Validated
+            </LabelToggle>
+            <FormFieldError message={fieldState.error?.message} />
+            <p className="text-xs text-neutral-400 text-center px-4">
+              If enabled, accounts that have already been validated will be
+              skipped during the sending process.
+            </p>
           </div>
         )}
       />
