@@ -310,13 +310,15 @@ const useSendMutation = () => {
           amount = floorToWholeNumber(cappedAmount);
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
-          amountNeeded = balance - amount;
+          /* Truncate to 4 decimals to avoid precision issues */
+          amountNeeded = parseFloat(truncateDecimals(balance - amount, 4));
         } else {
           /* Floor to whole number for final send */
           amount = floorToWholeNumber(balance);
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
-          amountNeeded = balance - amount;
+          /* Truncate to 4 decimals to avoid precision issues */
+          amountNeeded = parseFloat(truncateDecimals(balance - amount, 4));
         }
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
@@ -489,6 +491,7 @@ const useSendMutation = () => {
 
   /**
    * Plan refill transactions to fill skipped accounts
+   * Fills each recipient to maxAmount completely before moving to the next recipient
    */
   const planRefillTransactions = (
     donorAccounts: PreparedAccount[],
@@ -502,14 +505,18 @@ const useSendMutation = () => {
       .filter((acc) => acc.amountNeeded && acc.amountNeeded > 0)
       .map((acc) => ({ ...acc, remainingToGive: acc.amountNeeded! }));
 
-    /* Process each recipient */
+    /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
       let needed = maxAmount - recipient.balance;
 
+      /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
-        if (donor.remainingToGive <= 0 || needed <= 0) continue;
+        if (needed <= 0) break;
+        if (donor.remainingToGive <= 0) continue;
 
-        const transferAmount = Math.min(donor.remainingToGive, needed);
+        const transferAmount = parseFloat(
+          truncateDecimals(Math.min(donor.remainingToGive, needed), 4)
+        );
 
         transactions.push({
           from: donor.account,
@@ -519,9 +526,14 @@ const useSendMutation = () => {
 
         donor.remainingToGive -= transferAmount;
         needed -= transferAmount;
-
-        if (needed <= 0) break;
       }
+
+      /* Only move to next recipient after trying to fill this one completely */
+      console.log(
+        `Recipient ${recipient.account.title}: filled to ${
+          recipient.balance + (maxAmount - recipient.balance - needed)
+        }, still needs ${needed}`
+      );
     }
 
     return transactions;
