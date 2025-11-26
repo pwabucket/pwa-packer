@@ -76,9 +76,10 @@ const useSendMutation = () => {
     try {
       const reader = new WalletReader(account.walletAddress);
       const balance = await reader.getUSDTBalance();
+      const balanceStr = truncateDecimals(balance, 8);
 
       console.log(
-        `USDT Balance for ${account.title} (${account.walletAddress}): ${balance}`
+        `USDT Balance for ${account.title} (${account.walletAddress}): ${balanceStr}`
       );
 
       return {
