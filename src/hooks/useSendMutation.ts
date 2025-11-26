@@ -273,9 +273,10 @@ const useSendMutation = () => {
         validation = await getValidation(account);
       }
 
-      if (applyDifference) {
-        /* Initial phase: Apply difference for randomization */
-        const maxDifference = parseFloat(data.difference);
+      /* Initial phase: Apply difference for randomization */
+      const maxDifference = parseFloat(data.difference);
+
+      if (applyDifference && maxDifference > 0) {
         const minAmount = maxAmount - maxDifference;
 
         /* If balance >= minAmount, send random amount between minAmount and maxAmount (inclusive) */
