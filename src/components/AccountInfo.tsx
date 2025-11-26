@@ -175,7 +175,7 @@ const AccountInfo = ({ account }: { account: Account }) => {
                 value={String(value)}
                 className="text-rose-300"
                 href={
-                  key.includes("Address")
+                  key.endsWith("Address")
                     ? walletAddressLink(String(value))
                     : undefined
                 }
