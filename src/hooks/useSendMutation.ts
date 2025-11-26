@@ -73,17 +73,28 @@ const useSendMutation = () => {
   const checkBalance = async (
     account: Account
   ): Promise<{ hasBalance: boolean; balance: number }> => {
-    const reader = new WalletReader(account.walletAddress);
-    const balance = await reader.getUSDTBalance();
+    try {
+      const reader = new WalletReader(account.walletAddress);
+      const balance = await reader.getUSDTBalance();
 
-    console.log(
-      `USDT Balance for ${account.title} (${account.walletAddress}): ${balance}`
-    );
+      console.log(
+        `USDT Balance for ${account.title} (${account.walletAddress}): ${balance}`
+      );
 
-    return {
-      hasBalance: balance >= 1,
-      balance,
-    };
+      return {
+        hasBalance: balance >= 1,
+        balance,
+      };
+    } catch (error) {
+      console.error(
+        `Failed to fetch balance for ${account.title} (${account.walletAddress}):`,
+        error
+      );
+      return {
+        hasBalance: false,
+        balance: 0,
+      };
+    }
   };
 
   /**
@@ -245,9 +256,23 @@ const useSendMutation = () => {
     applyDifference: boolean = true,
     checkValidation: boolean = true
   ): Promise<PreparedAccount> => {
+    /* Initialize validation */
+    let validation: Activity | null = null;
+
     try {
+      /* Parallel fetch validation and balance */
+      const [validationResult, balanceResult] = await Promise.all([
+        checkValidation ? getValidation(account) : Promise.resolve(null),
+        checkBalance(account),
+      ]);
+
+      /* Check if already validated */
+      if (checkValidation) {
+        validation = validationResult;
+      }
+
       /* Check balance */
-      const { hasBalance, balance } = await checkBalance(account);
+      const { hasBalance, balance } = balanceResult;
 
       if (!hasBalance) {
         return {
@@ -257,7 +282,7 @@ const useSendMutation = () => {
           balance,
           amount: 0,
           amountNeeded: 0,
-          validation: null,
+          validation,
           error: "Insufficient balance",
         };
       }
@@ -266,12 +291,6 @@ const useSendMutation = () => {
 
       let amount: number;
       let amountNeeded: number;
-      let validation: Activity | null = null;
-
-      /* Check if already validated */
-      if (checkValidation) {
-        validation = await getValidation(account);
-      }
 
       /* Initial phase: Apply difference for randomization */
       const maxDifference = parseFloat(data.difference);
@@ -329,7 +348,7 @@ const useSendMutation = () => {
         amount: 0,
         balance: 0,
         amountNeeded: 0,
-        validation: null,
+        validation,
       };
     }
   };
