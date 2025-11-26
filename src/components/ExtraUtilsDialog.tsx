@@ -50,7 +50,7 @@ const ExtraUtilsDialog = () => {
           label="Merge"
           icon={<MdOutlineMerge className="size-5" />}
         >
-          <Link to="/merge" />
+          <Link replace to="/merge" />
         </ActionButton>
 
         {/* Backup */}
@@ -68,7 +68,7 @@ const ExtraUtilsDialog = () => {
           title="Restore a backup"
           icon={<MdOutlineRestore className="size-5" />}
         >
-          <Link to="/restore" />
+          <Link replace to="/restore" />
         </ActionButton>
 
         {/* Password Change */}
@@ -78,7 +78,7 @@ const ExtraUtilsDialog = () => {
           label="Password"
           icon={<MdOutlinePassword className="size-5" />}
         >
-          <Link to="/password" />
+          <Link replace to="/password" />
         </ActionButton>
 
         {/* Update URLs */}
@@ -88,7 +88,7 @@ const ExtraUtilsDialog = () => {
           label="URLs"
           icon={<MdLink className="size-5" />}
         >
-          <Link to="/update-urls" />
+          <Link replace to="/update-urls" />
         </ActionButton>
 
         {/* Status Check */}
@@ -98,7 +98,7 @@ const ExtraUtilsDialog = () => {
           label="Status"
           icon={<MdRadar className="size-5" />}
         >
-          <Link to="/status-check" />
+          <Link replace to="/status-check" />
         </ActionButton>
 
         {/* Validate */}
@@ -108,7 +108,7 @@ const ExtraUtilsDialog = () => {
           label="Validate"
           icon={<MdOutlineCheck className="size-5" />}
         >
-          <Link to="/validate" />
+          <Link replace to="/validate" />
         </ActionButton>
 
         {/* Refill */}
@@ -118,7 +118,7 @@ const ExtraUtilsDialog = () => {
           label="Refill"
           icon={<MdWaterDrop className="size-5" />}
         >
-          <Link to="/refill" />
+          <Link replace to="/refill" />
         </ActionButton>
 
         {/* Pack */}
@@ -128,7 +128,7 @@ const ExtraUtilsDialog = () => {
           label="Pack"
           icon={<HiOutlineCurrencyDollar className="size-5" />}
         >
-          <Link to="/pack" />
+          <Link replace to="/pack" />
         </ActionButton>
       </div>
     </PopupDialog>
