@@ -251,7 +251,7 @@ const useSendMutation = () => {
         /* If balance < minAmount, send whatever balance is available */
         if (balance >= minAmount) {
           /* Generate random value between minAmount and maxAmount */
-          const randomAmount = Math.random() * maxDifference + minAmount;
+          const randomAmount = Math.random() * (maxDifference + 1) + minAmount;
           const cappedAmount = Math.min(randomAmount, balance);
 
           /* Floor to whole number for final send */
