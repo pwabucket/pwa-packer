@@ -19,8 +19,12 @@ const WithdrawFormFields = ({ disabled }: WithdrawFormFieldsProps) => {
           <div className="flex flex-col gap-2">
             <Label htmlFor="amount">
               <img src={USDTIcon} className="size-4 inline-block" /> Amount to
-              Withdraw
+              Withdraw (Per Account)
             </Label>
+            <p className="text-xs text-neutral-400 text-center px-4">
+              The amount of USDT to withdraw from each account. If left blank,
+              the entire available balance will be withdrawn.
+            </p>
             <Input
               {...field}
               disabled={disabled}
@@ -33,6 +37,7 @@ const WithdrawFormFields = ({ disabled }: WithdrawFormFieldsProps) => {
             <p className="text-center text-xs text-blue-400">
               Leave blank to send all available funds
             </p>
+
             <FormFieldError message={fieldState.error?.message} />
           </div>
         )}
