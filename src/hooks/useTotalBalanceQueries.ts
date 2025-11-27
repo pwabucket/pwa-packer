@@ -2,6 +2,7 @@ import { useQueries, type UseQueryResult } from "@tanstack/react-query";
 import { useAppStore } from "../store/useAppStore";
 import { useCallback } from "react";
 import { fetchBalance } from "../lib/utils";
+import { useIsAuthenticated } from "./useIsAuthenticated";
 
 interface BalanceResult {
   usdtBalance: number;
@@ -9,6 +10,10 @@ interface BalanceResult {
 }
 
 const useTotalBalanceQueries = () => {
+  /* Check authentication status */
+  const authenticated = useIsAuthenticated();
+
+  /* Get accounts from the store */
   const accounts = useAppStore((state) => state.accounts);
 
   const combine = useCallback(
@@ -27,6 +32,7 @@ const useTotalBalanceQueries = () => {
   const queries = useQueries({
     combine,
     queries: accounts.map((account) => ({
+      enabled: Boolean(authenticated && account.walletAddress),
       queryKey: ["balance", account.walletAddress],
       queryFn: async () => fetchBalance(account.walletAddress),
       refetchInterval: 30_000, // Refetch every 30 seconds

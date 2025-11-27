@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Packer } from "../lib/Packer";
 import { Collapsible } from "radix-ui";
+import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
 
 const InfoItem = ({
   title,
@@ -60,11 +61,16 @@ const InfoItem = ({
 };
 
 const AccountInfo = ({ account }: { account: Account }) => {
+  /* Check authentication status */
+  const authenticated = useIsAuthenticated();
+
+  /* Extract user info from initDataUnsafe */
   const user = useMemo(() => {
     return extractTgWebAppData(account.url!)["initDataUnsafe"]["user"];
   }, [account.url]);
 
   const statusQuery = useQuery({
+    enabled: Boolean(authenticated && account.url),
     queryKey: ["account-status", account.id],
     queryFn: async () => {
       const packer = new Packer(account.url!);

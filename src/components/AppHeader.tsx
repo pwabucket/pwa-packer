@@ -14,7 +14,7 @@ const AppHeader = ({
   return (
     <header
       className={cn(
-        "sticky top-0 px-4 z-30 h-12",
+        "sticky top-0 px-4 z-20 h-12",
         "flex items-center justify-center",
         "bg-neutral-900 border-b border-neutral-700"
       )}

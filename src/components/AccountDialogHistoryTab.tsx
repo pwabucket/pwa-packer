@@ -4,10 +4,14 @@ import type { Account } from "../types";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import { cn, formatCurrency, transactionHashLink } from "../lib/utils";
 import { format } from "date-fns";
+import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
+  /* Check authentication status */
+  const authenticated = useIsAuthenticated();
+
   /* Query for withdrawal activity list */
   const query = useQuery({
-    enabled: Boolean(account.url),
+    enabled: Boolean(authenticated && account.url),
     queryKey: ["withdraw-activity-list", account.id],
     queryFn: async () => {
       const packer = new Packer(account.url!);

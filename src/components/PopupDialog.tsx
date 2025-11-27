@@ -8,7 +8,7 @@ const PopupDialog = (props: Dialog.DialogContentProps) => {
         className={cn(
           "fixed inset-0 bg-black/50",
           "grid place-items-center",
-          "overflow-auto p-4 z-50"
+          "overflow-auto p-4 z-30"
         )}
       >
         <Dialog.Content
