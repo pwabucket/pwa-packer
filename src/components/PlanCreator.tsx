@@ -17,7 +17,7 @@ import type {
   PlanStats,
 } from "../types";
 import { Packer } from "../lib/Packer";
-import { differenceInWeeks, format, startOfWeek, subDays } from "date-fns";
+import { format, startOfWeek } from "date-fns";
 import {
   chunkArrayGenerator,
   delayForSeconds,
@@ -30,6 +30,7 @@ import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
 import { PlanResults } from "../components/PlanResults";
 import toast from "react-hot-toast";
+import { getActivityStreak } from "../lib/activity";
 
 /** Plan Form Schema */
 const PlanFormSchema = yup
@@ -100,23 +101,7 @@ const PlanCreator = () => {
       const result = await packer.getWithdrawActivityList();
       const list = result.data.list;
 
-      let streak = 0;
-      let currentWeek;
-      for (const item of list) {
-        const itemDate = new Date(item["create_time"] + "-05:00");
-        const weekStart = startOfWeek(itemDate, { weekStartsOn: 1 });
-        const participationWeek = subDays(weekStart, 7);
-        const difference = currentWeek
-          ? differenceInWeeks(currentWeek, participationWeek)
-          : 0;
-
-        if (difference > 1) {
-          break;
-        } else {
-          streak++;
-        }
-        currentWeek = participationWeek;
-      }
+      const streak = getActivityStreak(list);
 
       return {
         status: true,
@@ -161,12 +146,16 @@ const PlanCreator = () => {
     const totalAmount = results.reduce((total, item) => total + item.amount, 0);
     const firstActivity = results.filter((item) => item.streak === 0).length;
     const secondActivity = results.filter((item) => item.streak === 1).length;
+    const consistentActivity = results.filter(
+      (item) => item.streak >= 2
+    ).length;
 
     return {
       totalAccounts,
       totalAmount,
       firstActivity,
       secondActivity,
+      consistentActivity,
     };
   };
 
@@ -210,6 +199,7 @@ const PlanCreator = () => {
         if (usableAccounts.length === 0) break;
         const randomAccount = randomItem(usableAccounts);
         randomAccount.amount += 1;
+        needed -= 1;
       }
 
       const results: PlanResult[] = availableAccounts.filter(
@@ -243,7 +233,7 @@ const PlanCreator = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       {mutation.data ? (
         <>
           {/* Plan Results Summary */}
@@ -256,12 +246,16 @@ const PlanCreator = () => {
               Total Accounts: {mutation.data.stats.totalAccounts}
             </p>
 
-            <p className="text-rose-300">
+            <p className="text-green-300">
               First Activity: {mutation.data.stats.firstActivity}
             </p>
 
             <p className="text-amber-300">
               Second Activity: {mutation.data.stats.secondActivity}
+            </p>
+
+            <p className="text-red-300">
+              Consistent Activity: {mutation.data.stats.consistentActivity}
             </p>
           </div>
 
@@ -350,7 +344,7 @@ const PlanCreator = () => {
           </form>
         </FormProvider>
       )}
-    </>
+    </div>
   );
 };
 

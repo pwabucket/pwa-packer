@@ -83,6 +83,7 @@ export interface PlanStats {
   totalAmount: number;
   firstActivity: number;
   secondActivity: number;
+  consistentActivity: number;
 }
 
 export interface PlanParameters {

@@ -1,6 +1,6 @@
 import { useDropzone } from "react-dropzone";
 import { DragZone } from "./DragZone";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import type {
   Activity,
@@ -11,13 +11,40 @@ import type {
 import { useMutation } from "@tanstack/react-query";
 import { useProgress } from "../hooks/useProgress";
 import { Packer } from "../lib/Packer";
-import { chunkArrayGenerator } from "../lib/utils";
+import {
+  chunkArrayGenerator,
+  delayForSeconds,
+  formatCurrency,
+} from "../lib/utils";
 import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
+import { Button } from "./Button";
 
 const PlanValidator = () => {
+  const [plans, setPlans] = useState<PlanResult[] | null>(null);
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
+
+  const calculateStats = (results: PlanValidationResult[]) => {
+    const totalAccounts = results.length;
+    const totalAmount = results.reduce((total, item) => total + item.amount, 0);
+    const progressAmount = results.reduce(
+      (total, item) => total + Number(item.activity?.amount || 0),
+      0
+    );
+    const successfulCount = results.filter((item) => item.validation).length;
+    const failedCount = results.filter((item) => !item.validation).length;
+
+    return {
+      totalAccounts,
+      totalAmount,
+      progressAmount,
+      successfulCount,
+      failedCount,
+    };
+  };
+
+  /* Validate Plan */
   const validatePlan = async (
     plan: PlanResult
   ): Promise<PlanValidationResult> => {
@@ -51,6 +78,7 @@ const PlanValidator = () => {
     }
   };
 
+  /* Mutation */
   const mutation = useMutation({
     mutationKey: ["validate-plan"],
     mutationFn: async (plans: PlanResult[]) => {
@@ -69,13 +97,20 @@ const PlanValidator = () => {
         );
 
         results.push(...chunkResults);
+
+        await delayForSeconds(1);
       }
+
+      const stats = calculateStats(results);
 
       return {
         results,
+        stats,
       };
     },
   });
+
+  /* On drop */
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     const reader = new FileReader();
@@ -83,7 +118,7 @@ const PlanValidator = () => {
     reader.addEventListener("load", (e) => {
       try {
         const data = JSON.parse(e.target!.result as string) as PlanFileContent;
-        mutation.mutateAsync(data.results);
+        setPlans(data.results);
       } catch {
         toast.error("Invalid plan file!");
       }
@@ -91,6 +126,7 @@ const PlanValidator = () => {
     reader.readAsText(file);
   }, []);
 
+  /* Dropzone */
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -100,22 +136,54 @@ const PlanValidator = () => {
     multiple: false,
   });
 
+  const validatePlans = () => {
+    mutation.mutateAsync(plans!);
+    toast.success("Plans validated successfully!");
+  };
+
   return (
-    <>
-      {mutation.data ? (
+    <div className="flex flex-col gap-4">
+      {plans ? (
         <>
-          <PlanResults results={mutation.data.results} />
+          {mutation.data ? (
+            <>
+              {/* Plan Results Summary */}
+              <div className="flex flex-col text-center text-sm">
+                <p className="text-green-400">Plan validated successfully!</p>
+                <p className="text-lime-300">
+                  Amount:{" "}
+                  {formatCurrency(mutation.data.stats.progressAmount, 3)} /{" "}
+                  {formatCurrency(mutation.data.stats.totalAmount, 3)}
+                </p>
+                <p className="text-blue-300">
+                  Accounts: {mutation.data.stats.successfulCount} /{" "}
+                  {mutation.data.stats.totalAccounts}
+                </p>
+              </div>
+            </>
+          ) : null}
+
+          <Button onClick={validatePlans}>Validate Plan</Button>
+
+          {mutation.isPending ? (
+            <Progress max={target} current={progress} />
+          ) : null}
+
+          <PlanResults results={mutation.data?.results || plans} />
         </>
-      ) : mutation.isPending ? (
-        <Progress max={target} current={progress} />
       ) : (
-        <DragZone
-          getRootProps={getRootProps}
-          getInputProps={getInputProps}
-          isDragActive={isDragActive}
-        />
+        <>
+          <p className="text-xs text-neutral-400 text-center px-4">
+            Import your plan file to validate accounts and progress.
+          </p>
+          <DragZone
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            isDragActive={isDragActive}
+          />
+        </>
       )}
-    </>
+    </div>
   );
 };
 
