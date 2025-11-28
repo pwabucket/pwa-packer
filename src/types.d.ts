@@ -61,3 +61,39 @@ export interface PackResult {
   withdrawActivity?: unknown;
   response?: unknown;
 }
+
+export interface PlanAccountStatus {
+  status: boolean;
+  skipped: boolean;
+  account: Account;
+  streak: number;
+}
+
+export interface PlanResult extends PlanAccountStatus {
+  amount: number;
+}
+
+export interface PlanValidationResult extends PlanResult {
+  validation: boolean;
+  activity: Activity | null;
+}
+
+export interface PlanStats {
+  totalAccounts: number;
+  totalAmount: number;
+  firstActivity: number;
+  secondActivity: number;
+}
+
+export interface PlanParameters {
+  total: string;
+  minimum: string;
+  maximum: string;
+}
+
+export interface PlanFileContent {
+  week: Date;
+  parameters: PlanParameters;
+  results: PlanResult[];
+  stats: PlanStats;
+}

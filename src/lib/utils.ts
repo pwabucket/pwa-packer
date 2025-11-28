@@ -269,3 +269,15 @@ export function downloadJsonFile(id: string, data: unknown) {
 
   return downloadFile(jsonBlob, `packer-${id}-${timestamp}.json`);
 }
+
+/**
+ * Floor value to whole number
+ */
+export function floorToWholeNumber(value: number): number {
+  return Math.floor(value);
+}
+
+/* Get random item */
+export function randomItem<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}

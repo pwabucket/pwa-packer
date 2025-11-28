@@ -6,12 +6,14 @@ import { HiOutlineArrowLeft } from "react-icons/hi2";
 interface InnerPageLayoutProps {
   title: React.ReactNode;
   children?: React.ReactNode;
+  wrapperClassName?: string;
   className?: string;
 }
 
 const InnerPageLayout = ({
   title,
   children,
+  wrapperClassName,
   className,
 }: InnerPageLayoutProps) => {
   const navigateBack = useNavigateBack();
@@ -27,7 +29,9 @@ const InnerPageLayout = ({
       />
 
       {/* Main content area */}
-      <MainContainer className={className}>{children}</MainContainer>
+      <MainContainer wrapperClassName={wrapperClassName} className={className}>
+        {children}
+      </MainContainer>
     </div>
   );
 };

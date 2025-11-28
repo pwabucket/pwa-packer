@@ -10,6 +10,7 @@ import {
   MdWaterDrop,
   MdOutlineMerge,
   MdRadar,
+  MdOutlineNextPlan,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -109,6 +110,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlineCheck className="size-5" />}
         >
           <Link replace to="/validate" />
+        </ActionButton>
+
+        {/* Plan */}
+        <ActionButton
+          asChild
+          title="Plan Accounts"
+          label="Plan"
+          icon={<MdOutlineNextPlan className="size-5" />}
+        >
+          <Link replace to="/plan" />
         </ActionButton>
 
         {/* Refill */}

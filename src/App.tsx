@@ -21,6 +21,7 @@ import { Pack } from "./pages/Pack";
 import { Refill } from "./pages/Refill";
 import { Merge } from "./pages/Merge";
 import { StatusCheck } from "./pages/StatusCheck";
+import { Plan } from "./pages/Plan";
 
 const INACTIVITY_DURATION = 2 * 60 * 1000;
 
@@ -59,6 +60,7 @@ function App() {
           <Route path="update-urls" element={<UpdateURLs />} />
           <Route path="status-check" element={<StatusCheck />} />
           <Route path="validate" element={<Validate />} />
+          <Route path="plan" element={<Plan />} />
           <Route path="pack" element={<Pack />} />
           <Route path="refill" element={<Refill />} />
         </Route>

@@ -13,6 +13,7 @@ import { MdOutlineArrowBackIos } from "react-icons/md";
 import { AccountSwitcher } from "./AccountSwitcher";
 import { AccountInfo } from "./AccountInfo";
 import { AccountDialogHistoryTab } from "./AccountDialogHistoryTab";
+import { TabTrigger } from "./TabTrigger";
 
 interface AccountWebviewProps {
   account: Account;
@@ -88,29 +89,7 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
   );
 };
 
-const WebviewAsideTabTrigger = ({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) => {
-  return (
-    <Tabs.Trigger
-      value={value}
-      className={cn(
-        "px-4 py-2 truncate",
-        "text-sm font-medium cursor-pointer",
-        "text-neutral-400 hover:text-yellow-500",
-        "data-[state=active]:text-yellow-500 border-b-2 border-b-transparent",
-        "data-[state=active]:border-b-yellow-500",
-        "focus:outline-none focus:ring-0"
-      )}
-    >
-      {title}
-    </Tabs.Trigger>
-  );
-};
+const WebviewAsideTabTrigger = TabTrigger;
 
 const WebviewAside = ({ account }: { account: Account }) => {
   return (
