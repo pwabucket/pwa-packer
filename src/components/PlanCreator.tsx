@@ -35,6 +35,7 @@ import { LabelToggle } from "./LabelToggle";
 import { WalletReader } from "../lib/WalletReader";
 import { usePassword } from "../hooks/usePassword";
 import { executeUsdtTransfers } from "../lib/transfers";
+import USDTIcon from "../assets/tether-usdt-logo.svg";
 
 /** Plan Form Schema */
 const PlanFormSchema = yup
@@ -527,7 +528,10 @@ const PlanCreator = () => {
               name="total"
               render={({ field, fieldState }) => (
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="total">Total Amount</Label>
+                  <Label htmlFor="total">
+                    <img src={USDTIcon} className="size-4 inline-block" /> Total
+                    Amount
+                  </Label>
                   <Input
                     {...field}
                     id="total"
