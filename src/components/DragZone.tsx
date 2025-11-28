@@ -26,20 +26,28 @@ const FileTypeIndicator = () => (
 );
 
 /* Upload Text Content Component */
-const UploadTextContent = ({ isDragActive }: { isDragActive: boolean }) => (
+const UploadTextContent = ({
+  title,
+  isDragActive,
+}: {
+  title: string;
+  isDragActive: boolean;
+}) => (
   <div className="flex flex-col gap-1">
     {isDragActive ? (
       <div className="flex flex-col gap-1">
         <p className="text-yellow-400 font-semibold text-lg animate-pulse">
-          Drop your file here
+          Drop your {title} file here
         </p>
-        <p className="text-yellow-500 text-sm">Release to upload</p>
+        <p className="text-yellow-500 text-sm">
+          Release to upload {title} file
+        </p>
       </div>
     ) : (
       <div className="flex flex-col gap-1">
         <p className="text-yellow-400 font-semibold text-base">Upload File</p>
         <p className="text-yellow-500 text-sm leading-relaxed">
-          Drag and drop your file here
+          Drag and drop your {title} file here
         </p>
         <div>
           <span className="inline-flex items-center px-3 py-2 rounded-full text-xs font-medium text-yellow-500 border border-yellow-500">
@@ -56,12 +64,14 @@ interface DragZoneProps {
   getRootProps: () => DropzoneRootProps;
   getInputProps: () => DropzoneInputProps;
   isDragActive: boolean;
+  title: string;
 }
 
 const DragZone = ({
+  title,
+  isDragActive,
   getRootProps,
   getInputProps,
-  isDragActive,
 }: DragZoneProps) => (
   <div
     {...getRootProps()}
@@ -89,7 +99,7 @@ const DragZone = ({
       <UploadIcon isDragActive={isDragActive} />
     </div>
 
-    <UploadTextContent isDragActive={isDragActive} />
+    <UploadTextContent title={title} isDragActive={isDragActive} />
     <FileTypeIndicator />
   </div>
 );

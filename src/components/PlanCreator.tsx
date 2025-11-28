@@ -141,6 +141,10 @@ const PlanCreator = () => {
   /* Prepare account */
   const prepareAccount = async (account: Account): Promise<PreparedAccount> => {
     try {
+      if (!account.url) {
+        throw new Error("Account is missing a URL!");
+      }
+
       const [balance, activity] = await Promise.all([
         checkBalance(account),
         checkActivity(account),

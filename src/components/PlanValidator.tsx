@@ -1,4 +1,3 @@
-import { useDropzone } from "react-dropzone";
 import { DragZone } from "./DragZone";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +19,7 @@ import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
 import { getActivityStreak } from "../lib/activity";
+import { useJsonDropzone } from "../hooks/useJsonDropzone";
 
 const PlanValidator = () => {
   const [plans, setPlans] = useState<PlanResult[] | null>(null);
@@ -130,14 +130,7 @@ const PlanValidator = () => {
   }, []);
 
   /* Dropzone */
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/json": [".json"],
-    },
-    maxFiles: 1,
-    multiple: false,
-  });
+  const { getRootProps, getInputProps, isDragActive } = useJsonDropzone(onDrop);
 
   const validatePlans = async () => {
     await mutation.mutateAsync(plans!);
@@ -182,9 +175,10 @@ const PlanValidator = () => {
       ) : (
         <>
           <p className="text-xs text-neutral-400 text-center px-4">
-            Import your plan file to validate accounts and progress.
+            Import your plan file to validate accounts and see progress.
           </p>
           <DragZone
+            title="plan"
             getRootProps={getRootProps}
             getInputProps={getInputProps}
             isDragActive={isDragActive}
