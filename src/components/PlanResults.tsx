@@ -3,61 +3,100 @@ import { cn, formatCurrency } from "../lib/utils";
 import type { PlanResult, PlanValidationResult } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
+import { Dialog } from "radix-ui";
+import { AccountWebview } from "./AccountWebview";
+import useLocationToggle from "../hooks/useLocationToggle";
+
+const PlanResultItem = ({
+  result,
+  disabled,
+}: {
+  disabled?: boolean;
+  result: PlanResult | PlanValidationResult;
+}) => {
+  const [showAccountWebview, toggleShowAccountWebview] = useLocationToggle(
+    `${result.account.id}-webview`
+  );
+
+  return (
+    <Dialog.Root
+      open={showAccountWebview}
+      onOpenChange={toggleShowAccountWebview}
+      key={result.account.id}
+    >
+      <Dialog.Trigger
+        disabled={disabled}
+        className={cn(
+          "flex items-center gap-2",
+          "bg-neutral-900",
+          "hover:bg-neutral-800",
+          "rounded-full p-2 cursor-pointer",
+          "disabled:opacity-50 disabled:pointer-events-none"
+        )}
+      >
+        {/* Avatar */}
+        <AccountAvatar account={result.account} className="size-8" />
+
+        {/* Title and Balance */}
+        <div className="grow min-w-0">
+          <h2
+            className={cn(
+              "font-bold text-xs flex items-baseline",
+              "text-yellow-500"
+            )}
+          >
+            {result.account.title}
+          </h2>
+          <AccountBalance account={result.account} />
+        </div>
+
+        {/* Details */}
+        <p className="flex flex-col shrink-0">
+          {/* Streak */}
+          <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
+            <span className="font-bold">Streak</span> {result.streak}
+          </span>{" "}
+          {/* Amount */}
+          <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
+            {"activity" in result && result.activity ? (
+              <>{formatCurrency(Number(result.activity.amount))} / </>
+            ) : null}
+            {formatCurrency(result.amount)}
+          </span>
+        </p>
+
+        {/* Status Icon */}
+        {"validation" in result ? (
+          <span className="shrink-0">
+            {result.validation ? (
+              <MdCheckCircle className="size-6 text-lime-400" />
+            ) : (
+              <MdOutlineClose className="size-6 text-red-500" />
+            )}
+          </span>
+        ) : null}
+      </Dialog.Trigger>
+
+      <AccountWebview account={result.account} enableSwitcher={false} />
+    </Dialog.Root>
+  );
+};
 
 const PlanResults = ({
+  disabled,
   results,
 }: {
+  disabled?: boolean;
   results: (PlanResult | PlanValidationResult)[];
 }) => {
   return (
-    <div className="flex flex-col gap-2">
-      {results.map((result, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-2 bg-neutral-800 rounded-full p-2"
-        >
-          {/* Avatar */}
-          <AccountAvatar account={result.account} className="size-8" />
-
-          {/* Title and Balance */}
-          <div className="grow min-w-0">
-            <h2
-              className={cn(
-                "font-bold text-xs flex items-baseline",
-                "text-yellow-500"
-              )}
-            >
-              {result.account.title}
-            </h2>
-            <AccountBalance account={result.account} />
-          </div>
-
-          {/* Details */}
-          <p className="flex flex-col shrink-0">
-            {/* Streak */}
-            <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-              <span className="font-bold">Streak</span> {result.streak}
-            </span>{" "}
-            {/* Amount */}
-            <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-              {formatCurrency(result.amount)}
-              {"activity" in result && result.activity ? (
-                <> / {formatCurrency(Number(result.activity.amount))}</>
-              ) : null}
-            </span>
-          </p>
-
-          {/* Status Icon */}
-          {"validation" in result ? (
-            <span className="shrink-0">
-              {result.validation ? (
-                <MdCheckCircle className="size-6 text-lime-400" />
-              ) : (
-                <MdOutlineClose className="size-6 text-red-500" />
-              )}
-            </span>
-          ) : null}
-        </div>
+    <div className={cn("flex flex-col gap-2")}>
+      {results.map((result) => (
+        <PlanResultItem
+          key={result.account.id}
+          result={result}
+          disabled={disabled}
+        />
       ))}
     </div>
   );

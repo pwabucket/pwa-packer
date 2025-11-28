@@ -129,7 +129,7 @@ const AccountItem = ({ account }: { account: Account }) => {
             />
           </div>
 
-          <AccountWebview account={account} close={closeAccountDetails} />
+          <AccountWebview account={account} />
         </Dialog.Root>
       </Reorder.Item>
 

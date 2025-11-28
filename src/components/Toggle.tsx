@@ -13,7 +13,7 @@ const Toggle = memo(function Toggle({
           "shrink-0",
           "relative rounded-full",
           "inline-flex h-6 w-10 items-center",
-          "dark:bg-neutral-800",
+          "bg-neutral-800",
           "peer-checked:bg-yellow-500",
 
           // Before

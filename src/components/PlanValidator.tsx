@@ -163,13 +163,18 @@ const PlanValidator = () => {
             </>
           ) : null}
 
-          <Button onClick={validatePlans}>Validate Plan</Button>
+          <Button disabled={mutation.isPending} onClick={validatePlans}>
+            {mutation.isPending ? "Validating..." : "Validate Plan"}
+          </Button>
 
           {mutation.isPending ? (
             <Progress max={target} current={progress} />
           ) : null}
 
-          <PlanResults results={mutation.data?.results || plans} />
+          <PlanResults
+            disabled={mutation.isPending}
+            results={mutation.data?.results || plans}
+          />
         </>
       ) : (
         <>

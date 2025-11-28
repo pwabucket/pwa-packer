@@ -17,7 +17,7 @@ import { TabTrigger } from "./TabTrigger";
 
 interface AccountWebviewProps {
   account: Account;
-  close: () => void;
+  enableSwitcher?: boolean;
 }
 
 interface WebviewAreaProps {
@@ -177,7 +177,10 @@ const AccountHeader = ({
   );
 };
 
-const AccountWebview = ({ account }: AccountWebviewProps) => {
+const AccountWebview = ({
+  account,
+  enableSwitcher = true,
+}: AccountWebviewProps) => {
   const [showAside, setShowAside] = useState(false);
   const toggleAside = useCallback(() => {
     setShowAside((prev) => !prev);
@@ -206,7 +209,9 @@ const AccountWebview = ({ account }: AccountWebviewProps) => {
         </div>
       </div>
 
-      <AccountSwitcher account={account} switchKey="webview" />
+      {enableSwitcher && (
+        <AccountSwitcher account={account} switchKey="webview" />
+      )}
     </PopupDialog>
   );
 };
