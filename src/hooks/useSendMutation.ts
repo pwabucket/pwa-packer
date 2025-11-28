@@ -17,14 +17,9 @@ import type {
 } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
-import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
-import { ethers } from "ethers";
-import {
-  BASE_GAS_PRICE,
-  GAS_LIMITS_TRANSFER,
-  USDT_DECIMALS,
-} from "../lib/transaction";
+import { WalletReader } from "../lib/WalletReader";
 import toast from "react-hot-toast";
+import { executeUsdtTransfers } from "../lib/transfers";
 
 interface SendMutationData {
   accounts: Account[];
@@ -162,38 +157,6 @@ const useSendMutation = () => {
         result: null,
       };
     }
-  };
-
-  /**
-   * Send USDT directly (without hash targeting) for refill operations
-   */
-  const sendUSDTDirect = async (from: Account, to: string, amount: number) => {
-    const amountStr = truncateDecimals(amount, 8);
-    const reader = new WalletReader(from.walletAddress);
-    const provider = reader.getProvider();
-    const usdtToken = reader.getUsdtTokenContract();
-
-    const privateKey = await getPrivateKey(from.id, password);
-    const wallet = new ethers.Wallet(privateKey, provider);
-
-    console.log(
-      `Refilling: Sending $${amountStr} USDT from ${from.title} (${from.walletAddress}) to ${to}`
-    );
-
-    const connectedToken = usdtToken.connect(wallet) as UsdtTokenContract;
-    const tx = await connectedToken.transfer(
-      to,
-      ethers.parseUnits(amountStr, USDT_DECIMALS),
-      {
-        gasLimit: GAS_LIMITS_TRANSFER["fast"],
-        gasPrice: BASE_GAS_PRICE,
-      }
-    );
-
-    const result = await tx.wait();
-    console.log(`Refill Result: ${from.title}`, result);
-
-    return result;
   };
 
   /** Get account validation */
@@ -550,56 +513,13 @@ const useSendMutation = () => {
   const executeRefillTransactions = async (
     transactions: RefillTransaction[]
   ): Promise<{ success: number; failed: number }> => {
-    let success = 0;
-    let failed = 0;
-
-    /* Group transactions by sender to avoid nonce collisions */
-    const groupedBySender = new Map<string, RefillTransaction[]>();
-    for (const tx of transactions) {
-      const senderKey = tx.from.walletAddress;
-      if (!groupedBySender.has(senderKey)) {
-        groupedBySender.set(senderKey, []);
-      }
-      groupedBySender.get(senderKey)!.push(tx);
-    }
-
-    /* Process each sender's transactions sequentially, but senders in parallel (chunks) */
-    const senderGroups = Array.from(groupedBySender.values());
-
-    for (const chunk of chunkArrayGenerator(senderGroups, 10)) {
-      const results = await Promise.all(
-        chunk.map(async (senderTxs) => {
-          let senderSuccess = 0;
-          let senderFailed = 0;
-
-          /* Execute this sender's transactions sequentially to maintain nonce order */
-          for (const tx of senderTxs) {
-            try {
-              await sendUSDTDirect(tx.from, tx.to.walletAddress, tx.amount);
-              senderSuccess++;
-            } catch (error) {
-              console.error(
-                `Refill failed from ${tx.from.title} to ${tx.to.title}:`,
-                error
-              );
-              senderFailed++;
-            } finally {
-              incrementProgress();
-            }
-          }
-
-          return { success: senderSuccess, failed: senderFailed };
-        })
-      );
-
-      success += results.reduce((sum, r) => sum + r.success, 0);
-      failed += results.reduce((sum, r) => sum + r.failed, 0);
-
-      /* Small delay between chunks */
-      if (chunk.length === 10) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-    }
+    const { success, failed } = await executeUsdtTransfers({
+      transactions,
+      password,
+      onResult: () => {
+        incrementProgress();
+      },
+    });
 
     return { success, failed };
   };

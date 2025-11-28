@@ -64,9 +64,11 @@ export interface PackResult {
 
 export interface PlanAccountStatus {
   status: boolean;
-  skipped: boolean;
   account: Account;
-  streak: number;
+  activity: {
+    activity: Activity | null;
+    streak: number;
+  };
 }
 
 export interface PlanResult extends PlanAccountStatus {
@@ -75,7 +77,6 @@ export interface PlanResult extends PlanAccountStatus {
 
 export interface PlanValidationResult extends PlanResult {
   validation: boolean;
-  activity: Activity | null;
 }
 
 export interface PlanStats {

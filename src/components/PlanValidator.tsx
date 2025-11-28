@@ -19,6 +19,7 @@ import {
 import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
+import { getActivityStreak } from "../lib/activity";
 
 const PlanValidator = () => {
   const [plans, setPlans] = useState<PlanResult[] | null>(null);
@@ -29,7 +30,7 @@ const PlanValidator = () => {
     const totalAccounts = results.length;
     const totalAmount = results.reduce((total, item) => total + item.amount, 0);
     const progressAmount = results.reduce(
-      (total, item) => total + Number(item.activity?.amount || 0),
+      (total, item) => total + Number(item.activity.activity?.amount || 0),
       0
     );
     const successfulCount = results.filter((item) => item.validation).length;
@@ -53,27 +54,29 @@ const PlanValidator = () => {
       await packer.initialize();
 
       const activity: Activity = await packer.getActivity();
+      const result = await packer.getWithdrawActivityList();
+      const list = result.data.list;
+      const streak = getActivityStreak(list);
 
       return {
         status: true,
-        skipped: false,
         account: plan.account,
         amount: plan.amount,
-        streak: plan.streak,
         validation: activity.activity && Number(activity.amount) >= plan.amount,
-        activity: activity,
+        activity: { activity, streak },
       };
     } catch (error) {
       console.log(`Error validating ${plan.account.title}`, error);
 
       return {
         status: false,
-        skipped: false,
         account: plan.account,
         amount: plan.amount,
-        streak: plan.streak,
         validation: false,
-        activity: null,
+        activity: {
+          activity: null,
+          streak: 0,
+        },
       };
     }
   };
@@ -136,8 +139,8 @@ const PlanValidator = () => {
     multiple: false,
   });
 
-  const validatePlans = () => {
-    mutation.mutateAsync(plans!);
+  const validatePlans = async () => {
+    await mutation.mutateAsync(plans!);
     toast.success("Plans validated successfully!");
   };
 

@@ -51,19 +51,30 @@ const PlanResultItem = ({
         </div>
 
         {/* Details */}
-        <p className="flex flex-col shrink-0">
-          {/* Streak */}
-          <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-            <span className="font-bold">Streak</span> {result.streak}
-          </span>{" "}
+        <p className="shrink-0 text-xs">
           {/* Amount */}
-          <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
-            {"activity" in result && result.activity ? (
-              <>{formatCurrency(Number(result.activity.amount))} / </>
-            ) : null}
-            {formatCurrency(result.amount)}
-          </span>
+          {result.activity.activity ? (
+            <span className="text-blue-300">
+              {formatCurrency(Number(result.activity.activity?.amount || 0))} /{" "}
+            </span>
+          ) : null}
+          <span className="text-lime-300">{formatCurrency(result.amount)}</span>
         </p>
+
+        {/* Streak */}
+        <span
+          className={cn(
+            "shrink-0 flex items-center justify-center font-bold",
+            "text-xs bg-neutral-700 size-4 rounded-full",
+            result.activity.streak > 1
+              ? "text-red-400"
+              : result.activity.streak > 0
+              ? "text-yellow-400"
+              : "text-green-400"
+          )}
+        >
+          {result.activity.streak}
+        </span>
 
         {/* Status Icon */}
         {"validation" in result ? (
