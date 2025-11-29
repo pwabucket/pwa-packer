@@ -9,9 +9,11 @@ import useLocationToggle from "../hooks/useLocationToggle";
 
 const PlanResultItem = ({
   result,
+  validated,
   disabled,
 }: {
   disabled?: boolean;
+  validated?: boolean;
   result: PlanResult | PlanValidationResult;
 }) => {
   const [showAccountWebview, toggleShowAccountWebview] = useLocationToggle(
@@ -53,7 +55,7 @@ const PlanResultItem = ({
         {/* Details */}
         <p className="shrink-0 text-xs">
           {/* Amount */}
-          {result.activity.activity ? (
+          {validated ? (
             <span className="text-blue-300">
               {formatCurrency(Number(result.activity.activity?.amount || 0))} /{" "}
             </span>
@@ -94,9 +96,11 @@ const PlanResultItem = ({
 };
 
 const PlanResults = ({
+  validated = false,
   disabled,
   results,
 }: {
+  validated?: boolean;
   disabled?: boolean;
   results: (PlanResult | PlanValidationResult)[];
 }) => {
@@ -106,6 +110,7 @@ const PlanResults = ({
         <PlanResultItem
           key={result.account.id}
           result={result}
+          validated={validated}
           disabled={disabled}
         />
       ))}

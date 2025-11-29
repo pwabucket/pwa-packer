@@ -147,6 +147,7 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
       {mutation.isPending ? <Progress max={target} current={progress} /> : null}
 
       <PlanResults
+        validated={mutation.isSuccess}
         disabled={mutation.isPending}
         results={mutation.data?.results || plan.results}
       />
