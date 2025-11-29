@@ -9,6 +9,7 @@ import type { BackupData } from "../types";
 import { encryption } from "../services/encryption";
 import { WalletReader } from "./WalletReader";
 import { format } from "date-fns";
+import Decimal from "decimal.js";
 
 export { v4 as uuid } from "uuid";
 
@@ -182,19 +183,27 @@ export function truncateAddress(address: string, length = 6) {
  * @returns Truncated number as string (no rounding, no scientific notation)
  */
 export function truncateDecimals(value: number, decimals: number = 8): string {
-  /* Convert to string with extra precision to avoid scientific notation */
-  const str = value.toFixed(Math.max(decimals + 5, 20));
+  return new Decimal(value).toPrecision(decimals, Decimal.ROUND_DOWN);
+}
 
-  /* Find decimal point position */
-  const dotIndex = str.indexOf(".");
+/**
+ * Truncate USDT amount to 4 decimal places (no rounding)
+ * USDT is a stablecoin and 4 decimals provides sufficient precision
+ * @param value - The USDT amount to truncate
+ * @returns Truncated USDT amount as number
+ */
+export function truncateUSDT(value: number): number {
+  return parseFloat(truncateDecimals(value, 4));
+}
 
-  /* If no decimal point or decimals is 0, return integer part only */
-  if (dotIndex === -1 || decimals === 0) {
-    return Math.trunc(value).toString();
-  }
-
-  /* Slice string to desired decimal places (pure truncation, no rounding) */
-  return str.slice(0, dotIndex + decimals + 1);
+/**
+ * Truncate BNB amount to 8 decimal places (no rounding)
+ * BNB uses 8 decimals for display (industry standard for native tokens)
+ * @param value - The BNB amount to truncate
+ * @returns Truncated BNB amount as number
+ */
+export function truncateBNB(value: number): number {
+  return parseFloat(truncateDecimals(value, 8));
 }
 
 /** Format number as currency string */

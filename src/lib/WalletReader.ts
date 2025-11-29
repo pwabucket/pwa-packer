@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { USDT_ABI, USDT_CONTRACT_ADDRESS, USDT_DECIMALS } from "./transaction";
 import { providers } from "../services/providers";
-import { truncateDecimals } from "./utils";
+import { truncateBNB, truncateUSDT } from "./utils";
 
 export type UsdtTokenContract = ethers.Contract & {
   decimals: () => Promise<number>;
@@ -48,16 +48,16 @@ class WalletReader {
   getBNBBalance = async (): Promise<number> => {
     const balance = await this.provider.getBalance(this.address);
     const formatted = ethers.formatEther(balance);
-    const truncated = truncateDecimals(parseFloat(formatted), 8);
-    return parseFloat(truncated);
+
+    return truncateBNB(parseFloat(formatted));
   };
 
   /** Get USDT Balance */
   getUSDTBalance = async (): Promise<number> => {
     const balance = await this.usdtToken.balanceOf(this.address);
     const formatted = ethers.formatUnits(balance, USDT_DECIMALS);
-    const truncated = truncateDecimals(parseFloat(formatted), 8);
-    return parseFloat(truncated);
+
+    return truncateUSDT(parseFloat(formatted));
   };
 }
 

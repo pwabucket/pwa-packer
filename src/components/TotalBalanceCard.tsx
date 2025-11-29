@@ -3,7 +3,13 @@ import { useTotalBalanceQueries } from "../hooks/useTotalBalanceQueries";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import { MdOutlineRefresh } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
-import { cn, formatCurrency, truncateDecimals } from "../lib/utils";
+import {
+  cn,
+  formatCurrency,
+  truncateBNB,
+  truncateDecimals,
+  truncateUSDT,
+} from "../lib/utils";
 const TotalBalanceCard = () => {
   const queryClient = useQueryClient();
   const queries = useTotalBalanceQueries();
@@ -14,8 +20,8 @@ const TotalBalanceCard = () => {
       (total, balance) => {
         return balance
           ? {
-              usdt: total.usdt + balance.usdtBalance,
-              bnb: total.bnb + balance.bnbBalance,
+              usdt: truncateUSDT(total.usdt + balance.usdtBalance),
+              bnb: truncateBNB(total.bnb + balance.bnbBalance),
             }
           : total;
       },

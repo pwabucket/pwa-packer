@@ -89,7 +89,6 @@ export interface PlanStats {
 
 export interface PlanParameters {
   total: string;
-  minimum: string;
   maximum: string;
 }
 

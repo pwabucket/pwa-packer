@@ -14,6 +14,7 @@ import {
   chunkArrayGenerator,
   delayForSeconds,
   formatCurrency,
+  truncateUSDT,
 } from "../lib/utils";
 import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
@@ -28,7 +29,9 @@ const PlanValidator = () => {
 
   const calculateStats = (results: PlanValidationResult[]) => {
     const totalAccounts = results.length;
-    const totalAmount = results.reduce((total, item) => total + item.amount, 0);
+    const totalAmount = truncateUSDT(
+      results.reduce((total, item) => total + item.amount, 0)
+    );
     const progressAmount = results.reduce(
       (total, item) => total + Number(item.activity.activity?.amount || 0),
       0

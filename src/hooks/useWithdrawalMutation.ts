@@ -6,7 +6,7 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
+import { chunkArrayGenerator, getPrivateKey, truncateUSDT } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
@@ -191,9 +191,11 @@ const useWithdrawalMutation = () => {
     const successfulSends = results.filter(
       (r) => r.status && !r.skipped
     ).length;
-    const totalSentValue = results
-      .filter((r) => r.status && r.amount)
-      .reduce((sum, r) => sum + (r.amount || 0), 0);
+    const totalSentValue = truncateUSDT(
+      results
+        .filter((r) => r.status && r.amount)
+        .reduce((sum, r) => sum + (r.amount || 0), 0)
+    );
 
     return {
       totalAccounts: results.length,

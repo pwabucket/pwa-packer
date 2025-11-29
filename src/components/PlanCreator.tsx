@@ -24,7 +24,7 @@ import {
   floorToWholeNumber,
   formatCurrency,
   randomItem,
-  truncateDecimals,
+  truncateUSDT,
 } from "../lib/utils";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
@@ -41,7 +41,6 @@ import USDTIcon from "../assets/tether-usdt-logo.svg";
 const PlanFormSchema = yup
   .object({
     total: yup.string().required().label("Total"),
-    minimum: yup.string().required().label("Minimum"),
     maximum: yup.string().required().label("Maximum"),
     fill: yup.boolean().required().label("Fill"),
   })
@@ -50,7 +49,6 @@ const PlanFormSchema = yup
 /** Plan Form Data */
 interface PlanFormData {
   total: string;
-  minimum: string;
   maximum: string;
   fill: boolean;
 }
@@ -76,11 +74,15 @@ const PlanCreator = () => {
     resolver: yupResolver(PlanFormSchema),
     defaultValues: {
       total: "",
-      minimum: "",
       maximum: "",
       fill: true,
     },
   });
+
+  /** Truncate value */
+  const truncateValue = (value: number) => {
+    return truncateUSDT(value);
+  };
 
   /**
    * Check if account has sufficient balance
@@ -89,10 +91,9 @@ const PlanCreator = () => {
     try {
       const reader = new WalletReader(account.walletAddress);
       const balance = await reader.getUSDTBalance();
-      const balanceStr = truncateDecimals(balance, 4);
 
       console.log(
-        `USDT Balance for ${account.title} (${account.walletAddress}): ${balanceStr}`
+        `USDT Balance for ${account.title} (${account.walletAddress}): ${balance}`
       );
 
       return balance;
@@ -194,7 +195,9 @@ const PlanCreator = () => {
   /* Calculate stats */
   const calculateStats = (results: PreparedResult[]): PlanStats => {
     const totalAccounts = results.length;
-    const totalAmount = results.reduce((total, item) => total + item.amount, 0);
+    const totalAmount = truncateValue(
+      results.reduce((total, item) => total + item.amount, 0)
+    );
     const firstActivity = results.filter(
       (item) => item.activity.streak === 0
     ).length;
@@ -215,9 +218,6 @@ const PlanCreator = () => {
   };
 
   const planFillTransfers = (plans: PreparedResult[]) => {
-    /* Helper to truncate to 4 decimals as number */
-    const truncate4 = (value: number) => parseFloat(truncateDecimals(value, 4));
-
     /* Separate accounts into categories */
     const participatingAccounts = plans.filter((item) => item.amount > 0);
     const nonParticipatingAccounts = plans.filter((item) => item.amount === 0);
@@ -232,15 +232,15 @@ const PlanCreator = () => {
     ];
 
     /* Calculate totals with 4 decimals */
-    const totalNeeded = truncate4(
+    const totalNeeded = truncateValue(
       accountsNeedingFunds.reduce(
-        (sum, item) => sum + truncate4(item.amount - item.balance),
+        (sum, item) => sum + truncateValue(item.amount - item.balance),
         0
       )
     );
-    const totalExcess = truncate4(
+    const totalExcess = truncateValue(
       accountsWithExcess.reduce(
-        (sum, item) => sum + truncate4(item.balance - item.amount),
+        (sum, item) => sum + truncateValue(item.balance - item.amount),
         0
       )
     );
@@ -272,26 +272,26 @@ const PlanCreator = () => {
 
     /* Sort by priority: accounts with excess that are participating should give first */
     accountsWithExcess.sort((a, b) => {
-      const aExcess = truncate4(a.balance - a.amount);
-      const bExcess = truncate4(b.balance - b.amount);
+      const aExcess = truncateValue(a.balance - a.amount);
+      const bExcess = truncateValue(b.balance - b.amount);
       return bExcess - aExcess; /* Higher excess first */
     });
 
     /* Sort recipients by need (higher deficit first) */
     accountsNeedingFunds.sort((a, b) => {
-      const aDeficit = truncate4(a.amount - a.balance);
-      const bDeficit = truncate4(b.amount - b.balance);
+      const aDeficit = truncateValue(a.amount - a.balance);
+      const bDeficit = truncateValue(b.amount - b.balance);
       return bDeficit - aDeficit;
     });
 
     let remainingNeeded = [...accountsNeedingFunds].map((item) => ({
       account: item.account,
-      needed: truncate4(item.amount - item.balance),
+      needed: truncateValue(item.amount - item.balance),
     }));
 
     /* Create transactions from excess accounts to deficit accounts (participating first) */
     for (const donor of accountsWithExcess) {
-      let availableToGive = truncate4(donor.balance - donor.amount);
+      let availableToGive = truncateValue(donor.balance - donor.amount);
 
       if (availableToGive <= 0) continue;
 
@@ -299,7 +299,7 @@ const PlanCreator = () => {
         if (recipient.needed <= 0) continue;
         if (availableToGive <= 0) break;
 
-        const transferAmount = truncate4(
+        const transferAmount = truncateValue(
           Math.min(availableToGive, recipient.needed)
         );
 
@@ -309,8 +309,8 @@ const PlanCreator = () => {
           amount: transferAmount,
         });
 
-        availableToGive = truncate4(availableToGive - transferAmount);
-        recipient.needed = truncate4(recipient.needed - transferAmount);
+        availableToGive = truncateValue(availableToGive - transferAmount);
+        recipient.needed = truncateValue(recipient.needed - transferAmount);
       }
     }
 
@@ -318,12 +318,12 @@ const PlanCreator = () => {
     const remainingExcess = accountsWithExcess
       .map((item) => ({
         account: item.account,
-        excess: truncate4(Math.max(0, item.balance - item.amount)),
+        excess: truncateValue(Math.max(0, item.balance - item.amount)),
       }))
       .filter((item) => item.excess > 0);
 
     if (remainingExcess.length > 0) {
-      const totalRemainingExcess = truncate4(
+      const totalRemainingExcess = truncateValue(
         remainingExcess.reduce((sum, item) => sum + item.excess, 0)
       );
 
@@ -343,7 +343,7 @@ const PlanCreator = () => {
             if (donor.excess <= 0) break;
 
             /* Transfer all available excess from this donor to this collector */
-            const transferAmount = truncate4(donor.excess);
+            const transferAmount = truncateValue(donor.excess);
 
             transactions.push({
               from: donor.account,
@@ -400,7 +400,7 @@ const PlanCreator = () => {
     return { success, failed };
   };
 
-  const planAmounts = (
+  const planAvailableAccounts = (
     preparedAccounts: PreparedAccount[],
     data: PlanFormData
   ) => {
@@ -412,9 +412,9 @@ const PlanCreator = () => {
         amount: 0,
       }));
 
-    const total = floorToWholeNumber(parseFloat(data.total));
-    const minimum = floorToWholeNumber(parseFloat(data.minimum));
+    const minimum = 1;
     const maximum = floorToWholeNumber(parseFloat(data.maximum));
+    const total = floorToWholeNumber(parseFloat(data.total));
     const difference = maximum - minimum;
 
     let needed = total;
@@ -450,7 +450,7 @@ const PlanCreator = () => {
       resetProgress();
       setTarget(selectedAccounts.length);
       const preparedAccounts = await getPreparedAccounts(selectedAccounts);
-      const availableAccounts = planAmounts(preparedAccounts, data);
+      const availableAccounts = planAvailableAccounts(preparedAccounts, data);
 
       if (data.fill) {
         await fillAccounts(availableAccounts);
@@ -545,30 +545,6 @@ const PlanCreator = () => {
                   <p className="text-xs text-neutral-400 text-center px-4">
                     This is the total amount to send from all accounts combined,
                     the total may be less if accounts are not sufficient.
-                  </p>
-                </div>
-              )}
-            />
-
-            {/* Minimum */}
-            <Controller
-              name="minimum"
-              render={({ field, fieldState }) => (
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="minimum">Minimum Amount</Label>
-                  <Input
-                    {...field}
-                    id="minimum"
-                    type="number"
-                    inputMode="decimal"
-                    autoComplete="off"
-                    placeholder="Minimum Amount"
-                    disabled={mutation.isPending}
-                  />
-                  <FormFieldError message={fieldState.error?.message} />
-                  <p className="text-xs text-neutral-400 text-center px-4">
-                    This is the minimum amount to send from each account.
-                    Accounts will not send less than this amount.
                   </p>
                 </div>
               )}

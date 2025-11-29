@@ -10,7 +10,9 @@ import { useMutation } from "@tanstack/react-query";
 import {
   chunkArrayGenerator,
   getPrivateKey,
+  truncateBNB,
   truncateDecimals,
+  truncateUSDT,
 } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
@@ -53,6 +55,11 @@ const useRefillMutation = () => {
     useProgress();
   const password = useAppStore((state) => state.password)!;
 
+  /* Truncate value to 8 decimals as number */
+  const truncateValue = (token: "bnb" | "usdt", value: number) => {
+    return token === "bnb" ? truncateBNB(value) : truncateUSDT(value);
+  };
+
   /**
    * Fetch account balance for given token
    */
@@ -94,13 +101,13 @@ const useRefillMutation = () => {
             excessFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: balanceValue - requiredBalance,
+              difference: truncateValue(token, balanceValue - requiredBalance),
             });
           } else if (balanceValue < requiredBalance) {
             insufficientFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: requiredBalance - balanceValue,
+              difference: truncateValue(token, requiredBalance - balanceValue),
             });
           }
         })
@@ -130,7 +137,10 @@ const useRefillMutation = () => {
     /* For BNB, each send transaction consumes gas from the sender */
     if (token === "bnb") {
       /* The sender needs gas to execute this transfer */
-      const maxTransferable = available - requiredGasInEther;
+      const maxTransferable = truncateValue(
+        token,
+        available - requiredGasInEther
+      );
       if (maxTransferable <= 0) return 0;
       transferAmount = Math.min(transferAmount, maxTransferable);
     }
@@ -203,8 +213,8 @@ const useRefillMutation = () => {
               ? transferAmount + requiredGasInEther
               : transferAmount;
 
-          donor.difference -= totalCost;
-          needed -= transferAmount;
+          donor.difference = truncateValue(token, donor.difference - totalCost);
+          needed = truncateValue(token, needed - transferAmount);
         }
 
         /* Mark this recipient as processed so it won't be drained by future recipients */
@@ -243,8 +253,12 @@ const useRefillMutation = () => {
               ? transferAmount + requiredGasInEther
               : transferAmount;
 
-          excessItem.difference -= totalCost;
-          needed -= transferAmount;
+          excessItem.difference = truncateValue(
+            token,
+            excessItem.difference - totalCost
+          );
+
+          needed = truncateValue(token, needed - transferAmount);
         }
       }
     }
@@ -396,11 +410,15 @@ const useRefillMutation = () => {
   /**
    * Calculate statistics from results
    */
-  const calculateStats = (results: RefillResult[]): RefillStats => {
+  const calculateStats = (
+    token: "bnb" | "usdt",
+    results: RefillResult[]
+  ): RefillStats => {
     const successfulSends = results.filter((r) => r.status).length;
-    const totalSentValue = results
-      .filter((r) => r.status)
-      .reduce((sum, r) => sum + r.task.amount, 0);
+    const totalSentValue = truncateValue(
+      token,
+      results.filter((r) => r.status).reduce((sum, r) => sum + r.task.amount, 0)
+    );
 
     return {
       successfulSends,
@@ -445,7 +463,7 @@ const useRefillMutation = () => {
       );
 
       /* Step 5: Calculate statistics */
-      const stats = calculateStats(results);
+      const stats = calculateStats(data.token, results);
 
       return { results, ...stats };
     },

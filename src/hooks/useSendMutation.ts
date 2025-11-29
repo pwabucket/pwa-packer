@@ -4,7 +4,7 @@ import {
   delayForSeconds,
   downloadJsonFile,
   getPrivateKey,
-  truncateDecimals,
+  truncateUSDT,
 } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
@@ -62,6 +62,11 @@ const useSendMutation = () => {
     return Math.floor(value);
   };
 
+  /** Truncate value */
+  const truncateValue = (value: number) => {
+    return truncateUSDT(value);
+  };
+
   /**
    * Check if account has sufficient balance
    */
@@ -71,10 +76,9 @@ const useSendMutation = () => {
     try {
       const reader = new WalletReader(account.walletAddress);
       const balance = await reader.getUSDTBalance();
-      const balanceStr = truncateDecimals(balance, 8);
 
       console.log(
-        `USDT Balance for ${account.title} (${account.walletAddress}): ${balanceStr}`
+        `USDT Balance for ${account.title} (${account.walletAddress}): ${balance}`
       );
 
       return {
@@ -107,7 +111,7 @@ const useSendMutation = () => {
     receiver: string;
     data: SendMutationData;
   }) => {
-    const amountStr = truncateDecimals(amount, 8);
+    const amountStr = amount.toString();
     const reader = new WalletReader(account.walletAddress);
     const privateKey = await getPrivateKey(account.id, password);
     const hashMaker = new HashMaker({
@@ -141,7 +145,7 @@ const useSendMutation = () => {
       console.log(`Submit Result: ${account.title}`, result);
       return {
         status: true,
-        amount: parseFloat(amountStr),
+        amount,
         hashResult,
         result,
       };
@@ -152,7 +156,7 @@ const useSendMutation = () => {
       );
       return {
         status: false,
-        amount: parseFloat(amountStr),
+        amount,
         hashResult,
         result: null,
       };
@@ -274,14 +278,13 @@ const useSendMutation = () => {
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
           /* Truncate to 4 decimals to avoid precision issues */
-          amountNeeded = parseFloat(truncateDecimals(balance - amount, 4));
+          amountNeeded = truncateValue(balance - amount);
         } else {
           /* Floor to whole number for final send */
           amount = floorToWholeNumber(balance);
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
-          /* Truncate to 4 decimals to avoid precision issues */
-          amountNeeded = parseFloat(truncateDecimals(balance - amount, 4));
+          amountNeeded = truncateValue(balance - amount);
         }
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
@@ -386,9 +389,8 @@ const useSendMutation = () => {
     const successfulValidations = results.filter(
       (r) => r.status && r.validation?.activity
     );
-    const totalAmountSent = successfulSends.reduce(
-      (sum, r) => sum + r.amount,
-      0
+    const totalAmountSent = truncateValue(
+      successfulSends.reduce((sum, r) => sum + r.amount, 0)
     );
 
     return {
@@ -434,7 +436,7 @@ const useSendMutation = () => {
   /**
    * Prepare accounts by checking balances and determining amounts
    */
-  const getAmounts = async (
+  const getPreparedAccounts = async (
     accounts: Account[],
     data: SendMutationData,
     applyDifference: boolean = true,
@@ -470,17 +472,15 @@ const useSendMutation = () => {
 
     /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
-      let needed = parseFloat(
-        truncateDecimals(maxAmount - recipient.balance, 4)
-      );
+      let needed = truncateValue(maxAmount - recipient.balance);
 
       /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
         if (needed <= 0) break;
         if (donor.remainingToGive <= 0) continue;
 
-        const transferAmount = parseFloat(
-          truncateDecimals(Math.min(donor.remainingToGive, needed), 4)
+        const transferAmount = truncateValue(
+          Math.min(donor.remainingToGive, needed)
         );
 
         transactions.push({
@@ -489,17 +489,17 @@ const useSendMutation = () => {
           amount: transferAmount,
         });
 
-        donor.remainingToGive = parseFloat(
-          truncateDecimals(donor.remainingToGive - transferAmount, 4)
+        donor.remainingToGive = truncateValue(
+          donor.remainingToGive - transferAmount
         );
-        needed = parseFloat(truncateDecimals(needed - transferAmount, 4));
+        needed = truncateValue(needed - transferAmount);
       }
 
       /* Only move to next recipient after trying to fill this one completely */
       console.log(
-        `Recipient ${recipient.account.title}: filled to ${
+        `Recipient ${recipient.account.title}: filled to ${truncateValue(
           recipient.balance + (maxAmount - recipient.balance - needed)
-        }, still needs ${needed}`
+        )}, still needs ${needed}`
       );
     }
 
@@ -536,7 +536,7 @@ const useSendMutation = () => {
 
       /* PHASE 1: Prepare all accounts and determine amounts */
       console.log("=== PHASE 1: Preparing accounts ===");
-      const preparedAccounts = await getAmounts(data.accounts, data);
+      const preparedAccounts = await getPreparedAccounts(data.accounts, data);
 
       /* Apply skipValidated filter */
       const availableAccounts = preparedAccounts.filter((item) => {
@@ -617,7 +617,7 @@ const useSendMutation = () => {
       if (skippedAccounts.length > 0) {
         /* Re-prepare skipped accounts to get updated balances after refill */
         const skippedAccountList = skippedAccounts.map((acc) => acc.account);
-        const refilledPrepared = await getAmounts(
+        const refilledPrepared = await getPreparedAccounts(
           skippedAccountList,
           data,
           false,
