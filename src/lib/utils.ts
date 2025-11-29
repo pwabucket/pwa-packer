@@ -186,9 +186,7 @@ export function truncateDecimals(
   value: Decimal.Value,
   decimals: number = 8
 ): string {
-  return new Decimal(value)
-    .toDecimalPlaces(decimals, Decimal.ROUND_DOWN)
-    .toString();
+  return new Decimal(value).toFixed(decimals, Decimal.ROUND_DOWN);
 }
 
 /**
