@@ -5,6 +5,7 @@ import { useSendMutation } from "../hooks/useSendMutation";
 import toast from "react-hot-toast";
 import { useAccountsSelector } from "../hooks/useAccountsSelector";
 import { SendForm } from "./SendForm";
+import { PlanDuration } from "./PlanDuration";
 
 const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
   const accounts = useMemo(() => plan.results.map((p) => p.account), [plan]);
@@ -37,14 +38,17 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
   };
 
   return (
-    <SendForm
-      handleFormSubmit={handleFormSubmit}
-      selector={selector}
-      mutation={sendMutation}
-      form={sendForm}
-      showAmount={false}
-      showDifference={false}
-    />
+    <div className="flex flex-col gap-4">
+      <PlanDuration week={plan.week} />
+      <SendForm
+        handleFormSubmit={handleFormSubmit}
+        selector={selector}
+        mutation={sendMutation}
+        form={sendForm}
+        showAmount={false}
+        showDifference={false}
+      />
+    </div>
   );
 };
 

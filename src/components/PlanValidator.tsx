@@ -18,6 +18,7 @@ import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
 import { getActivityStreak } from "../lib/activity";
 import Decimal from "decimal.js";
+import { PlanDuration } from "./PlanDuration";
 
 const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
@@ -123,6 +124,7 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
 
   return (
     <div className="flex flex-col gap-4">
+      <PlanDuration week={plan.week} />
       {mutation.data ? (
         <>
           {/* Plan Results Summary */}
