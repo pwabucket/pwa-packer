@@ -71,7 +71,7 @@ const useSendMutation = () => {
       );
 
       return {
-        hasBalance: balance.greaterThan(new Decimal(1)),
+        hasBalance: balance.gt(new Decimal(1)),
         balance,
       };
     } catch (error) {
@@ -256,7 +256,7 @@ const useSendMutation = () => {
 
         /* If balance >= minAmount, send random amount between minAmount and maxAmount (inclusive) */
         /* If balance < minAmount, send whatever balance is available */
-        if (balance >= minAmount) {
+        if (balance.gte(minAmount)) {
           /* Generate random value between minAmount and maxAmount */
           const randomAmount = Decimal.random()
             .times(maxDifference.plus(1))

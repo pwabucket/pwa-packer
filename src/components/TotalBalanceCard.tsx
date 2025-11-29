@@ -16,8 +16,8 @@ const TotalBalanceCard = () => {
       (total, balance) => {
         return balance
           ? {
-              usdt: total.usdt.plus(new Decimal(balance.usdtBalance)),
-              bnb: total.bnb.plus(new Decimal(balance.bnbBalance)),
+              usdt: total.usdt.plus(balance.usdtBalance),
+              bnb: total.bnb.plus(balance.bnbBalance),
             }
           : total;
       },

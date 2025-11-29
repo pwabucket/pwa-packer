@@ -231,14 +231,12 @@ const PlanCreator = () => {
 
     /* Calculate totals with 4 decimals */
     const totalNeeded = accountsNeedingFunds.reduce(
-      (sum, item) =>
-        sum.plus(new Decimal(item.amount).minus(new Decimal(item.balance))),
+      (sum, item) => sum.plus(item.amount.minus(item.balance)),
       new Decimal(0)
     );
 
     const totalExcess = accountsWithExcess.reduce(
-      (sum, item) =>
-        sum.plus(new Decimal(item.balance).minus(new Decimal(item.amount))),
+      (sum, item) => sum.plus(item.balance.minus(item.amount)),
       new Decimal(0)
     );
 
