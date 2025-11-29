@@ -19,6 +19,8 @@ interface SendFormProps {
   form: ReturnType<typeof useSendForm>;
   showAmount?: boolean;
   showDifference?: boolean;
+  showValidate?: boolean;
+  showSkipValidated?: boolean;
 }
 
 const SendForm = ({
@@ -28,6 +30,8 @@ const SendForm = ({
   form: { form, append, remove },
   showAmount,
   showDifference,
+  showValidate,
+  showSkipValidated,
 }: SendFormProps) => {
   const [showResults, setShowResults] = useLocationToggle(
     "send-results-dialog"
@@ -89,6 +93,8 @@ const SendForm = ({
                 disabled={mutation.isPending}
                 showAmount={showAmount}
                 showDifference={showDifference}
+                showValidate={showValidate}
+                showSkipValidated={showSkipValidated}
               />
             </>
           )}

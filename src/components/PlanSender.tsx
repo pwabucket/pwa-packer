@@ -21,6 +21,12 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
+    /* Validate Accounts */
+    if (selector.selectedAccounts.length === 0) {
+      toast.error("No accounts available to send funds from.");
+      return;
+    }
+
     /* Validate Target Characters */
     if (data.targetCharacters.length === 0) {
       toast.error("Please select at least one target character.");
@@ -47,6 +53,7 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
         form={sendForm}
         showAmount={false}
         showDifference={false}
+        showSkipValidated={false}
       />
     </div>
   );
