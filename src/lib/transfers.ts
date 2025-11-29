@@ -1,22 +1,18 @@
 import { ethers } from "ethers";
 import type { Account } from "../types";
-import {
-  chunkArrayGenerator,
-  delayForSeconds,
-  getPrivateKey,
-  truncateDecimals,
-} from "./utils";
+import { chunkArrayGenerator, delayForSeconds, getPrivateKey } from "./utils";
 import { WalletReader, type UsdtTokenContract } from "./WalletReader";
 import {
   BASE_GAS_PRICE,
   GAS_LIMITS_TRANSFER,
   USDT_DECIMALS,
 } from "./transaction";
+import type Decimal from "decimal.js";
 
 interface UsdtTransferTransaction {
   from: Account;
   to: Account;
-  amount: number;
+  amount: Decimal;
 }
 
 export async function executeUsdtTransfers({
@@ -59,7 +55,7 @@ export async function executeUsdtTransfers({
         /* Execute this sender's transactions sequentially to maintain nonce order */
         for (const tx of senderTxs) {
           try {
-            const amountStr = truncateDecimals(tx.amount, 4);
+            const amountStr = tx.amount.toString();
             const reader = new WalletReader(tx.from.walletAddress);
             const provider = reader.getProvider();
             const usdtToken = reader.getUsdtTokenContract();

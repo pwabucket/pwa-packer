@@ -184,9 +184,16 @@ export function truncateAddress(address: string, length = 6) {
  */
 export function truncateDecimals(
   value: Decimal.Value,
-  decimals: number = 8
+  decimals: number = 8,
+  fixed: boolean = false
 ): string {
-  return new Decimal(value).toFixed(decimals, Decimal.ROUND_DOWN);
+  if (fixed) {
+    return new Decimal(value).toFixed(decimals, Decimal.ROUND_DOWN);
+  }
+
+  return new Decimal(value)
+    .toDecimalPlaces(decimals, Decimal.ROUND_DOWN)
+    .toString();
 }
 
 /**
@@ -210,7 +217,10 @@ export function truncateBNB(value: Decimal.Value): number {
 }
 
 /** Format number as currency string */
-export function formatCurrency(value: number, decimals: number = 2): string {
+export function formatCurrency(
+  value: Decimal.Value,
+  decimals: number = 2
+): string {
   return Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -285,8 +295,8 @@ export function downloadJsonFile(id: string, data: unknown) {
 /**
  * Floor value to whole number
  */
-export function floorToWholeNumber(value: number): number {
-  return Math.floor(value);
+export function floorToWholeNumber(value: Decimal.Value): Decimal {
+  return Decimal.floor(value);
 }
 
 /* Get random item */

@@ -7,12 +7,7 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import {
-  chunkArrayGenerator,
-  getPrivateKey,
-  truncateBNB,
-  truncateUSDT,
-} from "../lib/utils";
+import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
@@ -27,14 +22,14 @@ interface RefillMutationParams {
 
 interface RefillItem {
   account: Account;
-  balance: number /* Actual balance */;
-  difference: number /* Positive for excess, negative for insufficient */;
+  balance: Decimal /* Actual balance */;
+  difference: Decimal /* Positive for excess, negative for insufficient */;
 }
 
 interface RefillTodo {
   from: Account;
   to: Account;
-  amount: number;
+  amount: Decimal;
 }
 
 interface RefillResult {
@@ -47,7 +42,7 @@ interface RefillResult {
 interface RefillStats {
   successfulSends: number;
   totalTransactions: number;
-  totalSentValue: number;
+  totalSentValue: Decimal;
 }
 
 const useRefillMutation = () => {
@@ -55,18 +50,10 @@ const useRefillMutation = () => {
     useProgress();
   const password = useAppStore((state) => state.password)!;
 
-  /* Truncate value to 8 decimals as number */
-  const truncateValue = (token: "bnb" | "usdt", value: Decimal.Value) => {
-    return token === "bnb" ? truncateBNB(value) : truncateUSDT(value);
-  };
-
   /**
    * Fetch account balance for given token
    */
-  const fetchBalance = async (
-    account: Account,
-    token: "bnb" | "usdt"
-  ): Promise<number> => {
+  const fetchBalance = async (account: Account, token: "bnb" | "usdt") => {
     const reader = new WalletReader(account.walletAddress);
     return token === "bnb"
       ? await reader.getBNBBalance()
@@ -79,7 +66,7 @@ const useRefillMutation = () => {
   const analyzeAccounts = async (
     accounts: Account[],
     token: "bnb" | "usdt",
-    requiredBalance: number
+    requiredBalance: Decimal
   ): Promise<{
     excessFundsAccounts: RefillItem[];
     insufficientFundsAccounts: RefillItem[];
@@ -101,18 +88,16 @@ const useRefillMutation = () => {
             excessFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: truncateValue(
-                token,
-                new Decimal(balanceValue).minus(new Decimal(requiredBalance))
+              difference: new Decimal(balanceValue).minus(
+                new Decimal(requiredBalance)
               ),
             });
           } else if (balanceValue < requiredBalance) {
             insufficientFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: truncateValue(
-                token,
-                new Decimal(requiredBalance).minus(new Decimal(balanceValue))
+              difference: new Decimal(requiredBalance).minus(
+                new Decimal(balanceValue)
               ),
             });
           }
@@ -133,25 +118,24 @@ const useRefillMutation = () => {
    * gas-adjusted in analyzeAccounts. But EACH send needs gas, so we deduct per transaction.
    */
   const calculateTransferAmount = (
-    needed: number,
-    available: number,
+    needed: Decimal,
+    available: Decimal,
     token: "bnb" | "usdt",
-    requiredGasInEther: number
-  ): number => {
-    let transferAmount = Math.min(needed, available);
+    requiredGasInEther: Decimal
+  ): Decimal => {
+    let transferAmount = Decimal.min(needed, available);
 
     /* For BNB, each send transaction consumes gas from the sender */
     if (token === "bnb") {
       /* The sender needs gas to execute this transfer */
-      const maxTransferable = truncateValue(
-        token,
-        new Decimal(available).minus(new Decimal(requiredGasInEther))
+      const maxTransferable = new Decimal(available).minus(
+        new Decimal(requiredGasInEther)
       );
-      if (maxTransferable <= 0) return 0;
-      transferAmount = Math.min(transferAmount, maxTransferable);
+      if (maxTransferable.lte(0)) return new Decimal(0);
+      transferAmount = Decimal.min(transferAmount, maxTransferable);
     }
 
-    return transferAmount > 0 ? transferAmount : 0;
+    return transferAmount.gt(0) ? transferAmount : new Decimal(0);
   };
 
   /**
@@ -163,7 +147,7 @@ const useRefillMutation = () => {
     greedy: boolean = false,
     excessFundsAccounts: RefillItem[],
     insufficientFundsAccounts: RefillItem[],
-    requiredGasInEther: number
+    requiredGasInEther: Decimal
   ): RefillTodo[] => {
     const todo: RefillTodo[] = [];
 
@@ -194,10 +178,10 @@ const useRefillMutation = () => {
               d.account.id !== recipient.account.id &&
               !processedRecipients.has(d.account.id)
           )
-          .sort((a, b) => b.difference - a.difference);
+          .sort((a, b) => b.difference.minus(a.difference).toNumber());
 
         for (const donor of availableDonors) {
-          if (donor.difference <= 0 || needed <= 0) continue;
+          if (donor.difference.lte(0) || needed.lte(0)) continue;
 
           const transferAmount = calculateTransferAmount(
             needed,
@@ -206,7 +190,7 @@ const useRefillMutation = () => {
             requiredGasInEther
           );
 
-          if (transferAmount <= 0) continue;
+          if (transferAmount.lte(0)) continue;
 
           todo.push({
             from: donor.account,
@@ -221,14 +205,10 @@ const useRefillMutation = () => {
                 )
               : new Decimal(transferAmount);
 
-          donor.difference = truncateValue(
-            token,
-            new Decimal(donor.difference).minus(new Decimal(totalCost))
+          donor.difference = new Decimal(donor.difference).minus(
+            new Decimal(totalCost)
           );
-          needed = truncateValue(
-            token,
-            new Decimal(needed).minus(new Decimal(transferAmount))
-          );
+          needed = new Decimal(needed).minus(new Decimal(transferAmount));
         }
 
         /* Mark this recipient as processed so it won't be drained by future recipients */
@@ -237,15 +217,15 @@ const useRefillMutation = () => {
     } else {
       /* NORMAL MODE: Only excess accounts donate to insufficient accounts */
       /* Sort excess accounts by available funds (most available first) */
-      const sortedDonors = [...excessFundsAccounts].sort(
-        (a, b) => b.difference - a.difference
+      const sortedDonors = [...excessFundsAccounts].sort((a, b) =>
+        b.difference.minus(a.difference).toNumber()
       );
 
       for (const insufficientItem of insufficientFundsAccounts) {
         let needed = insufficientItem.difference;
 
         for (const excessItem of sortedDonors) {
-          if (excessItem.difference <= 0 || needed <= 0) continue;
+          if (excessItem.difference.lte(0) || needed.lte(0)) continue;
 
           const transferAmount = calculateTransferAmount(
             needed,
@@ -254,7 +234,7 @@ const useRefillMutation = () => {
             requiredGasInEther
           );
 
-          if (transferAmount <= 0) continue;
+          if (transferAmount.lte(0)) continue;
 
           todo.push({
             from: excessItem.account,
@@ -269,15 +249,11 @@ const useRefillMutation = () => {
                 )
               : new Decimal(transferAmount);
 
-          excessItem.difference = truncateValue(
-            token,
-            new Decimal(excessItem.difference).minus(new Decimal(totalCost))
+          excessItem.difference = new Decimal(excessItem.difference).minus(
+            new Decimal(totalCost)
           );
 
-          needed = truncateValue(
-            token,
-            new Decimal(needed).minus(new Decimal(transferAmount))
-          );
+          needed = new Decimal(needed).minus(new Decimal(transferAmount));
         }
       }
     }
@@ -312,7 +288,7 @@ const useRefillMutation = () => {
     wallet: ethers.Wallet,
     usdtToken?: UsdtTokenContract
   ): Promise<ethers.TransactionReceipt | null> => {
-    const amountStr = truncateValue(token, task.amount).toString();
+    const amountStr = task.amount.toString();
 
     console.log(
       `Refilling ${task.to.title} (${
@@ -429,20 +405,11 @@ const useRefillMutation = () => {
   /**
    * Calculate statistics from results
    */
-  const calculateStats = (
-    token: "bnb" | "usdt",
-    results: RefillResult[]
-  ): RefillStats => {
+  const calculateStats = (results: RefillResult[]): RefillStats => {
     const successfulSends = results.filter((r) => r.status).length;
-    const totalSentValue = truncateValue(
-      token,
-      results
-        .filter((r) => r.status)
-        .reduce(
-          (sum, r) => sum.plus(new Decimal(r.task.amount)),
-          new Decimal(0)
-        )
-    );
+    const totalSentValue = results
+      .filter((r) => r.status)
+      .reduce((sum, r) => sum.plus(new Decimal(r.task.amount)), new Decimal(0));
 
     return {
       successfulSends,
@@ -457,10 +424,9 @@ const useRefillMutation = () => {
       resetProgress();
       setTarget(0);
 
-      const requiredBalance = parseFloat(data.amount);
-      const requiredGasInEther = truncateValue(
-        "bnb",
-        new Decimal(ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE))
+      const requiredBalance = new Decimal(data.amount);
+      const requiredGasInEther = new Decimal(
+        ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE)
       );
 
       /* Step 1: Analyze accounts */
@@ -488,7 +454,7 @@ const useRefillMutation = () => {
       );
 
       /* Step 5: Calculate statistics */
-      const stats = calculateStats(data.token, results);
+      const stats = calculateStats(results);
 
       return { results, ...stats };
     },

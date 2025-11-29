@@ -1,3 +1,4 @@
+import type Decimal from "decimal.js";
 import type { HashResult } from "./lib/HashMaker";
 
 export interface Account {
@@ -12,7 +13,7 @@ export interface SendStats {
   totalAccounts: number;
   successfulSends: number;
   successfulValidations: number;
-  totalAmountSent: number;
+  totalAmountSent: Decimal;
 }
 
 export interface ValidationResult {
@@ -24,9 +25,9 @@ export interface SendResult {
   skipped?: boolean;
   account: Account;
   receiver: string;
-  balance?: number;
-  amount: number;
-  amountNeeded: number;
+  balance?: Decimal;
+  amount: Decimal;
+  amountNeeded: Decimal;
   hashResult?: HashResult | null;
   validation?: ValidationResult | null;
   error?: unknown;
@@ -55,7 +56,7 @@ export interface PackResult {
   status: boolean;
   skipped?: boolean;
   account: Account;
-  amount?: number;
+  amount?: Decimal.Value;
   error?: unknown;
   activity?: Activity;
   withdrawActivity?: unknown;
@@ -72,7 +73,7 @@ export interface PlanAccountStatus {
 }
 
 export interface PlanResult extends PlanAccountStatus {
-  amount: number;
+  amount: Decimal.Value;
 }
 
 export interface PlanValidationResult extends PlanResult {
@@ -80,8 +81,8 @@ export interface PlanValidationResult extends PlanResult {
 }
 
 export interface PlanStats {
+  totalAmount: Decimal.Value;
   totalAccounts: number;
-  totalAmount: number;
   firstActivity: number;
   secondActivity: number;
   consistentActivity: number;

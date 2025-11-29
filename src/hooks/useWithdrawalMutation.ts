@@ -6,7 +6,7 @@ import {
 } from "../lib/transaction";
 import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
-import { chunkArrayGenerator, getPrivateKey, truncateUSDT } from "../lib/utils";
+import { chunkArrayGenerator, getPrivateKey } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
@@ -30,7 +30,7 @@ interface WithdrawalResult {
 interface WithdrawalStats {
   totalAccounts: number;
   successfulSends: number;
-  totalSentValue: number;
+  totalSentValue: Decimal;
 }
 
 const useWithdrawalMutation = () => {
@@ -45,7 +45,7 @@ const useWithdrawalMutation = () => {
   const determineWithdrawalAmount = async (
     account: Account,
     requestedAmount?: string
-  ): Promise<{ amount: string; balance: number } | null> => {
+  ): Promise<{ amount: string; balance: Decimal } | null> => {
     const reader = new WalletReader(account.walletAddress);
     const balance = await reader.getUSDTBalance();
 
@@ -60,8 +60,8 @@ const useWithdrawalMutation = () => {
     }
 
     /* Check if sufficient balance */
-    const amountValue = parseFloat(requestedAmount);
-    if (balance < amountValue) {
+    const amountValue = new Decimal(requestedAmount);
+    if (balance.lt(amountValue)) {
       return null; /* Insufficient balance */
     }
 
@@ -192,14 +192,9 @@ const useWithdrawalMutation = () => {
     const successfulSends = results.filter(
       (r) => r.status && !r.skipped
     ).length;
-    const totalSentValue = truncateUSDT(
-      results
-        .filter((r) => r.status && r.amount)
-        .reduce(
-          (sum, r) => sum.plus(new Decimal(r.amount || 0)),
-          new Decimal(0)
-        )
-    );
+    const totalSentValue = results
+      .filter((r) => r.status && r.amount)
+      .reduce((sum, r) => sum.plus(new Decimal(r.amount || 0)), new Decimal(0));
 
     return {
       totalAccounts: results.length,

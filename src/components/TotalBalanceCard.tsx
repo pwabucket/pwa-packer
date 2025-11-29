@@ -3,36 +3,27 @@ import { useTotalBalanceQueries } from "../hooks/useTotalBalanceQueries";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import { MdOutlineRefresh } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  cn,
-  formatCurrency,
-  truncateBNB,
-  truncateDecimals,
-  truncateUSDT,
-} from "../lib/utils";
+import { cn, formatCurrency, truncateBNB } from "../lib/utils";
 import Decimal from "decimal.js";
 const TotalBalanceCard = () => {
   const queryClient = useQueryClient();
   const queries = useTotalBalanceQueries();
   const totalBalance = useMemo(() => {
-    if (!queries.isSuccess) return { usdt: 0, bnb: 0 };
+    if (!queries.isSuccess)
+      return { usdt: new Decimal(0), bnb: new Decimal(0) };
 
     return queries.data.reduce(
       (total, balance) => {
         return balance
           ? {
-              usdt: truncateUSDT(
-                new Decimal(total.usdt).plus(new Decimal(balance.usdtBalance))
-              ),
-              bnb: truncateBNB(
-                new Decimal(total.bnb).plus(new Decimal(balance.bnbBalance))
-              ),
+              usdt: total.usdt.plus(new Decimal(balance.usdtBalance)),
+              bnb: total.bnb.plus(new Decimal(balance.bnbBalance)),
             }
           : total;
       },
       {
-        usdt: 0,
-        bnb: 0,
+        usdt: new Decimal(0),
+        bnb: new Decimal(0),
       }
     );
   }, [queries]);
@@ -65,7 +56,7 @@ const TotalBalanceCard = () => {
       </p>
       <p className="text-center text-xs flex justify-center items-center gap-2 text-neutral-400">
         <img src={BNBIcon} alt="BNB" className="inline-block size-5" />
-        {truncateDecimals(totalBalance.bnb, 8)} BNB
+        {truncateBNB(totalBalance.bnb)} BNB
       </p>
     </div>
   ) : (

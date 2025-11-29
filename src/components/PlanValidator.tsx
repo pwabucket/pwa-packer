@@ -14,7 +14,6 @@ import {
   chunkArrayGenerator,
   delayForSeconds,
   formatCurrency,
-  truncateUSDT,
 } from "../lib/utils";
 import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
@@ -30,18 +29,14 @@ const PlanValidator = () => {
 
   const calculateStats = (results: PlanValidationResult[]) => {
     const totalAccounts = results.length;
-    const totalAmount = truncateUSDT(
-      results.reduce(
-        (total, item) => total.plus(new Decimal(item.amount)),
-        new Decimal(0)
-      )
+    const totalAmount = results.reduce(
+      (total, item) => total.plus(new Decimal(item.amount)),
+      new Decimal(0)
     );
-    const progressAmount = truncateUSDT(
-      results.reduce(
-        (total, item) =>
-          total.plus(new Decimal(item.activity.activity?.amount || 0)),
-        new Decimal(0)
-      )
+    const progressAmount = results.reduce(
+      (total, item) =>
+        total.plus(new Decimal(item.activity.activity?.amount || 0)),
+      new Decimal(0)
     );
     const successfulCount = results.filter((item) => item.validation).length;
     const failedCount = results.filter((item) => !item.validation).length;
@@ -71,8 +66,10 @@ const PlanValidator = () => {
       return {
         status: true,
         account: plan.account,
-        amount: plan.amount,
-        validation: activity.activity && Number(activity.amount) >= plan.amount,
+        amount: new Decimal(plan.amount),
+        validation:
+          activity.activity &&
+          new Decimal(activity.amount).gte(new Decimal(plan.amount)),
         activity: { activity, streak },
       };
     } catch (error) {
@@ -81,7 +78,7 @@ const PlanValidator = () => {
       return {
         status: false,
         account: plan.account,
-        amount: plan.amount,
+        amount: new Decimal(plan.amount),
         validation: false,
         activity: {
           activity: null,

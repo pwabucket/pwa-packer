@@ -9,6 +9,7 @@ import {
   MINOR_GAS_INCREMENT,
   RPC,
 } from "./transaction";
+import type Decimal from "decimal.js";
 
 export interface HashWallet {
   address: string;
@@ -23,9 +24,9 @@ export interface HashResult {
   nonce: number;
   initialNonce: number;
   gasPrice: string;
-  amount: string;
   attempts: number;
   character: string;
+  amount: Decimal.Value;
   wallet?: HashWallet;
 }
 
@@ -77,7 +78,7 @@ class HashMaker {
     baseTx: object;
     targetCharacters: string[];
     gasPrice: bigint;
-    amount: string;
+    amount: Decimal.Value;
   }): Promise<HashResult> {
     let attempts = 0;
 
@@ -286,7 +287,7 @@ class HashMaker {
     chainId,
   }: {
     to: string;
-    amount: string;
+    amount: Decimal.Value;
     nonce: number;
     chainId: bigint;
   }) {
@@ -294,7 +295,7 @@ class HashMaker {
       throw new Error("Wallet address is not initialized.");
     }
 
-    const data = this._buildTokenCallData(to, amount);
+    const data = this._buildTokenCallData(to, amount.toString());
     const txGasPrice = BASE_GAS_PRICE;
     const txGasLimit = GAS_LIMITS_TRANSFER["fast"];
 
@@ -359,7 +360,7 @@ class HashMaker {
     amount,
   }: {
     wallet: HashWallet;
-    amount: string;
+    amount: Decimal.Value;
   }) {
     if (!this.address) {
       throw new Error("Wallet address is not initialized.");

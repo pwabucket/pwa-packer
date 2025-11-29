@@ -3,6 +3,7 @@ import type { Account, PackResult } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
 import { delayForSeconds } from "../lib/utils";
+import { Decimal } from "decimal.js";
 
 /** Parameters for Pack Mutation */
 interface PackMutationParams {
@@ -13,7 +14,7 @@ interface PackMutationParams {
 interface PackStats {
   totalAccounts: number;
   packedAccounts: number;
-  totalWithdrawn: number;
+  totalWithdrawn: Decimal.Value;
 }
 
 const usePackMutation = () => {
@@ -95,8 +96,9 @@ const usePackMutation = () => {
   const calculateStats = (results: PackResult[]): PackStats => {
     const packedAccounts = results.filter((r) => r.status && !r.skipped).length;
     const totalWithdrawn = results.reduce(
-      (sum, r) => sum + (r.status && r.amount ? r.amount : 0),
-      0
+      (sum, r) =>
+        sum.plus(r.status && r.amount ? new Decimal(r.amount) : new Decimal(0)),
+      new Decimal(0)
     );
 
     return {

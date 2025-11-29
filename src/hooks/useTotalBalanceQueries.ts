@@ -3,10 +3,11 @@ import { useAppStore } from "../store/useAppStore";
 import { useCallback } from "react";
 import { fetchBalance } from "../lib/utils";
 import { useIsAuthenticated } from "./useIsAuthenticated";
+import type Decimal from "decimal.js";
 
 interface BalanceResult {
-  usdtBalance: number;
-  bnbBalance: number;
+  usdtBalance: Decimal;
+  bnbBalance: Decimal;
 }
 
 const useTotalBalanceQueries = () => {
