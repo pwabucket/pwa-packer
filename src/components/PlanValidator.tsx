@@ -21,6 +21,7 @@ import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
 import { getActivityStreak } from "../lib/activity";
 import { useJsonDropzone } from "../hooks/useJsonDropzone";
+import Decimal from "decimal.js";
 
 const PlanValidator = () => {
   const [plans, setPlans] = useState<PlanResult[] | null>(null);
@@ -30,11 +31,17 @@ const PlanValidator = () => {
   const calculateStats = (results: PlanValidationResult[]) => {
     const totalAccounts = results.length;
     const totalAmount = truncateUSDT(
-      results.reduce((total, item) => total + item.amount, 0)
+      results.reduce(
+        (total, item) => total.plus(new Decimal(item.amount)),
+        new Decimal(0)
+      )
     );
-    const progressAmount = results.reduce(
-      (total, item) => total + Number(item.activity.activity?.amount || 0),
-      0
+    const progressAmount = truncateUSDT(
+      results.reduce(
+        (total, item) =>
+          total.plus(new Decimal(item.activity.activity?.amount || 0)),
+        new Decimal(0)
+      )
     );
     const successfulCount = results.filter((item) => item.validation).length;
     const failedCount = results.filter((item) => !item.validation).length;

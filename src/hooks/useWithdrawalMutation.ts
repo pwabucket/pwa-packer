@@ -10,6 +10,7 @@ import { chunkArrayGenerator, getPrivateKey, truncateUSDT } from "../lib/utils";
 import type { Account } from "../types";
 import { useProgress } from "./useProgress";
 import { WalletReader, type UsdtTokenContract } from "../lib/WalletReader";
+import Decimal from "decimal.js";
 
 interface WithdrawMutationParams {
   accounts: Account[];
@@ -194,7 +195,10 @@ const useWithdrawalMutation = () => {
     const totalSentValue = truncateUSDT(
       results
         .filter((r) => r.status && r.amount)
-        .reduce((sum, r) => sum + (r.amount || 0), 0)
+        .reduce(
+          (sum, r) => sum.plus(new Decimal(r.amount || 0)),
+          new Decimal(0)
+        )
     );
 
     return {

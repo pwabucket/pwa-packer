@@ -36,6 +36,7 @@ import { WalletReader } from "../lib/WalletReader";
 import { usePassword } from "../hooks/usePassword";
 import { executeUsdtTransfers } from "../lib/transfers";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
+import Decimal from "decimal.js";
 
 /** Plan Form Schema */
 const PlanFormSchema = yup
@@ -78,11 +79,6 @@ const PlanCreator = () => {
       fill: true,
     },
   });
-
-  /** Truncate value */
-  const truncateValue = (value: number) => {
-    return truncateUSDT(value);
-  };
 
   /**
    * Check if account has sufficient balance
@@ -195,8 +191,11 @@ const PlanCreator = () => {
   /* Calculate stats */
   const calculateStats = (results: PreparedResult[]): PlanStats => {
     const totalAccounts = results.length;
-    const totalAmount = truncateValue(
-      results.reduce((total, item) => total + item.amount, 0)
+    const totalAmount = truncateUSDT(
+      results.reduce(
+        (total, item) => total.plus(new Decimal(item.amount)),
+        new Decimal(0)
+      )
     );
     const firstActivity = results.filter(
       (item) => item.activity.streak === 0
@@ -232,16 +231,19 @@ const PlanCreator = () => {
     ];
 
     /* Calculate totals with 4 decimals */
-    const totalNeeded = truncateValue(
+    const totalNeeded = truncateUSDT(
       accountsNeedingFunds.reduce(
-        (sum, item) => sum + truncateValue(item.amount - item.balance),
-        0
+        (sum, item) =>
+          sum.plus(new Decimal(item.amount).minus(new Decimal(item.balance))),
+        new Decimal(0)
       )
     );
-    const totalExcess = truncateValue(
+
+    const totalExcess = truncateUSDT(
       accountsWithExcess.reduce(
-        (sum, item) => sum + truncateValue(item.balance - item.amount),
-        0
+        (sum, item) =>
+          sum.plus(new Decimal(item.balance).minus(new Decimal(item.amount))),
+        new Decimal(0)
       )
     );
 
@@ -272,26 +274,30 @@ const PlanCreator = () => {
 
     /* Sort by priority: accounts with excess that are participating should give first */
     accountsWithExcess.sort((a, b) => {
-      const aExcess = truncateValue(a.balance - a.amount);
-      const bExcess = truncateValue(b.balance - b.amount);
-      return bExcess - aExcess; /* Higher excess first */
+      const aExcess = new Decimal(a.balance).minus(new Decimal(a.amount));
+      const bExcess = new Decimal(b.balance).minus(new Decimal(b.amount));
+      return truncateUSDT(bExcess.minus(aExcess)); /* Higher excess first */
     });
 
     /* Sort recipients by need (higher deficit first) */
     accountsNeedingFunds.sort((a, b) => {
-      const aDeficit = truncateValue(a.amount - a.balance);
-      const bDeficit = truncateValue(b.amount - b.balance);
-      return bDeficit - aDeficit;
+      const aDeficit = new Decimal(a.amount).minus(new Decimal(a.balance));
+      const bDeficit = new Decimal(b.amount).minus(new Decimal(b.balance));
+      return truncateUSDT(bDeficit.minus(aDeficit));
     });
 
     let remainingNeeded = [...accountsNeedingFunds].map((item) => ({
       account: item.account,
-      needed: truncateValue(item.amount - item.balance),
+      needed: truncateUSDT(
+        new Decimal(item.amount).minus(new Decimal(item.balance))
+      ),
     }));
 
     /* Create transactions from excess accounts to deficit accounts (participating first) */
     for (const donor of accountsWithExcess) {
-      let availableToGive = truncateValue(donor.balance - donor.amount);
+      let availableToGive = truncateUSDT(
+        new Decimal(donor.balance).minus(new Decimal(donor.amount))
+      );
 
       if (availableToGive <= 0) continue;
 
@@ -299,7 +305,7 @@ const PlanCreator = () => {
         if (recipient.needed <= 0) continue;
         if (availableToGive <= 0) break;
 
-        const transferAmount = truncateValue(
+        const transferAmount = truncateUSDT(
           Math.min(availableToGive, recipient.needed)
         );
 
@@ -309,8 +315,12 @@ const PlanCreator = () => {
           amount: transferAmount,
         });
 
-        availableToGive = truncateValue(availableToGive - transferAmount);
-        recipient.needed = truncateValue(recipient.needed - transferAmount);
+        availableToGive = truncateUSDT(
+          new Decimal(availableToGive).minus(new Decimal(transferAmount))
+        );
+        recipient.needed = truncateUSDT(
+          new Decimal(recipient.needed).minus(new Decimal(transferAmount))
+        );
       }
     }
 
@@ -318,13 +328,18 @@ const PlanCreator = () => {
     const remainingExcess = accountsWithExcess
       .map((item) => ({
         account: item.account,
-        excess: truncateValue(Math.max(0, item.balance - item.amount)),
+        excess: truncateUSDT(
+          new Decimal(item.balance).minus(new Decimal(item.amount))
+        ),
       }))
       .filter((item) => item.excess > 0);
 
     if (remainingExcess.length > 0) {
-      const totalRemainingExcess = truncateValue(
-        remainingExcess.reduce((sum, item) => sum + item.excess, 0)
+      const totalRemainingExcess = truncateUSDT(
+        remainingExcess.reduce(
+          (sum, item) => sum.plus(new Decimal(item.excess)),
+          new Decimal(0)
+        )
       );
 
       /* Any non-participating account can collect excess funds */
@@ -343,7 +358,7 @@ const PlanCreator = () => {
             if (donor.excess <= 0) break;
 
             /* Transfer all available excess from this donor to this collector */
-            const transferAmount = truncateValue(donor.excess);
+            const transferAmount = truncateUSDT(donor.excess);
 
             transactions.push({
               from: donor.account,

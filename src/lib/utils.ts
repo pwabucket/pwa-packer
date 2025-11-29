@@ -182,8 +182,13 @@ export function truncateAddress(address: string, length = 6) {
  * @param decimals - Number of decimal places (default: 8)
  * @returns Truncated number as string (no rounding, no scientific notation)
  */
-export function truncateDecimals(value: number, decimals: number = 8): string {
-  return new Decimal(value).toPrecision(decimals, Decimal.ROUND_DOWN);
+export function truncateDecimals(
+  value: Decimal.Value,
+  decimals: number = 8
+): string {
+  return new Decimal(value)
+    .toDecimalPlaces(decimals, Decimal.ROUND_DOWN)
+    .toString();
 }
 
 /**
@@ -192,8 +197,8 @@ export function truncateDecimals(value: number, decimals: number = 8): string {
  * @param value - The USDT amount to truncate
  * @returns Truncated USDT amount as number
  */
-export function truncateUSDT(value: number): number {
-  return parseFloat(truncateDecimals(value, 4));
+export function truncateUSDT(value: Decimal.Value): number {
+  return Number(truncateDecimals(value, 4));
 }
 
 /**
@@ -202,8 +207,8 @@ export function truncateUSDT(value: number): number {
  * @param value - The BNB amount to truncate
  * @returns Truncated BNB amount as number
  */
-export function truncateBNB(value: number): number {
-  return parseFloat(truncateDecimals(value, 8));
+export function truncateBNB(value: Decimal.Value): number {
+  return Number(truncateDecimals(value, 8));
 }
 
 /** Format number as currency string */
@@ -213,7 +218,7 @@ export function formatCurrency(value: number, decimals: number = 2): string {
     currency: "USD",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(parseFloat(truncateDecimals(value, decimals)));
+  }).format(Number(truncateDecimals(value, decimals)));
 }
 
 /** Delay Options */

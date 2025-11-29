@@ -20,6 +20,7 @@ import { Packer } from "../lib/Packer";
 import { WalletReader } from "../lib/WalletReader";
 import toast from "react-hot-toast";
 import { executeUsdtTransfers } from "../lib/transfers";
+import Decimal from "decimal.js";
 
 interface SendMutationData {
   accounts: Account[];
@@ -60,11 +61,6 @@ const useSendMutation = () => {
    */
   const floorToWholeNumber = (value: number): number => {
     return Math.floor(value);
-  };
-
-  /** Truncate value */
-  const truncateValue = (value: number) => {
-    return truncateUSDT(value);
   };
 
   /**
@@ -278,13 +274,17 @@ const useSendMutation = () => {
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
           /* Truncate to 4 decimals to avoid precision issues */
-          amountNeeded = truncateValue(balance - amount);
+          amountNeeded = truncateUSDT(
+            new Decimal(balance).minus(new Decimal(amount))
+          );
         } else {
           /* Floor to whole number for final send */
           amount = floorToWholeNumber(balance);
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
-          amountNeeded = truncateValue(balance - amount);
+          amountNeeded = truncateUSDT(
+            new Decimal(balance).minus(new Decimal(amount))
+          );
         }
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
@@ -389,8 +389,11 @@ const useSendMutation = () => {
     const successfulValidations = results.filter(
       (r) => r.status && r.validation?.activity
     );
-    const totalAmountSent = truncateValue(
-      successfulSends.reduce((sum, r) => sum + r.amount, 0)
+    const totalAmountSent = truncateUSDT(
+      successfulSends.reduce(
+        (sum, r) => sum.plus(new Decimal(r.amount)),
+        new Decimal(0)
+      )
     );
 
     return {
@@ -472,14 +475,16 @@ const useSendMutation = () => {
 
     /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
-      let needed = truncateValue(maxAmount - recipient.balance);
+      let needed = truncateUSDT(
+        new Decimal(maxAmount).minus(new Decimal(recipient.balance))
+      );
 
       /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
         if (needed <= 0) break;
         if (donor.remainingToGive <= 0) continue;
 
-        const transferAmount = truncateValue(
+        const transferAmount = truncateUSDT(
           Math.min(donor.remainingToGive, needed)
         );
 
@@ -489,17 +494,26 @@ const useSendMutation = () => {
           amount: transferAmount,
         });
 
-        donor.remainingToGive = truncateValue(
-          donor.remainingToGive - transferAmount
+        donor.remainingToGive = truncateUSDT(
+          new Decimal(donor.remainingToGive).minus(new Decimal(transferAmount))
         );
-        needed = truncateValue(needed - transferAmount);
+        needed = truncateUSDT(
+          new Decimal(needed).minus(new Decimal(transferAmount))
+        );
       }
+
+      /** Calculated filled amount */
+      const filledAmount = truncateUSDT(
+        new Decimal(recipient.balance).plus(
+          new Decimal(maxAmount)
+            .minus(new Decimal(recipient.balance))
+            .minus(new Decimal(needed))
+        )
+      );
 
       /* Only move to next recipient after trying to fill this one completely */
       console.log(
-        `Recipient ${recipient.account.title}: filled to ${truncateValue(
-          recipient.balance + (maxAmount - recipient.balance - needed)
-        )}, still needs ${needed}`
+        `Recipient ${recipient.account.title}: filled to ${filledAmount}, still needs ${needed}`
       );
     }
 

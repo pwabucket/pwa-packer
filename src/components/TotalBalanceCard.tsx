@@ -10,6 +10,7 @@ import {
   truncateDecimals,
   truncateUSDT,
 } from "../lib/utils";
+import Decimal from "decimal.js";
 const TotalBalanceCard = () => {
   const queryClient = useQueryClient();
   const queries = useTotalBalanceQueries();
@@ -20,8 +21,12 @@ const TotalBalanceCard = () => {
       (total, balance) => {
         return balance
           ? {
-              usdt: truncateUSDT(total.usdt + balance.usdtBalance),
-              bnb: truncateBNB(total.bnb + balance.bnbBalance),
+              usdt: truncateUSDT(
+                new Decimal(total.usdt).plus(new Decimal(balance.usdtBalance))
+              ),
+              bnb: truncateBNB(
+                new Decimal(total.bnb).plus(new Decimal(balance.bnbBalance))
+              ),
             }
           : total;
       },
