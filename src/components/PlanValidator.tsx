@@ -18,7 +18,7 @@ import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
 import { getActivityStreak } from "../lib/activity";
 import Decimal from "decimal.js";
-import { PlanDuration } from "./PlanDuration";
+import { PlanInfo } from "./PlanInfo";
 
 const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
@@ -124,17 +124,25 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <PlanDuration week={plan.week} />
+      {/* Plan Info */}
+      <PlanInfo plan={plan} />
+
       {mutation.data ? (
         <>
           {/* Plan Results Summary */}
           <div className="flex flex-col text-center text-sm">
             <p className="text-green-400">Plan validated successfully!</p>
-            <p className="text-lime-300">
-              Amount: {formatCurrency(mutation.data.stats.progressAmount, 3)} /{" "}
-              {formatCurrency(mutation.data.stats.totalAmount, 3)}
-            </p>
             <p className="text-blue-300">
+              Amount:{" "}
+              <span>
+                {formatCurrency(mutation.data.stats.progressAmount, 3)}
+              </span>{" "}
+              /{" "}
+              <span className="text-fuchsia-300">
+                {formatCurrency(mutation.data.stats.totalAmount, 3)}
+              </span>
+            </p>
+            <p className="text-yellow-300">
               Accounts: {mutation.data.stats.successfulCount} /{" "}
               {mutation.data.stats.totalAccounts}
             </p>
