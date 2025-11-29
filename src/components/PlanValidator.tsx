@@ -136,6 +136,10 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
               Accounts: {mutation.data.stats.successfulCount} /{" "}
               {mutation.data.stats.totalAccounts}
             </p>
+
+            <p className="text-red-300">
+              Failed Validations: {mutation.data.stats.failedCount}
+            </p>
           </div>
         </>
       ) : null}
