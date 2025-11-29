@@ -55,18 +55,25 @@ const SendFormSchema = yup
   })
   .required();
 
-const useSendForm = () => {
+const useSendForm = (defaultValues: Partial<SendFormData> = {}) => {
   /** Form */
   const form = useForm({
     defaultValues: {
-      amount: "",
-      difference: "0",
-      mode: "single" as const,
-      delay: 5 as const,
-      gasLimit: "fast" as const,
-      targetCharacters: ["a", "b", "c", "d", "e", "f"],
-      validate: true,
-      skipValidated: true,
+      amount: defaultValues.amount || "",
+      difference: defaultValues.difference || "0",
+      mode: defaultValues.mode || ("single" as const),
+      delay: defaultValues.delay || (5 as const),
+      gasLimit: defaultValues.gasLimit || ("fast" as const),
+      targetCharacters: defaultValues.targetCharacters || [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+      ],
+      validate: defaultValues.validate || true,
+      skipValidated: defaultValues.skipValidated || true,
     },
     resolver: yupResolver(SendFormSchema),
   });

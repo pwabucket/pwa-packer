@@ -14,6 +14,8 @@ interface SendFormFieldsProps {
   disabled?: boolean;
   append: (char: string) => void;
   remove: (index: number) => void;
+  showAmount?: boolean;
+  showDifference?: boolean;
 }
 
 const FormControlButton = (props: React.ComponentProps<"button">) => (
@@ -29,86 +31,96 @@ const FormControlButton = (props: React.ComponentProps<"button">) => (
   />
 );
 
-const SendFormFields = ({ disabled, append, remove }: SendFormFieldsProps) => {
+const SendFormFields = ({
+  disabled,
+  append,
+  remove,
+  showAmount = true,
+  showDifference = true,
+}: SendFormFieldsProps) => {
   return (
     <>
       {/* Amount */}
-      <Controller
-        name="amount"
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="amount">
-              <img src={USDTIcon} className="size-4 inline-block" /> Max amount
-              to send
-            </Label>
-            <Input
-              {...field}
-              disabled={disabled}
-              id="amount"
-              type="number"
-              min={1}
-              inputMode="decimal"
-              autoComplete="off"
-              placeholder="Amount"
-            />
-            <FormFieldError message={fieldState.error?.message} />
-            <p className="text-xs text-neutral-400 text-center px-4">
-              The maximum amount of USDT to send from each account. Accounts
-              with less than this amount will send their entire balance.
-            </p>
-          </div>
-        )}
-      />
-
-      {/* Difference */}
-      <Controller
-        name="difference"
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="difference">Difference</Label>
-            <div className="flex gap-2 items-center">
+      {showAmount && (
+        <Controller
+          name="amount"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="amount">
+                <img src={USDTIcon} className="size-4 inline-block" /> Max
+                amount to send
+              </Label>
               <Input
                 {...field}
                 disabled={disabled}
-                id="difference"
+                id="amount"
                 type="number"
+                min={1}
                 inputMode="decimal"
                 autoComplete="off"
-                placeholder="Maximum difference allowed"
-                className="grow min-w-0"
+                placeholder="Amount"
               />
-
-              <FormControlButton
-                type="button"
-                onClick={() =>
-                  field.onChange(
-                    Math.max((parseFloat(field.value) || 0) - 1, 0)
-                  )
-                }
-                disabled={disabled}
-              >
-                <MdChevronLeft className="size-5" />
-              </FormControlButton>
-
-              <FormControlButton
-                type="button"
-                onClick={() =>
-                  field.onChange((parseFloat(field.value) || 0) + 1)
-                }
-                disabled={disabled}
-              >
-                <MdChevronRight className="size-5" />
-              </FormControlButton>
+              <FormFieldError message={fieldState.error?.message} />
+              <p className="text-xs text-neutral-400 text-center px-4">
+                The maximum amount of USDT to send from each account. Accounts
+                with less than this amount will send their entire balance.
+              </p>
             </div>
-            <FormFieldError message={fieldState.error?.message} />
-            <p className="text-xs text-neutral-400 text-center px-4">
-              If set to {field.value} and amount is 100, accounts will send
-              between {100 - field.value} and 100 USDT randomly. The remaining
-              balance will be refilled into other accounts.
-            </p>
-          </div>
-        )}
-      />
+          )}
+        />
+      )}
+
+      {/* Difference */}
+      {showDifference && (
+        <Controller
+          name="difference"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="difference">Difference</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  id="difference"
+                  type="number"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  placeholder="Maximum difference allowed"
+                  className="grow min-w-0"
+                />
+
+                <FormControlButton
+                  type="button"
+                  onClick={() =>
+                    field.onChange(
+                      Math.max((parseFloat(field.value) || 0) - 1, 0)
+                    )
+                  }
+                  disabled={disabled}
+                >
+                  <MdChevronLeft className="size-5" />
+                </FormControlButton>
+
+                <FormControlButton
+                  type="button"
+                  onClick={() =>
+                    field.onChange((parseFloat(field.value) || 0) + 1)
+                  }
+                  disabled={disabled}
+                >
+                  <MdChevronRight className="size-5" />
+                </FormControlButton>
+              </div>
+              <FormFieldError message={fieldState.error?.message} />
+              <p className="text-xs text-neutral-400 text-center px-4">
+                If set to {field.value} and amount is 100, accounts will send
+                between {100 - field.value} and 100 USDT randomly. The remaining
+                balance will be refilled into other accounts.
+              </p>
+            </div>
+          )}
+        />
+      )}
 
       {/* Mode */}
       <Controller

@@ -1,5 +1,3 @@
-import { DragZone } from "./DragZone";
-import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import type {
   Activity,
@@ -19,11 +17,9 @@ import { Progress } from "./Progress";
 import { PlanResults } from "./PlanResults";
 import { Button } from "./Button";
 import { getActivityStreak } from "../lib/activity";
-import { useJsonDropzone } from "../hooks/useJsonDropzone";
 import Decimal from "decimal.js";
 
-const PlanValidator = () => {
-  const [plans, setPlans] = useState<PlanResult[] | null>(null);
+const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -120,78 +116,40 @@ const PlanValidator = () => {
     },
   });
 
-  /* On drop */
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    const reader = new FileReader();
-
-    reader.addEventListener("load", (e) => {
-      try {
-        const data = JSON.parse(e.target!.result as string) as PlanFileContent;
-        setPlans(data.results);
-      } catch {
-        toast.error("Invalid plan file!");
-      }
-    });
-    reader.readAsText(file);
-  }, []);
-
-  /* Dropzone */
-  const { getRootProps, getInputProps, isDragActive } = useJsonDropzone(onDrop);
-
   const validatePlans = async () => {
-    await mutation.mutateAsync(plans!);
+    await mutation.mutateAsync(plan.results!);
     toast.success("Plans validated successfully!");
   };
 
   return (
     <div className="flex flex-col gap-4">
-      {plans ? (
+      {mutation.data ? (
         <>
-          {mutation.data ? (
-            <>
-              {/* Plan Results Summary */}
-              <div className="flex flex-col text-center text-sm">
-                <p className="text-green-400">Plan validated successfully!</p>
-                <p className="text-lime-300">
-                  Amount:{" "}
-                  {formatCurrency(mutation.data.stats.progressAmount, 3)} /{" "}
-                  {formatCurrency(mutation.data.stats.totalAmount, 3)}
-                </p>
-                <p className="text-blue-300">
-                  Accounts: {mutation.data.stats.successfulCount} /{" "}
-                  {mutation.data.stats.totalAccounts}
-                </p>
-              </div>
-            </>
-          ) : null}
-
-          <Button disabled={mutation.isPending} onClick={validatePlans}>
-            {mutation.isPending ? "Validating..." : "Validate Plan"}
-          </Button>
-
-          {mutation.isPending ? (
-            <Progress max={target} current={progress} />
-          ) : null}
-
-          <PlanResults
-            disabled={mutation.isPending}
-            results={mutation.data?.results || plans}
-          />
+          {/* Plan Results Summary */}
+          <div className="flex flex-col text-center text-sm">
+            <p className="text-green-400">Plan validated successfully!</p>
+            <p className="text-lime-300">
+              Amount: {formatCurrency(mutation.data.stats.progressAmount, 3)} /{" "}
+              {formatCurrency(mutation.data.stats.totalAmount, 3)}
+            </p>
+            <p className="text-blue-300">
+              Accounts: {mutation.data.stats.successfulCount} /{" "}
+              {mutation.data.stats.totalAccounts}
+            </p>
+          </div>
         </>
-      ) : (
-        <>
-          <p className="text-xs text-neutral-400 text-center px-4">
-            Import your plan file to validate accounts and see progress.
-          </p>
-          <DragZone
-            title="plan"
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-            isDragActive={isDragActive}
-          />
-        </>
-      )}
+      ) : null}
+
+      <Button disabled={mutation.isPending} onClick={validatePlans}>
+        {mutation.isPending ? "Validating..." : "Validate Plan"}
+      </Button>
+
+      {mutation.isPending ? <Progress max={target} current={progress} /> : null}
+
+      <PlanResults
+        disabled={mutation.isPending}
+        results={mutation.data?.results || plan.results}
+      />
     </div>
   );
 };

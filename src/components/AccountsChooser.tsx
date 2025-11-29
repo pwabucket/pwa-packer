@@ -1,4 +1,3 @@
-import { useAppStore } from "../store/useAppStore";
 import type { Account } from "../types";
 import { AccountAddresses } from "./AccountAddresses";
 import { AccountBalance } from "./AccountBalance";
@@ -23,6 +22,7 @@ interface AccountsChooserResult {
 }
 
 interface AccountsChooserProps {
+  accounts: Account[];
   disabled?: boolean;
   allSelected?: boolean;
   selectedAccounts: Account[];
@@ -117,6 +117,7 @@ const AccountItem = ({
 };
 
 const AccountsChooser = ({
+  accounts,
   disabled,
   allSelected,
   selectedAccounts,
@@ -124,8 +125,6 @@ const AccountsChooser = ({
   toggleAccount,
   toggleAllAccounts,
 }: AccountsChooserProps) => {
-  const accounts = useAppStore((state) => state.accounts);
-
   return (
     <div className="flex flex-col gap-4 py-4">
       {/* Account List Heading */}
