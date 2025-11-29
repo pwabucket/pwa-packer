@@ -84,21 +84,17 @@ const useRefillMutation = () => {
           const balanceValue = balance;
 
           /* Categorize account */
-          if (balanceValue > requiredBalance) {
+          if (balanceValue.gt(requiredBalance)) {
             excessFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: new Decimal(balanceValue).minus(
-                new Decimal(requiredBalance)
-              ),
+              difference: balanceValue.minus(requiredBalance),
             });
-          } else if (balanceValue < requiredBalance) {
+          } else if (balanceValue.lt(requiredBalance)) {
             insufficientFundsAccounts.push({
               account,
               balance: balanceValue,
-              difference: new Decimal(requiredBalance).minus(
-                new Decimal(balanceValue)
-              ),
+              difference: requiredBalance.minus(balanceValue),
             });
           }
         })
@@ -128,9 +124,7 @@ const useRefillMutation = () => {
     /* For BNB, each send transaction consumes gas from the sender */
     if (token === "bnb") {
       /* The sender needs gas to execute this transfer */
-      const maxTransferable = new Decimal(available).minus(
-        new Decimal(requiredGasInEther)
-      );
+      const maxTransferable = available.minus(requiredGasInEther);
       if (maxTransferable.lte(0)) return new Decimal(0);
       transferAmount = Decimal.min(transferAmount, maxTransferable);
     }
@@ -200,15 +194,11 @@ const useRefillMutation = () => {
 
           const totalCost =
             token === "bnb"
-              ? new Decimal(transferAmount).plus(
-                  new Decimal(requiredGasInEther)
-                )
-              : new Decimal(transferAmount);
+              ? transferAmount.plus(requiredGasInEther)
+              : transferAmount;
 
-          donor.difference = new Decimal(donor.difference).minus(
-            new Decimal(totalCost)
-          );
-          needed = new Decimal(needed).minus(new Decimal(transferAmount));
+          donor.difference = donor.difference.minus(totalCost);
+          needed = needed.minus(transferAmount);
         }
 
         /* Mark this recipient as processed so it won't be drained by future recipients */
@@ -244,16 +234,11 @@ const useRefillMutation = () => {
 
           const totalCost =
             token === "bnb"
-              ? new Decimal(transferAmount).plus(
-                  new Decimal(requiredGasInEther)
-                )
-              : new Decimal(transferAmount);
+              ? transferAmount.plus(requiredGasInEther)
+              : transferAmount;
 
-          excessItem.difference = new Decimal(excessItem.difference).minus(
-            new Decimal(totalCost)
-          );
-
-          needed = new Decimal(needed).minus(new Decimal(transferAmount));
+          excessItem.difference = excessItem.difference.minus(totalCost);
+          needed = needed.minus(transferAmount);
         }
       }
     }
@@ -409,7 +394,7 @@ const useRefillMutation = () => {
     const successfulSends = results.filter((r) => r.status).length;
     const totalSentValue = results
       .filter((r) => r.status)
-      .reduce((sum, r) => sum.plus(new Decimal(r.task.amount)), new Decimal(0));
+      .reduce((sum, r) => sum.plus(r.task.amount), new Decimal(0));
 
     return {
       successfulSends,

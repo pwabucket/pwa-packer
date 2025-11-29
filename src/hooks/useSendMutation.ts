@@ -268,13 +268,13 @@ const useSendMutation = () => {
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
           /* Truncate to 4 decimals to avoid precision issues */
-          amountNeeded = new Decimal(balance).minus(new Decimal(amount));
+          amountNeeded = balance.minus(amount);
         } else {
           /* Floor to whole number for final send */
           amount = floorToWholeNumber(balance);
 
           /* amountNeeded = leftover decimals that can be used for refilling others */
-          amountNeeded = new Decimal(balance).minus(new Decimal(amount));
+          amountNeeded = balance.minus(amount);
         }
       } else {
         /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
@@ -380,7 +380,7 @@ const useSendMutation = () => {
       (r) => r.status && r.validation?.activity
     );
     const totalAmountSent = successfulSends.reduce(
-      (sum, r) => sum.plus(new Decimal(r.amount)),
+      (sum, r) => sum.plus(r.amount),
       new Decimal(0)
     );
 
@@ -463,7 +463,7 @@ const useSendMutation = () => {
 
     /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
-      let needed = new Decimal(maxAmount).minus(new Decimal(recipient.balance));
+      let needed = maxAmount.minus(recipient.balance);
 
       /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
@@ -478,17 +478,13 @@ const useSendMutation = () => {
           amount: transferAmount,
         });
 
-        donor.remainingToGive = new Decimal(donor.remainingToGive).minus(
-          new Decimal(transferAmount)
-        );
-        needed = new Decimal(needed).minus(new Decimal(transferAmount));
+        donor.remainingToGive = donor.remainingToGive.minus(transferAmount);
+        needed = needed.minus(transferAmount);
       }
 
       /** Calculated filled amount */
-      const filledAmount = new Decimal(recipient.balance).plus(
-        new Decimal(maxAmount)
-          .minus(new Decimal(recipient.balance))
-          .minus(new Decimal(needed))
+      const filledAmount = recipient.balance.plus(
+        maxAmount.minus(recipient.balance).minus(needed)
       );
 
       /* Only move to next recipient after trying to fill this one completely */

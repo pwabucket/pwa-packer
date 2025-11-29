@@ -191,7 +191,7 @@ const PlanCreator = () => {
   const calculateStats = (results: PreparedResult[]): PlanStats => {
     const totalAccounts = results.length;
     const totalAmount = results.reduce(
-      (total, item) => total.plus(new Decimal(item.amount)),
+      (total, item) => total.plus(item.amount),
       new Decimal(0)
     );
     const firstActivity = results.filter(
@@ -269,28 +269,26 @@ const PlanCreator = () => {
 
     /* Sort by priority: accounts with excess that are participating should give first */
     accountsWithExcess.sort((a, b) => {
-      const aExcess = new Decimal(a.balance).minus(new Decimal(a.amount));
-      const bExcess = new Decimal(b.balance).minus(new Decimal(b.amount));
+      const aExcess = a.balance.minus(a.amount);
+      const bExcess = b.balance.minus(b.amount);
       return bExcess.minus(aExcess).toNumber(); /* Higher excess first */
     });
 
     /* Sort recipients by need (higher deficit first) */
     accountsNeedingFunds.sort((a, b) => {
-      const aDeficit = new Decimal(a.amount).minus(new Decimal(a.balance));
-      const bDeficit = new Decimal(b.amount).minus(new Decimal(b.balance));
+      const aDeficit = a.amount.minus(a.balance);
+      const bDeficit = b.amount.minus(b.balance);
       return bDeficit.minus(aDeficit).toNumber();
     });
 
     let remainingNeeded = [...accountsNeedingFunds].map((item) => ({
       account: item.account,
-      needed: new Decimal(item.amount).minus(new Decimal(item.balance)),
+      needed: item.amount.minus(item.balance),
     }));
 
     /* Create transactions from excess accounts to deficit accounts (participating first) */
     for (const donor of accountsWithExcess) {
-      let availableToGive = new Decimal(donor.balance).minus(
-        new Decimal(donor.amount)
-      );
+      let availableToGive = donor.balance.minus(donor.amount);
 
       if (availableToGive.lte(0)) continue;
 
@@ -306,12 +304,8 @@ const PlanCreator = () => {
           amount: transferAmount,
         });
 
-        availableToGive = new Decimal(availableToGive).minus(
-          new Decimal(transferAmount)
-        );
-        recipient.needed = new Decimal(recipient.needed).minus(
-          new Decimal(transferAmount)
-        );
+        availableToGive = availableToGive.minus(transferAmount);
+        recipient.needed = recipient.needed.minus(transferAmount);
       }
     }
 
@@ -319,13 +313,13 @@ const PlanCreator = () => {
     const remainingExcess = accountsWithExcess
       .map((item) => ({
         account: item.account,
-        excess: new Decimal(item.balance).minus(new Decimal(item.amount)),
+        excess: item.balance.minus(item.amount),
       }))
       .filter((item) => item.excess.gt(0));
 
     if (remainingExcess.length > 0) {
       const totalRemainingExcess = remainingExcess.reduce(
-        (sum, item) => sum.plus(new Decimal(item.excess)),
+        (sum, item) => sum.plus(item.excess),
         new Decimal(0)
       );
 
