@@ -28,6 +28,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "../components/Input";
 import { useDebounce } from "react-use";
 import type { Account } from "../types";
+import { AccountsContext } from "../contexts/AccountsContext";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -241,15 +242,22 @@ const Dashboard = () => {
               No accounts available. Please create one.
             </p>
           ) : (
-            <Reorder.Group
-              values={accounts}
-              onReorder={(newOrder) => !search && setAccounts(newOrder)}
-              className="flex flex-col gap-2"
+            <AccountsContext.Provider
+              value={{
+                group: "dashboard",
+                accounts: filteredAccounts,
+              }}
             >
-              {filteredAccounts.map((account) => (
-                <AccountItem key={account.id} account={account} />
-              ))}
-            </Reorder.Group>
+              <Reorder.Group
+                values={accounts}
+                onReorder={(newOrder) => !search && setAccounts(newOrder)}
+                className="flex flex-col gap-2"
+              >
+                {filteredAccounts.map((account) => (
+                  <AccountItem key={account.id} account={account} />
+                ))}
+              </Reorder.Group>
+            </AccountsContext.Provider>
           )}
         </div>
       </MainContainer>

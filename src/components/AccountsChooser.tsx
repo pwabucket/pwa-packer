@@ -12,8 +12,9 @@ import {
   MdRemoveCircle,
 } from "react-icons/md";
 import { Dialog } from "radix-ui";
-import useLocationToggle from "../hooks/useLocationToggle";
 import { AccountDetailsDialog } from "./AccountDialog";
+import { AccountsContext } from "../contexts/AccountsContext";
+import { useAccountsToggle } from "../hooks/useAccountsToggle";
 
 interface AccountsChooserResult {
   status: boolean;
@@ -46,8 +47,9 @@ const AccountItem = ({
   result,
   toggleAccount,
 }: AccountItemProps) => {
-  const [showAccountDetails, toggleShowAccountDetails] = useLocationToggle(
-    `${account.id}-details`
+  const [showAccountDetails, toggleShowAccountDetails] = useAccountsToggle(
+    account,
+    "details"
   );
 
   return (
@@ -143,20 +145,24 @@ const AccountsChooser = ({
       )}
 
       <div className="flex flex-col gap-2">
-        {accounts.map((account) => (
-          <AccountItem
-            key={account.id}
-            account={account}
-            checked={selectedAccounts.some((item) => item.id === account.id)}
-            result={
-              results
-                ? results.find((res) => res.account.id === account.id) || null
-                : undefined
-            }
-            toggleAccount={toggleAccount}
-            disabled={disabled}
-          />
-        ))}
+        <AccountsContext.Provider
+          value={{ group: "accounts-chooser", accounts }}
+        >
+          {accounts.map((account) => (
+            <AccountItem
+              key={account.id}
+              account={account}
+              checked={selectedAccounts.some((item) => item.id === account.id)}
+              result={
+                results
+                  ? results.find((res) => res.account.id === account.id) || null
+                  : undefined
+              }
+              toggleAccount={toggleAccount}
+              disabled={disabled}
+            />
+          ))}
+        </AccountsContext.Provider>
       </div>
     </div>
   );

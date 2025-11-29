@@ -21,13 +21,13 @@ const AccountBalance = ({ account, ...props }: AccountBalanceProps) => {
       )}
     >
       {/* USDT Balance */}
-      <span className="flex items-center gap-1">
+      <span className="flex items-center gap-1 truncate">
         <img src={USDTIcon} alt="USDT" className="size-3" />
         {truncateDecimals(balance.usdtBalance, 3, true)}
       </span>
 
       {/* BNB Balance */}
-      <span className="flex items-center gap-1">
+      <span className="flex items-center gap-1 truncate">
         <img src={BNBIcon} alt="BNB" className="size-3" />
         {truncateDecimals(balance.bnbBalance, 6, true)}
       </span>

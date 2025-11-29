@@ -1,8 +1,8 @@
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router";
-import { useAppStore } from "../store/useAppStore";
 import type { Account } from "../types";
 import { cn } from "../lib/utils";
+import { useAccountsContext } from "../hooks/useAccountsContext";
 
 const AccountSwitcherButton = (props: React.ComponentProps<"button">) => {
   return (
@@ -26,7 +26,7 @@ const AccountSwitcher = ({
   switchKey: string;
 }) => {
   const navigate = useNavigate();
-  const accounts = useAppStore((state) => state.accounts);
+  const { accounts, group } = useAccountsContext();
   const location = useLocation();
 
   const switchAccount = (direction: "next" | "previous") => {
@@ -39,9 +39,9 @@ const AccountSwitcher = ({
 
     const newState = {
       ...location.state,
-      [`${newAccount.id}-${switchKey}`]: true,
+      [`${group}-${newAccount.id}-${switchKey}`]: true,
     };
-    delete newState[`${account.id}-${switchKey}`];
+    delete newState[`${group}-${account.id}-${switchKey}`];
 
     navigate(location, {
       state: newState,

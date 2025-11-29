@@ -1,11 +1,15 @@
-import { MdCheckCircle, MdOutlineClose } from "react-icons/md";
+import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { cn, formatCurrency } from "../lib/utils";
 import type { PlanResult, PlanValidationResult } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
 import { Dialog } from "radix-ui";
 import { AccountWebview } from "./AccountWebview";
-import useLocationToggle from "../hooks/useLocationToggle";
+import { AccountsContext } from "../contexts/AccountsContext";
+import { useMemo } from "react";
+import { AccountAddresses } from "./AccountAddresses";
+import { AccountDetailsDialog } from "./AccountDialog";
+import { useAccountsToggle } from "../hooks/useAccountsToggle";
 
 const PlanResultItem = ({
   result,
@@ -16,8 +20,14 @@ const PlanResultItem = ({
   validated?: boolean;
   result: PlanResult | PlanValidationResult;
 }) => {
-  const [showAccountWebview, toggleShowAccountWebview] = useLocationToggle(
-    `${result.account.id}-webview`
+  const [showAccountWebview, toggleShowAccountWebview] = useAccountsToggle(
+    result.account,
+    "webview"
+  );
+
+  const [showAccountDetails, toggleShowAccountDetails] = useAccountsToggle(
+    result.account,
+    "details"
   );
 
   return (
@@ -26,71 +36,109 @@ const PlanResultItem = ({
       onOpenChange={toggleShowAccountWebview}
       key={result.account.id}
     >
-      <Dialog.Trigger
-        disabled={disabled}
+      <div
         className={cn(
-          "flex items-center gap-2",
+          "text-left",
+          "flex items-center p-2",
           "bg-neutral-900",
           "hover:bg-neutral-800",
-          "rounded-full p-2 cursor-pointer",
-          "disabled:opacity-50 disabled:pointer-events-none"
+          "rounded-4xl cursor-pointer",
+          "has-[button:disabled]:opacity-50 has-[button:disabled]:pointer-events-none"
         )}
       >
-        {/* Avatar */}
-        <AccountAvatar account={result.account} className="size-8" />
-
-        {/* Title and Balance */}
-        <div className="grow min-w-0">
-          <h2
-            className={cn(
-              "font-bold text-xs flex items-baseline",
-              "text-yellow-500"
-            )}
-          >
-            {result.account.title}
-          </h2>
-          <AccountBalance account={result.account} />
-        </div>
-
-        {/* Details */}
-        <p className="shrink-0 text-xs">
-          {/* Amount */}
-          {validated ? (
-            <span className="text-blue-300">
-              {formatCurrency(Number(result.activity.activity?.amount || 0))} /{" "}
-            </span>
-          ) : null}
-          <span className="text-lime-300">{formatCurrency(result.amount)}</span>
-        </p>
-
-        {/* Streak */}
-        <span
+        <Dialog.Trigger
+          disabled={disabled}
           className={cn(
-            "shrink-0 flex items-center justify-center font-bold",
-            "text-xs bg-neutral-700 size-4 rounded-full",
-            result.activity.streak > 1
-              ? "text-red-400"
-              : result.activity.streak > 0
-              ? "text-yellow-400"
-              : "text-green-400"
+            "cursor-pointer text-left",
+            "p-1 flex grow min-w-0 gap-2 items-center"
           )}
         >
-          {result.activity.streak}
-        </span>
+          {/* Avatar */}
+          <AccountAvatar account={result.account} />
 
-        {/* Status Icon */}
-        {"validation" in result ? (
-          <span className="shrink-0">
-            {result.validation ? (
-              <MdCheckCircle className="size-6 text-lime-400" />
-            ) : (
-              <MdOutlineClose className="size-6 text-red-500" />
+          {/* Account Info */}
+          <div className="flex flex-col gap-0.5 grow min-w-0">
+            <h2 className="font-bold text-sm text-yellow-500 truncate">
+              {result.account.title}
+            </h2>
+
+            {/* Account Addresses */}
+            <AccountAddresses account={result.account} />
+
+            {/* Balance Info */}
+            <AccountBalance account={result.account} />
+          </div>
+
+          {/* Details */}
+          <div className="flex shrink-0 gap-2 items-center">
+            <div className="font-bold shrink-0 text-xs flex flex-col items-end">
+              {/* Validation Status */}
+              {validated && "validation" in result ? (
+                <span
+                  className={cn(
+                    result.validation ? "text-green-400" : "text-red-400"
+                  )}
+                >
+                  {result.validation ? "Success" : "Failed"}
+                </span>
+              ) : null}
+
+              {/* Amount */}
+              <p>
+                {validated ? (
+                  <span className="text-blue-300">
+                    {formatCurrency(
+                      Number(result.activity.activity?.amount || 0)
+                    )}{" "}
+                    /{" "}
+                  </span>
+                ) : null}
+                <span className="text-fuchsia-300">
+                  {formatCurrency(result.amount)}
+                </span>
+              </p>
+            </div>
+
+            {/* Streak */}
+            <span
+              className={cn(
+                "shrink-0 flex items-center justify-center font-bold",
+                "text-xs bg-neutral-700 size-4 rounded-full",
+                result.activity.streak > 1
+                  ? "text-red-400"
+                  : result.activity.streak > 0
+                  ? "text-yellow-400"
+                  : "text-green-400"
+              )}
+            >
+              {result.activity.streak}
+            </span>
+          </div>
+        </Dialog.Trigger>
+
+        {/* Account Wallet Details */}
+        <Dialog.Root
+          open={showAccountDetails}
+          onOpenChange={toggleShowAccountDetails}
+        >
+          <Dialog.Trigger
+            disabled={disabled}
+            className={cn(
+              "shrink-0",
+              "p-2 flex items-center justify-center cursor-pointer",
+              "hover:bg-neutral-700 rounded-full",
+              "text-neutral-500 hover:text-yellow-500",
+              "transition-colors duration-200"
             )}
-          </span>
-        ) : null}
-      </Dialog.Trigger>
+          >
+            <MdOutlineAccountBalanceWallet className="size-5" />
+          </Dialog.Trigger>
 
-      <AccountWebview account={result.account} enableSwitcher={false} />
+          <AccountDetailsDialog account={result.account} />
+        </Dialog.Root>
+      </div>
+
+      <AccountWebview account={result.account} />
     </Dialog.Root>
   );
 };
@@ -104,16 +152,24 @@ const PlanResults = ({
   disabled?: boolean;
   results: (PlanResult | PlanValidationResult)[];
 }) => {
+  const accounts = useMemo(() => results.map((r) => r.account), [results]);
   return (
     <div className={cn("flex flex-col gap-2")}>
-      {results.map((result) => (
-        <PlanResultItem
-          key={result.account.id}
-          result={result}
-          validated={validated}
-          disabled={disabled}
-        />
-      ))}
+      <AccountsContext.Provider
+        value={{
+          group: "plan-results",
+          accounts,
+        }}
+      >
+        {results.map((result) => (
+          <PlanResultItem
+            key={result.account.id}
+            result={result}
+            validated={validated}
+            disabled={disabled}
+          />
+        ))}
+      </AccountsContext.Provider>
     </div>
   );
 };

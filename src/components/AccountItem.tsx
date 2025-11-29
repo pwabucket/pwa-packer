@@ -10,7 +10,7 @@ import { useCallback } from "react";
 import { AccountWebview } from "./AccountWebview";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountEditDialog } from "./AccountEditDialog";
-import useLocationToggle from "../hooks/useLocationToggle";
+import { useAccountsToggle } from "../hooks/useAccountsToggle";
 
 const AccountActionButton = (props: React.ComponentProps<"button">) => {
   return (
@@ -31,15 +31,16 @@ const AccountActionButton = (props: React.ComponentProps<"button">) => {
 const AccountItem = ({ account }: { account: Account }) => {
   const dragControls = useDragControls();
 
-  const [showAccountWebview, toggleShowAccountWebview] = useLocationToggle(
-    `${account.id}-webview`
+  const [showAccountWebview, toggleShowAccountWebview] = useAccountsToggle(
+    account,
+    "webview"
   );
-  const [showAccountDetails, toggleShowAccountDetails] = useLocationToggle(
-    `${account.id}-details`
+  const [showAccountDetails, toggleShowAccountDetails] = useAccountsToggle(
+    account,
+    "details"
   );
-  const [showEditForm, toggleShowEditForm] = useLocationToggle(
-    `${account.id}-edit`
-  );
+
+  const [showEditForm, toggleShowEditForm] = useAccountsToggle(account, "edit");
 
   /* Launch Account Details Dialog */
   const launchAccountDetails = useCallback(() => {
