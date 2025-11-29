@@ -23,25 +23,28 @@ import { usePendingActivity } from "../hooks/usePendingActivity";
 import { TokenButton } from "../components/TokenButton";
 import { launchParcel } from "../lib/parcel";
 import useLocationToggle from "../hooks/useLocationToggle";
+import Decimal from "decimal.js";
 
 /** Parse Amount to Smallest Unit */
-const parseToSmallUnit = (amount: number) => {
+const parseToSmallUnit = (amount: Decimal) => {
   return truncateDecimals(amount, 8);
 };
 
 /** Calculate Required BNB for Split and Transaction Fees */
 const calculateRequiredBNB = (amount: string, accountCount: number) => {
-  const amountToSplit = parseFloat(amount);
-  if (amountToSplit > 0 && accountCount > 0) {
+  const amountToSplit = new Decimal(amount);
+  if (amountToSplit.gt(0) && accountCount > 0) {
     /* Calculate Required Split Amount */
     const requiredSplitAmount =
       BigInt(accountCount) * BASE_GAS_PRICE * GAS_LIMIT_NATIVE;
 
     /* Convert to Ether */
-    const gasAmountInEther = ethers.formatEther(requiredSplitAmount);
+    const gasAmountInEther = new Decimal(
+      ethers.formatEther(requiredSplitAmount)
+    );
 
     /* Total Amount */
-    return parseToSmallUnit(amountToSplit + parseFloat(gasAmountInEther));
+    return parseToSmallUnit(amountToSplit.plus(gasAmountInEther));
   }
   return 0;
 };
@@ -211,7 +214,9 @@ const Split = () => {
                       Each:{" "}
                       {selectedAccounts.length > 0
                         ? parseToSmallUnit(
-                            field.value / selectedAccounts.length
+                            new Decimal(field.value).div(
+                              selectedAccounts.length
+                            )
                           )
                         : 0}{" "}
                       BNB

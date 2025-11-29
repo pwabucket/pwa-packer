@@ -196,26 +196,6 @@ export function truncateDecimals(
     .toString();
 }
 
-/**
- * Truncate USDT amount to 4 decimal places (no rounding)
- * USDT is a stablecoin and 4 decimals provides sufficient precision
- * @param value - The USDT amount to truncate
- * @returns Truncated USDT amount as number
- */
-export function truncateUSDT(value: Decimal.Value): number {
-  return Number(truncateDecimals(value, 4));
-}
-
-/**
- * Truncate BNB amount to 8 decimal places (no rounding)
- * BNB uses 8 decimals for display (industry standard for native tokens)
- * @param value - The BNB amount to truncate
- * @returns Truncated BNB amount as number
- */
-export function truncateBNB(value: Decimal.Value): number {
-  return Number(truncateDecimals(value, 8));
-}
-
 /** Format number as currency string */
 export function formatCurrency(
   value: Decimal.Value,

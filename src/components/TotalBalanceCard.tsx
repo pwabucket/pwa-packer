@@ -3,7 +3,7 @@ import { useTotalBalanceQueries } from "../hooks/useTotalBalanceQueries";
 import BNBIcon from "../assets/bnb-bnb-logo.svg";
 import { MdOutlineRefresh } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
-import { cn, formatCurrency, truncateBNB } from "../lib/utils";
+import { cn, formatCurrency, truncateDecimals } from "../lib/utils";
 import Decimal from "decimal.js";
 const TotalBalanceCard = () => {
   const queryClient = useQueryClient();
@@ -56,7 +56,7 @@ const TotalBalanceCard = () => {
       </p>
       <p className="text-center text-xs flex justify-center items-center gap-2 text-neutral-400">
         <img src={BNBIcon} alt="BNB" className="inline-block size-5" />
-        {truncateBNB(totalBalance.bnb)} BNB
+        {truncateDecimals(totalBalance.bnb, 8, true)} BNB
       </p>
     </div>
   ) : (
