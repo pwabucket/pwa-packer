@@ -588,12 +588,19 @@ const useSendMutation = () => {
         );
 
         if (refillTransactions.length > 0) {
+          /* Toast for refill start */
           toast.loading(
             `Refilling ${refillTransactions.length} transactions...`
           );
+
+          /* Set target for refill transactions */
           resetProgress();
           setTarget(refillTransactions.length);
+
+          /* Execute refill transactions */
           refillStats = await executeRefillTransactions(refillTransactions);
+
+          /* Debug log for refill stats */
           console.log(
             `Refill complete: ${refillStats.success} success, ${refillStats.failed} failed`
           );
@@ -618,11 +625,12 @@ const useSendMutation = () => {
           );
 
           if (refilledToProcess.length > 0) {
-            /* Set target for refilled accounts */
+            /* Toast for sending from refilled accounts */
             toast.loading(
               `Sending from ${refilledToProcess.length} refilled accounts...`
             );
 
+            /* Set target for refilled sends */
             resetProgress();
             setTarget(refilledToProcess.length);
 
