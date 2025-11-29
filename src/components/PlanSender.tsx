@@ -11,12 +11,12 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
   const selector = useAccountsSelector(accounts);
 
   /** Form */
-  const { form, append, remove } = useSendForm({
+  const sendForm = useSendForm({
     amount: plan.parameters.maximum,
   });
 
   /* Mutation for Sending Funds */
-  const { mutation, target, progress } = useSendMutation();
+  const sendMutation = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
@@ -27,7 +27,7 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
     }
 
     /* Send Funds */
-    await mutation.mutateAsync({
+    await sendMutation.mutation.mutateAsync({
       ...data,
       accounts: selector.selectedAccounts,
     });
@@ -40,8 +40,8 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
     <SendForm
       handleFormSubmit={handleFormSubmit}
       selector={selector}
-      mutation={{ mutation, target, progress }}
-      form={{ form, append, remove }}
+      mutation={sendMutation}
+      form={sendForm}
       showAmount={false}
       showDifference={false}
     />

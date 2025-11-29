@@ -74,6 +74,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             append={append}
             remove={remove}
             disabled={mutation.isPending}
+            showDifference={false}
           />
         </form>
       </FormProvider>

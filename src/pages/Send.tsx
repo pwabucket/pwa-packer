@@ -8,18 +8,17 @@ import { SendForm } from "../components/SendForm";
 /** Send Page Component */
 const Send = () => {
   const selector = useAccountsChooser();
-  const { selectedAccounts } = selector;
 
-  /** Form */
-  const { form, append, remove } = useSendForm();
+  /** Send Form */
+  const sendForm = useSendForm();
 
-  /* Mutation for Sending Funds */
-  const { mutation, target, progress } = useSendMutation();
+  /* Send Mutation */
+  const sendMutation = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
     /* Validate Accounts */
-    if (selectedAccounts.length === 0) {
+    if (selector.selectedAccounts.length === 0) {
       toast.error("No accounts available to send funds from.");
       return;
     }
@@ -30,9 +29,9 @@ const Send = () => {
       return;
     }
 
-    const { results } = await mutation.mutateAsync({
+    const { results } = await sendMutation.mutation.mutateAsync({
       ...data,
-      accounts: selectedAccounts,
+      accounts: selector.selectedAccounts,
     });
 
     /* Count Successful Sends */
@@ -40,11 +39,11 @@ const Send = () => {
 
     /* Show Summary Alert */
     toast.success(
-      `Successfully sent from ${successfulSends}/${selectedAccounts.length} accounts.`
+      `Successfully sent from ${successfulSends}/${selector.selectedAccounts.length} accounts.`
     );
 
     /* Reset Form */
-    form.reset();
+    sendForm.form.reset();
 
     return results;
   };
@@ -54,8 +53,8 @@ const Send = () => {
       <SendForm
         handleFormSubmit={handleFormSubmit}
         selector={selector}
-        mutation={{ mutation, target, progress }}
-        form={{ form, append, remove }}
+        mutation={sendMutation}
+        form={sendForm}
       />
     </InnerPageLayout>
   );
