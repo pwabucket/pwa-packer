@@ -1,7 +1,12 @@
 import type { SendResult } from "../types";
 import { Accordion } from "radix-ui";
 import { AccountAddresses } from "./AccountAddresses";
-import { cn, transactionHashLink, walletAddressLink } from "../lib/utils";
+import {
+  cn,
+  transactionHashLink,
+  truncateDecimals,
+  walletAddressLink,
+} from "../lib/utils";
 import { AccountBalance } from "./AccountBalance";
 import { ItemInfo, type ItemInfoProps } from "./ItemInfo";
 import { MdCheckCircle, MdOutlineClose, MdRemoveCircle } from "react-icons/md";
@@ -69,7 +74,14 @@ const SendResultsAccordion = ({ results }: SendResultsAccordionProps) => (
           {/* Amount */}
           <ResultInfo
             title="Amount Sent (Needed)"
-            value={res.amount ? `${res.amount} (${res.amountNeeded})` : "0"}
+            value={
+              res.amount
+                ? `${truncateDecimals(res.amount, 2)} (${truncateDecimals(
+                    res.amountNeeded,
+                    2
+                  )})`
+                : "0"
+            }
             icon={<span>💰</span>}
             valueClassName="text-yellow-300"
           />

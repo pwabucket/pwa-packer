@@ -11,6 +11,7 @@ import { cn, formatCurrency } from "../lib/utils";
 import type { Account, Activity } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
+import Decimal from "decimal.js";
 
 interface ValidationResult {
   status: boolean;
@@ -76,12 +77,14 @@ const ValidationResults = ({ results }: ValidationResultsProps) => {
               {/* Deposited Amount */}
               <span className="text-orange-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">IN:</span>{" "}
-                {formatCurrency(Number(result.activity?.amount || 0))}
+                {formatCurrency(new Decimal(result.activity?.amount || 0))}
               </span>{" "}
               {/* Available Amount */}
               <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">AV:</span>{" "}
-                {formatCurrency(Number(result.activity?.activityBalance || 0))}
+                {formatCurrency(
+                  new Decimal(result.activity?.activityBalance || 0)
+                )}
               </span>
             </p>
 

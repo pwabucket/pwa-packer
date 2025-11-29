@@ -3,6 +3,7 @@ import type { Account, Activity } from "../types";
 import { useProgress } from "./useProgress";
 import { Packer } from "../lib/Packer";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
+import Decimal from "decimal.js";
 
 interface ValidationMutationParams {
   accounts: Account[];
@@ -19,8 +20,8 @@ interface ValidationResult {
 interface ValidationStats {
   totalAccounts: number;
   activeAccounts: number;
-  totalAmount: number;
-  availableBalance: number;
+  totalAmount: Decimal;
+  availableBalance: Decimal;
 }
 
 const useValidationMutation = () => {
@@ -57,19 +58,23 @@ const useValidationMutation = () => {
    */
   const calculateStats = (results: ValidationResult[]): ValidationStats => {
     let activeAccounts = 0;
-    let totalAmount = 0;
-    let availableBalance = 0;
+    let totalAmount = new Decimal(0);
+    let availableBalance = new Decimal(0);
 
     for (const result of results) {
       if (result.status && result.activity) {
         /* Count active accounts */
         if (result.activity.activity) {
           activeAccounts++;
-          totalAmount += Number(result.activity.amount) || 0;
+          totalAmount = totalAmount.plus(
+            new Decimal(result.activity.amount) || new Decimal(0)
+          );
         }
 
         /* Sum available balance */
-        availableBalance += Number(result.activity.activityBalance) || 0;
+        availableBalance = availableBalance.plus(
+          new Decimal(result.activity.activityBalance) || new Decimal(0)
+        );
       }
     }
 
