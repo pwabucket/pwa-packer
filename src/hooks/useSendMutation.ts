@@ -524,8 +524,10 @@ const useSendMutation = () => {
       /* Max amount to send */
       const maxAmount = new Decimal(data.amount);
 
-      /* PHASE 1: Prepare all accounts and determine amounts */
-      console.log("=== PHASE 1: Preparing accounts ===");
+      /* Difference for randomization */
+      const difference = new Decimal(data.difference);
+
+      /* Prepare all accounts and determine amounts */
       const preparedAccounts = await getPreparedAccounts(data.accounts, data);
 
       /* Apply skipValidated filter */
@@ -563,18 +565,16 @@ const useSendMutation = () => {
       /* Set initial target (will be updated) */
       setTarget(accountsToProcess.length);
 
-      /* PHASE 2: Send from accounts with sufficient balance */
-      console.log("=== PHASE 2: Sending from funded accounts ===");
+      /* Process initial sends */
       const phase1Results =
         data.mode === "single"
           ? await processSingle(accountsToProcess, data)
           : await processBatch(accountsToProcess, data);
 
-      /* PHASE 3: Refill skipped accounts */
-      console.log("=== PHASE 3: Refilling skipped accounts ===");
+      let phase2Results: SendResult[] = [];
       let refillStats = { success: 0, failed: 0 };
 
-      if (skippedAccounts.length > 0) {
+      if (difference.gt(0) && skippedAccounts.length > 0) {
         const refillTransactions = planRefillTransactions(
           accountsToProcess,
           skippedAccounts,
@@ -597,46 +597,41 @@ const useSendMutation = () => {
           console.log(
             `Refill complete: ${refillStats.success} success, ${refillStats.failed} failed`
           );
-        }
-      }
 
-      /* PHASE 4: Prepare and send from refilled accounts */
-      console.log("=== PHASE 4: Sending from refilled accounts ===");
-      let phase2Results: SendResult[] = [];
-
-      if (skippedAccounts.length > 0) {
-        /* Re-prepare skipped accounts to get updated balances after refill */
-        const skippedAccountList = skippedAccounts.map((acc) => acc.account);
-        const refilledPrepared = await getPreparedAccounts(
-          skippedAccountList,
-          data,
-          false,
-          false
-        );
-
-        /* Filter accounts that now have balance to send */
-        const refilledToProcess = refilledPrepared.filter(
-          (acc) => acc.status && !acc.skipped
-        );
-
-        console.log(
-          `Refilled accounts ready to send: ${refilledToProcess.length}`
-        );
-
-        if (refilledToProcess.length > 0) {
-          /* Set target for refilled accounts */
-          toast.loading(
-            `Sending from ${refilledToProcess.length} refilled accounts...`
+          /* Re-prepare skipped accounts to get updated balances after refill */
+          const skippedAccountList = skippedAccounts.map((acc) => acc.account);
+          const refilledPrepared = await getPreparedAccounts(
+            skippedAccountList,
+            data,
+            false,
+            false
           );
 
-          resetProgress();
-          setTarget(refilledToProcess.length);
+          /* Filter accounts that now have balance to send */
+          const refilledToProcess = refilledPrepared.filter(
+            (acc) => acc.status && !acc.skipped
+          );
 
-          /* Process using same mode as phase 1 */
-          phase2Results =
-            data.mode === "single"
-              ? await processSingle(refilledToProcess, data)
-              : await processBatch(refilledToProcess, data);
+          /* Debug log for refilled accounts ready to process */
+          console.log(
+            `Refilled accounts ready to send: ${refilledToProcess.length}`
+          );
+
+          if (refilledToProcess.length > 0) {
+            /* Set target for refilled accounts */
+            toast.loading(
+              `Sending from ${refilledToProcess.length} refilled accounts...`
+            );
+
+            resetProgress();
+            setTarget(refilledToProcess.length);
+
+            /* Process using same mode as phase 1 */
+            phase2Results =
+              data.mode === "single"
+                ? await processSingle(refilledToProcess, data)
+                : await processBatch(refilledToProcess, data);
+          }
         }
       }
 
