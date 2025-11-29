@@ -190,7 +190,7 @@ const SendFormFields = ({
                 onChange={field.onChange}
                 disabled={disabled}
               >
-                Validate Confirmation?
+                Validate Confirmation
               </LabelToggle>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
