@@ -11,10 +11,12 @@ import {
   MdOutlineAccountBalanceWallet,
   MdRemoveCircle,
 } from "react-icons/md";
-import { Dialog } from "radix-ui";
+import { Dialog, Slot } from "radix-ui";
 import { AccountDetailsDialog } from "./AccountDialog";
 import { AccountsContext } from "../contexts/AccountsContext";
 import { useAccountsToggle } from "../hooks/useAccountsToggle";
+import { useId } from "react";
+import { AccountWebview } from "./AccountWebview";
 
 interface AccountsChooserResult {
   status: boolean;
@@ -40,6 +42,59 @@ interface AccountItemProps {
   result?: AccountsChooserResult | null;
 }
 
+const AccountItemResult = ({
+  result,
+}: {
+  result: AccountsChooserResult | null;
+}) => {
+  return (
+    <span className="w-10 flex items-center justify-center">
+      {result ? (
+        result.status ? (
+          <MdCheckCircle className="size-5 text-green-500 shrink-0" />
+        ) : result.skipped ? (
+          <MdRemoveCircle className="size-5 text-yellow-500 shrink-0" />
+        ) : (
+          <MdCancel className="size-5 text-red-500 shrink-0" />
+        )
+      ) : (
+        <MdInfo className="size-5 text-neutral-500 shrink-0" />
+      )}
+    </span>
+  );
+};
+
+const AccountItemDetails = ({ account }: { account: Account }) => {
+  return (
+    <>
+      {/* Title and balance */}
+      <div className="flex flex-col grow min-w-0">
+        <span className="text-xs font-bold text-yellow-500">
+          {account.title}
+        </span>
+
+        <AccountBalance account={account} />
+      </div>
+
+      {/* Addresses */}
+      <AccountAddresses account={account} />
+    </>
+  );
+};
+
+const AccountItemWrapper = (props: Slot.SlotProps) => {
+  return (
+    <Slot.Root
+      {...props}
+      className={cn(
+        "flex items-center gap-2 cursor-pointer grow min-w-0 pl-1",
+        "text-left",
+        props.className
+      )}
+    />
+  );
+};
+
 const AccountItem = ({
   account,
   checked,
@@ -47,6 +102,11 @@ const AccountItem = ({
   result,
   toggleAccount,
 }: AccountItemProps) => {
+  const [showAccountWebview, toggleShowAccountWebview] = useAccountsToggle(
+    account,
+    "webview"
+  );
+
   const [showAccountDetails, toggleShowAccountDetails] = useAccountsToggle(
     account,
     "details"
@@ -56,45 +116,43 @@ const AccountItem = ({
     <div
       className={cn(
         "bg-neutral-900",
+        "hover:bg-neutral-800 cursor-pointer",
         "flex items-center gap-1 p-1.5 rounded-full",
         "has-[input:disabled]:opacity-60"
       )}
     >
-      <label className="flex items-center gap-2 cursor-pointer grow min-w-0 pl-1">
-        {typeof result !== "undefined" ? (
-          <span className="w-10 flex items-center justify-center">
-            {result ? (
-              result.status ? (
-                <MdCheckCircle className="size-5 text-green-500 shrink-0" />
-              ) : result.skipped ? (
-                <MdRemoveCircle className="size-5 text-yellow-500 shrink-0" />
-              ) : (
-                <MdCancel className="size-5 text-red-500 shrink-0" />
-              )
-            ) : (
-              <MdInfo className="size-5 text-neutral-500 shrink-0" />
-            )}
-          </span>
-        ) : (
-          <Toggle
-            checked={checked}
-            onChange={(ev) => toggleAccount(account, ev.target.checked)}
-            disabled={disabled}
-          />
-        )}
+      {typeof result !== "undefined" ? (
+        <Dialog.Root
+          open={showAccountWebview}
+          onOpenChange={toggleShowAccountWebview}
+        >
+          <AccountItemWrapper>
+            <Dialog.Trigger>
+              <AccountItemResult result={result} />
+              {/* Title and balance */}
+              <AccountItemDetails account={account} />
+            </Dialog.Trigger>
+          </AccountItemWrapper>
 
-        {/* Title and balance */}
-        <div className="flex flex-col grow min-w-0">
-          <span className="text-xs font-bold text-yellow-500">
-            {account.title}
-          </span>
+          {/* Webview */}
+          <AccountWebview account={account} />
+        </Dialog.Root>
+      ) : (
+        <AccountItemWrapper>
+          <label>
+            {/* Toggle */}
 
-          <AccountBalance account={account} />
-        </div>
+            <Toggle
+              checked={checked}
+              onChange={(ev) => toggleAccount(account, ev.target.checked)}
+              disabled={disabled}
+            />
 
-        {/* Addresses */}
-        <AccountAddresses account={account} />
-      </label>
+            {/* Title and balance */}
+            <AccountItemDetails account={account} />
+          </label>
+        </AccountItemWrapper>
+      )}
 
       <Dialog.Root
         open={showAccountDetails}
@@ -127,6 +185,8 @@ const AccountsChooser = ({
   toggleAccount,
   toggleAllAccounts,
 }: AccountsChooserProps) => {
+  const id = useId();
+
   return (
     <div className="flex flex-col gap-4 py-4">
       {/* Account List Heading */}
@@ -146,7 +206,7 @@ const AccountsChooser = ({
 
       <div className="flex flex-col gap-2">
         <AccountsContext.Provider
-          value={{ group: "accounts-chooser", accounts }}
+          value={{ group: `accounts-chooser-${id}`, accounts }}
         >
           {accounts.map((account) => (
             <AccountItem

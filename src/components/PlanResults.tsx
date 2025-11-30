@@ -31,20 +31,21 @@ const PlanResultItem = ({
   );
 
   return (
-    <Dialog.Root
-      open={showAccountWebview}
-      onOpenChange={toggleShowAccountWebview}
-      key={result.account.id}
+    <div
+      className={cn(
+        "text-left",
+        "flex items-center p-2",
+        "bg-neutral-900",
+        "hover:bg-neutral-800",
+        "rounded-4xl cursor-pointer",
+        "has-[button:disabled]:opacity-50 has-[button:disabled]:pointer-events-none"
+      )}
     >
-      <div
-        className={cn(
-          "text-left",
-          "flex items-center p-2",
-          "bg-neutral-900",
-          "hover:bg-neutral-800",
-          "rounded-4xl cursor-pointer",
-          "has-[button:disabled]:opacity-50 has-[button:disabled]:pointer-events-none"
-        )}
+      {/* Webview Dialog */}
+      <Dialog.Root
+        open={showAccountWebview}
+        onOpenChange={toggleShowAccountWebview}
+        key={result.account.id}
       >
         <Dialog.Trigger
           disabled={disabled}
@@ -97,6 +98,17 @@ const PlanResultItem = ({
                   {formatCurrency(result.amount)}
                 </span>
               </p>
+
+              {/* Activity Balance */}
+              {validated ? (
+                <p>
+                  <span className="text-lime-400">
+                    {formatCurrency(
+                      Number(result.activity.activity?.activityBalance || 0)
+                    )}
+                  </span>
+                </p>
+              ) : null}
             </div>
 
             {/* Streak */}
@@ -115,31 +127,30 @@ const PlanResultItem = ({
             </span>
           </div>
         </Dialog.Trigger>
+        <AccountWebview account={result.account} />
+      </Dialog.Root>
 
-        {/* Account Wallet Details */}
-        <Dialog.Root
-          open={showAccountDetails}
-          onOpenChange={toggleShowAccountDetails}
+      {/* Account Wallet Details */}
+      <Dialog.Root
+        open={showAccountDetails}
+        onOpenChange={toggleShowAccountDetails}
+      >
+        <Dialog.Trigger
+          disabled={disabled}
+          className={cn(
+            "shrink-0",
+            "p-2 flex items-center justify-center cursor-pointer",
+            "hover:bg-neutral-700 rounded-full",
+            "text-neutral-500 hover:text-yellow-500",
+            "transition-colors duration-200"
+          )}
         >
-          <Dialog.Trigger
-            disabled={disabled}
-            className={cn(
-              "shrink-0",
-              "p-2 flex items-center justify-center cursor-pointer",
-              "hover:bg-neutral-700 rounded-full",
-              "text-neutral-500 hover:text-yellow-500",
-              "transition-colors duration-200"
-            )}
-          >
-            <MdOutlineAccountBalanceWallet className="size-5" />
-          </Dialog.Trigger>
+          <MdOutlineAccountBalanceWallet className="size-5" />
+        </Dialog.Trigger>
 
-          <AccountDetailsDialog account={result.account} />
-        </Dialog.Root>
-      </div>
-
-      <AccountWebview account={result.account} />
-    </Dialog.Root>
+        <AccountDetailsDialog account={result.account} />
+      </Dialog.Root>
+    </div>
   );
 };
 

@@ -35,6 +35,12 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
         total.plus(new Decimal(item.activity.activity?.amount || 0)),
       new Decimal(0)
     );
+
+    const availableAmount = results.reduce(
+      (total, item) =>
+        total.plus(new Decimal(item.activity.activity?.activityBalance || 0)),
+      new Decimal(0)
+    );
     const successfulCount = results.filter((item) => item.validation).length;
     const failedCount = results.filter((item) => !item.validation).length;
 
@@ -42,6 +48,7 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
       totalAccounts,
       totalAmount,
       progressAmount,
+      availableAmount,
       successfulCount,
       failedCount,
     };
@@ -60,13 +67,21 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
       const list = result.data.list;
       const streak = getActivityStreak(list);
 
+      let validation = false;
+      if (activity.activity) {
+        const planAmount = new Decimal(plan.amount);
+        const activityAmount = new Decimal(activity.amount);
+        const activityBalance = new Decimal(activity.activityBalance || 0);
+
+        validation =
+          activityBalance.gt(new Decimal(0)) || activityAmount.gte(planAmount);
+      }
+
       return {
         status: true,
         account: plan.account,
         amount: new Decimal(plan.amount),
-        validation:
-          activity.activity &&
-          new Decimal(activity.amount).gte(new Decimal(plan.amount)),
+        validation: validation,
         activity: { activity, streak },
       };
     } catch (error) {
@@ -140,6 +155,12 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
               /{" "}
               <span className="text-fuchsia-300">
                 {formatCurrency(mutation.data.stats.totalAmount, 3)}
+              </span>
+            </p>
+            <p className="text-lime-300">
+              Available:{" "}
+              <span>
+                {formatCurrency(mutation.data.stats.availableAmount, 3)}
               </span>
             </p>
             <p className="text-yellow-300">
