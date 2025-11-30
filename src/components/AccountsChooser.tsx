@@ -121,6 +121,7 @@ const AccountItem = ({
         "has-[input:disabled]:opacity-60"
       )}
     >
+      {/* Webview Dialog */}
       {typeof result !== "undefined" ? (
         <Dialog.Root
           open={showAccountWebview}
@@ -154,6 +155,7 @@ const AccountItem = ({
         </AccountItemWrapper>
       )}
 
+      {/* Details Dialog */}
       <Dialog.Root
         open={showAccountDetails}
         onOpenChange={toggleShowAccountDetails}
