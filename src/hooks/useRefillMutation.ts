@@ -24,6 +24,9 @@ interface RefillItem {
   account: Account;
   balance: Decimal /* Actual balance */;
   difference: Decimal /* Positive for excess, negative for insufficient */;
+  excessive: boolean;
+  insufficient: boolean;
+  sufficient: boolean;
 }
 
 interface RefillTodo {
@@ -67,17 +70,15 @@ const useRefillMutation = () => {
     accounts: Account[],
     token: "bnb" | "usdt",
     requiredBalance: Decimal
-  ): Promise<{
-    excessFundsAccounts: RefillItem[];
-    insufficientFundsAccounts: RefillItem[];
-  }> => {
-    const excessFundsAccounts: RefillItem[] = [];
-    const insufficientFundsAccounts: RefillItem[] = [];
+  ) => {
+    /* Results array */
+    const results: RefillItem[] = [];
 
     /* Fetch balances in chunks to avoid rate limiting */
     for (const chunk of chunkArrayGenerator(accounts, 10)) {
-      await Promise.all(
-        chunk.map(async (account) => {
+      const chunkResults = await Promise.all(
+        chunk.map(async (account): Promise<RefillItem> => {
+          /* Fetch balance */
           const balance = await fetchBalance(account, token);
 
           /* Don't deduct gas here - it's handled per-transaction in calculateTransferAmount */
@@ -85,26 +86,40 @@ const useRefillMutation = () => {
 
           /* Categorize account */
           if (balanceValue.gt(requiredBalance)) {
-            excessFundsAccounts.push({
+            return {
               account,
               balance: balanceValue,
               difference: balanceValue.minus(requiredBalance),
-            });
+              excessive: true,
+              insufficient: false,
+              sufficient: false,
+            };
           } else if (balanceValue.lt(requiredBalance)) {
-            insufficientFundsAccounts.push({
+            return {
               account,
               balance: balanceValue,
               difference: requiredBalance.minus(balanceValue),
-            });
+              excessive: false,
+              insufficient: true,
+              sufficient: false,
+            };
+          } else {
+            return {
+              account,
+              balance: balanceValue,
+              difference: new Decimal(0),
+              excessive: false,
+              sufficient: true,
+              insufficient: false,
+            };
           }
         })
       );
+
+      results.push(...chunkResults);
     }
 
-    console.log("Excess funds accounts:", excessFundsAccounts);
-    console.log("Insufficient funds accounts:", insufficientFundsAccounts);
-
-    return { excessFundsAccounts, insufficientFundsAccounts };
+    return results;
   };
 
   /**
@@ -139,11 +154,26 @@ const useRefillMutation = () => {
   const planRefillTransactions = (
     token: "bnb" | "usdt",
     greedy: boolean = false,
-    excessFundsAccounts: RefillItem[],
-    insufficientFundsAccounts: RefillItem[],
+    analysis: RefillItem[],
     requiredGasInEther: Decimal
   ): RefillTodo[] => {
     const todo: RefillTodo[] = [];
+
+    const excessFundsAccounts: RefillItem[] = analysis.filter(
+      (item) => item.excessive
+    );
+
+    const sufficientFundsAccounts: RefillItem[] = analysis.filter(
+      (item) => item.sufficient
+    );
+
+    const insufficientFundsAccounts: RefillItem[] = analysis.filter(
+      (item) => item.insufficient
+    );
+
+    console.log("Excess funds accounts:", excessFundsAccounts);
+    console.log("Sufficient funds accounts:", sufficientFundsAccounts);
+    console.log("Insufficient funds accounts:", insufficientFundsAccounts);
 
     if (greedy) {
       /* GREEDY MODE: Prioritize filling accounts completely */
@@ -415,15 +445,17 @@ const useRefillMutation = () => {
       );
 
       /* Step 1: Analyze accounts */
-      const { excessFundsAccounts, insufficientFundsAccounts } =
-        await analyzeAccounts(data.accounts, data.token, requiredBalance);
+      const analysis = await analyzeAccounts(
+        data.accounts,
+        data.token,
+        requiredBalance
+      );
 
       /* Step 2: Plan transactions */
       const todo = planRefillTransactions(
         data.token,
         data.greedy,
-        excessFundsAccounts,
-        insufficientFundsAccounts,
+        analysis,
         requiredGasInEther
       );
 
