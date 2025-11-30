@@ -116,7 +116,7 @@ const AccountItem = ({
     <div
       className={cn(
         "bg-neutral-900",
-        "hover:bg-neutral-800 cursor-pointer",
+        "hover:bg-neutral-800/60 cursor-pointer",
         "flex items-center gap-1 p-1.5 rounded-full",
         "has-[input:disabled]:opacity-60"
       )}
