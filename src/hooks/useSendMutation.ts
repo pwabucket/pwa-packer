@@ -71,7 +71,7 @@ const useSendMutation = () => {
       );
 
       return {
-        hasBalance: balance.gt(new Decimal(1)),
+        hasBalance: balance.gte(new Decimal(1)),
         balance,
       };
     } catch (error) {
