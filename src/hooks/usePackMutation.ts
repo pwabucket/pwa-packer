@@ -41,8 +41,9 @@ const usePackMutation = () => {
       await packer.initialize();
 
       const activity = await packer.getActivity();
-      const { data: withdrawActivity } = await packer.getWithdrawActivity();
-      const amount = new Decimal(withdrawActivity.activityBalance || 0);
+      const withdrawal = await packer.getWithdrawActivity();
+      const withdrawActivity = withdrawal?.data;
+      const amount = new Decimal(withdrawActivity?.activityBalance || 0);
 
       /* Skip if no balance */
       if (amount.lte(0)) {
