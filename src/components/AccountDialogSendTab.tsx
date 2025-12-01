@@ -12,10 +12,10 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const password = usePassword();
 
   /** Form */
-  const { form, append, remove } = useSendForm();
+  const sendForm = useSendForm();
 
   /* Mutation for Sending Funds */
-  const { mutation } = useSendMutation();
+  const sendMutation = useSendMutation();
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: SendFormData) => {
@@ -31,7 +31,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
       return;
     }
 
-    await mutation.mutateAsync({
+    await sendMutation.mutation.mutateAsync({
       ...data,
       accounts: [account],
     });
@@ -43,18 +43,18 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
   return (
     <div className="flex flex-col gap-4">
       {/* Send Results Accordion */}
-      {mutation.isSuccess && mutation.data ? (
+      {sendMutation.mutation.isSuccess && sendMutation.mutation.data ? (
         <div className="flex flex-col gap-2">
           <h2 className="text-sm font-bold text-yellow-500 text-center">
             <MdReceipt className="inline-block mr-1" /> Transfer Receipt
           </h2>
-          <SendResultsAccordion results={mutation.data.results} />
+          <SendResultsAccordion results={sendMutation.mutation.data.results} />
         </div>
       ) : null}
 
-      <FormProvider {...form}>
+      <FormProvider {...sendForm.form}>
         <form
-          onSubmit={form.handleSubmit(handleFormSubmit)}
+          onSubmit={sendForm.form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-4"
         >
           <p className="text-center text-neutral-400 text-sm bg-neutral-800/50 p-4 rounded-lg break-all">
@@ -71,9 +71,8 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
 
           {/** Send Form Fields */}
           <SendFormFields
-            append={append}
-            remove={remove}
-            disabled={mutation.isPending}
+            sendForm={sendForm}
+            disabled={sendMutation.mutation.isPending}
             showDifference={false}
           />
         </form>

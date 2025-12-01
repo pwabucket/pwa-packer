@@ -15,8 +15,8 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
       <SendForm
         handleFormSubmit={handleFormSubmit}
         selector={selector}
-        mutation={sendMutation}
-        form={sendForm}
+        sendMutation={sendMutation}
+        sendForm={sendForm}
         showAmount={false}
         showDifference={false}
         showSkipValidated={false}

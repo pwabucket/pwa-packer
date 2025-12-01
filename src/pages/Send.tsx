@@ -53,8 +53,8 @@ const Send = () => {
       <SendForm
         handleFormSubmit={handleFormSubmit}
         selector={selector}
-        mutation={sendMutation}
-        form={sendForm}
+        sendMutation={sendMutation}
+        sendForm={sendForm}
       />
     </InnerPageLayout>
   );

@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { AccountAddresses } from "./AccountAddresses";
 import { AccountDetailsDialog } from "./AccountDialog";
 import { useAccountsToggle } from "../hooks/useAccountsToggle";
+import Decimal from "decimal.js";
 
 const PlanResultItem = ({
   result,
@@ -89,7 +90,7 @@ const PlanResultItem = ({
                 {validated ? (
                   <span className="text-blue-300">
                     {formatCurrency(
-                      Number(result.activity.activity?.amount || 0)
+                      new Decimal(result.activity.activity?.amount || 0)
                     )}{" "}
                     /{" "}
                   </span>
@@ -104,7 +105,9 @@ const PlanResultItem = ({
                 <p>
                   <span className="text-lime-400">
                     {formatCurrency(
-                      Number(result.activity.activity?.activityBalance || 0)
+                      new Decimal(
+                        result.activity.activity?.activityBalance || 0
+                      )
                     )}
                   </span>
                 </p>

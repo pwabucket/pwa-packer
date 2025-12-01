@@ -7,6 +7,7 @@ import type { PackResult } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
+import Decimal from "decimal.js";
 
 /** Pack Results Props Interface */
 interface PackResultsProps {
@@ -67,7 +68,7 @@ const PackResults = ({ results }: PackResultsProps) => {
               {/* Available Amount */}
               <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">OUT:</span>{" "}
-                {formatCurrency(Number(result.amount || 0), 2)}
+                {formatCurrency(new Decimal(result.amount || 0), 2)}
               </span>
             </p>
 

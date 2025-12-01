@@ -22,7 +22,7 @@ interface WithdrawalResult {
   status: boolean;
   skipped?: boolean;
   account: Account;
-  amount?: number;
+  amount?: Decimal.Value;
   result?: ethers.ContractTransactionReceipt | null;
   error?: unknown;
 }
@@ -30,7 +30,7 @@ interface WithdrawalResult {
 interface WithdrawalStats {
   totalAccounts: number;
   successfulSends: number;
-  totalSentValue: Decimal;
+  totalSentValue: Decimal.Value;
 }
 
 const useWithdrawalMutation = () => {
@@ -142,7 +142,7 @@ const useWithdrawalMutation = () => {
       return {
         status: true,
         account,
-        amount: parseFloat(withdrawalInfo.amount),
+        amount: new Decimal(withdrawalInfo.amount),
         result,
       };
     } catch (error) {

@@ -9,11 +9,12 @@ import { Select } from "./Select";
 import { LabelToggle } from "./LabelToggle";
 import { Slider } from "./Slider";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import Decimal from "decimal.js";
+import type { useSendForm } from "../hooks/useSendForm";
 
 interface SendFormFieldsProps {
   disabled?: boolean;
-  append: (char: string) => void;
-  remove: (index: number) => void;
+  sendForm: ReturnType<typeof useSendForm>;
   showAmount?: boolean;
   showDifference?: boolean;
   showValidate?: boolean;
@@ -35,13 +36,14 @@ const FormControlButton = (props: React.ComponentProps<"button">) => (
 
 const SendFormFields = ({
   disabled,
-  append,
-  remove,
+  sendForm: { form, append, remove },
   showAmount = true,
   showDifference = true,
   showValidate = true,
   showSkipValidated = true,
 }: SendFormFieldsProps) => {
+  const amount = form.watch("amount") || 100;
+
   return (
     <>
       {/* Amount */}
@@ -97,7 +99,10 @@ const SendFormFields = ({
                   type="button"
                   onClick={() =>
                     field.onChange(
-                      Math.max((parseFloat(field.value) || 0) - 1, 0)
+                      Decimal.max(
+                        new Decimal(field.value || 0).minus(1),
+                        0
+                      ).toString()
                     )
                   }
                   disabled={disabled}
@@ -108,7 +113,9 @@ const SendFormFields = ({
                 <FormControlButton
                   type="button"
                   onClick={() =>
-                    field.onChange((parseFloat(field.value) || 0) + 1)
+                    field.onChange(
+                      new Decimal(field.value || 0).plus(1).toString()
+                    )
                   }
                   disabled={disabled}
                 >
@@ -117,9 +124,10 @@ const SendFormFields = ({
               </div>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If set to {field.value} and amount is 100, accounts will send
-                between {100 - field.value} and 100 USDT randomly. The remaining
-                balance will be refilled into other accounts.
+                If set to {field.value} and amount is {amount}, accounts will
+                send between {new Decimal(amount).minus(field.value).toString()}{" "}
+                and {amount} USDT randomly. The remaining balance will be
+                refilled into other accounts.
               </p>
             </div>
           )}

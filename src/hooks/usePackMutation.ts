@@ -42,10 +42,10 @@ const usePackMutation = () => {
 
       const activity = await packer.getActivity();
       const { data: withdrawActivity } = await packer.getWithdrawActivity();
-      const amount = Number(withdrawActivity.activityBalance || 0);
+      const amount = new Decimal(withdrawActivity.activityBalance || 0);
 
       /* Skip if no balance */
-      if (amount <= 0) {
+      if (amount.lte(0)) {
         return {
           status: false,
           skipped: true,

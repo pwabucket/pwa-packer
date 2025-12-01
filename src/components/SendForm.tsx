@@ -15,8 +15,8 @@ import { usePendingActivity } from "../hooks/usePendingActivity";
 interface SendFormProps {
   handleFormSubmit: (data: SendFormData) => void;
   selector: ReturnType<typeof useAccountsSelector>;
-  mutation: ReturnType<typeof useSendMutation>;
-  form: ReturnType<typeof useSendForm>;
+  sendMutation: ReturnType<typeof useSendMutation>;
+  sendForm: ReturnType<typeof useSendForm>;
   showAmount?: boolean;
   showDifference?: boolean;
   showValidate?: boolean;
@@ -26,8 +26,8 @@ interface SendFormProps {
 const SendForm = ({
   handleFormSubmit,
   selector,
-  mutation: { mutation, progress, target },
-  form: { form, append, remove },
+  sendMutation,
+  sendForm,
   showAmount,
   showDifference,
   showValidate,
@@ -43,24 +43,28 @@ const SendForm = ({
   return (
     <div className="flex flex-col gap-2">
       {/* Send Results Summary / Dialog */}
-      {mutation.isSuccess && (
+      {sendMutation.mutation.isSuccess && (
         <>
           {/* Send Results Summary */}
           <div className="flex flex-col text-center text-sm">
             <p className="text-green-400">Transfers completed successfully!</p>
             <p className="text-blue-300">
-              Accounts: ({mutation.data?.successfulSends} /{" "}
-              {mutation.data?.totalAccounts})
+              Accounts: ({sendMutation.mutation.data?.successfulSends} /{" "}
+              {sendMutation.mutation.data?.totalAccounts})
             </p>
 
             <p className="text-rose-300">
-              Validations: ({mutation.data?.successfulValidations} /{" "}
-              {mutation.data?.totalAccounts})
+              Validations: ({sendMutation.mutation.data?.successfulValidations}{" "}
+              / {sendMutation.mutation.data?.totalAccounts})
             </p>
 
             <p className="text-lime-300">
               Total Amount:{" "}
-              {formatCurrency(mutation.data?.totalAmountSent || 0, 3)} USDT
+              {formatCurrency(
+                sendMutation.mutation.data?.totalAmountSent || 0,
+                3
+              )}{" "}
+              USDT
             </p>
           </div>
 
@@ -69,17 +73,17 @@ const SendForm = ({
             <Dialog.Trigger asChild>
               <Button className="mx-auto">View Detailed Results</Button>
             </Dialog.Trigger>
-            <SendResults results={mutation.data.results} />
+            <SendResults results={sendMutation.mutation.data.results} />
           </Dialog.Root>
         </>
       )}
 
-      <FormProvider {...form}>
+      <FormProvider {...sendForm.form}>
         <form
-          onSubmit={form.handleSubmit(handleFormSubmit)}
+          onSubmit={sendForm.form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-4"
         >
-          {!mutation.isSuccess && (
+          {!sendMutation.mutation.isSuccess && (
             <>
               <p className="text-center text-sm text-blue-400">
                 A transfer will be initiated from each account to their
@@ -88,9 +92,8 @@ const SendForm = ({
 
               {/** Send Form Fields */}
               <SendFormFields
-                append={append}
-                remove={remove}
-                disabled={mutation.isPending}
+                sendForm={sendForm}
+                disabled={sendMutation.mutation.isPending}
                 showAmount={showAmount}
                 showDifference={showDifference}
                 showValidate={showValidate}
@@ -100,13 +103,18 @@ const SendForm = ({
           )}
 
           {/* Progress Bar */}
-          {mutation.isPending && <Progress max={target} current={progress} />}
+          {sendMutation.mutation.isPending && (
+            <Progress
+              max={sendMutation.target}
+              current={sendMutation.progress}
+            />
+          )}
 
           {/* Accounts Chooser */}
           <AccountsChooser
             {...selector}
-            disabled={mutation.isPending}
-            results={mutation.data?.results}
+            disabled={sendMutation.mutation.isPending}
+            results={sendMutation.mutation.data?.results}
           />
         </form>
       </FormProvider>

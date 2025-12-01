@@ -5,6 +5,7 @@ import { MdOutlineOpenInNew } from "react-icons/md";
 import { cn, formatCurrency, transactionHashLink } from "../lib/utils";
 import { format } from "date-fns";
 import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
+import Decimal from "decimal.js";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
   /* Check authentication status */
   const authenticated = useIsAuthenticated();
@@ -42,7 +43,7 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
                 activity.status === 3 ? "text-lime-400" : "text-orange-400"
               )}
             >
-              {formatCurrency(Number(activity.tp))}
+              {formatCurrency(new Decimal(activity.tp))}
             </p>
 
             {/* Status */}
