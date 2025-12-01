@@ -193,7 +193,7 @@ const AccountsChooser = ({
     <div className="flex flex-col gap-4 py-4">
       {/* Account List Heading */}
       <h4 className="font-protest-guerrilla px-4 text-center text-lg">
-        Accounts ({accounts.length})
+        Accounts ({selectedAccounts.length} / {accounts.length})
       </h4>
 
       {!results && (
