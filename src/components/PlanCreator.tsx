@@ -10,9 +10,14 @@ import { PlanResults } from "../components/PlanResults";
 import { LabelToggle } from "./LabelToggle";
 import USDTIcon from "../assets/tether-usdt-logo.svg";
 import { usePlanCreator } from "../hooks/usePlanCreator";
+import type { PlanFileContent } from "../types";
 
 /** Plan Creator Component */
-const PlanCreator = () => {
+const PlanCreator = ({
+  onCreate,
+}: {
+  onCreate: (data: PlanFileContent) => void;
+}) => {
   const {
     form,
     mutation,
@@ -20,7 +25,7 @@ const PlanCreator = () => {
     accountsChooser,
     progress,
     target,
-  } = usePlanCreator();
+  } = usePlanCreator(onCreate);
 
   return (
     <div className="flex flex-col gap-4">

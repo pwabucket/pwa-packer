@@ -52,7 +52,7 @@ interface PreparedResult extends PreparedAccount {
 }
 
 /** Plan Creator Component */
-const usePlanCreator = () => {
+const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   const accountsChooser = useAccountsChooser();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
@@ -448,7 +448,7 @@ const usePlanCreator = () => {
 
       const week = startOfWeek(new Date(), { weekStartsOn: 1 });
       const weekStr = format(week, "yyyy-MM-dd");
-      const fileContent: PlanFileContent = {
+      const plan: PlanFileContent = {
         parameters: data,
         week,
         stats,
@@ -456,18 +456,20 @@ const usePlanCreator = () => {
       };
 
       /* Download result */
-      downloadJsonFile(`plan-${weekStr}-week`, fileContent);
+      downloadJsonFile(`plan-${weekStr}-week`, plan);
 
       return {
         results,
         stats,
+        plan,
       };
     },
   });
 
   /** Handle Form Submit */
   const handleFormSubmit = async (data: PlanFormData) => {
-    await mutation.mutateAsync(data);
+    const result = await mutation.mutateAsync(data);
+    onCreate(result.plan);
     toast.success("Plan created and downloaded successfully!");
   };
 

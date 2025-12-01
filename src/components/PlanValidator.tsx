@@ -7,7 +7,7 @@ import { PlanInfo } from "./PlanInfo";
 import { usePlanValidator } from "../hooks/usePlanValidator";
 
 const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
-  const { mutation, progress, target, validatePlans } = usePlanValidator(plan);
+  const { mutation, progress, target, validatePlan } = usePlanValidator(plan);
 
   return (
     <div className="flex flex-col gap-4">
@@ -47,7 +47,7 @@ const PlanValidator = ({ plan }: { plan: PlanFileContent }) => {
         </>
       ) : null}
 
-      <Button disabled={mutation.isPending} onClick={validatePlans}>
+      <Button disabled={mutation.isPending} onClick={validatePlan}>
         {mutation.isPending ? "Validating..." : "Validate Plan"}
       </Button>
 

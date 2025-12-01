@@ -31,7 +31,7 @@ const Plan = () => {
           forceMount
           className="data-[state=inactive]:hidden"
         >
-          <PlanCreator />
+          <PlanCreator onCreate={setPlan} />
         </Tabs.Content>
 
         {/* Send */}

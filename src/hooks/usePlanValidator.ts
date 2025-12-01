@@ -47,7 +47,7 @@ const usePlanValidator = (plan: PlanFileContent) => {
   };
 
   /* Validate Plan */
-  const validatePlan = async (
+  const validateAccount = async (
     plan: PlanResult
   ): Promise<PlanValidationResult> => {
     try {
@@ -104,7 +104,7 @@ const usePlanValidator = (plan: PlanFileContent) => {
       for (const chunk of chunkArrayGenerator(plans, 10)) {
         const chunkResults = await Promise.all(
           chunk.map(async (account) => {
-            const result = await validatePlan(account);
+            const result = await validateAccount(account);
             incrementProgress();
             return result;
           })
@@ -124,16 +124,16 @@ const usePlanValidator = (plan: PlanFileContent) => {
     },
   });
 
-  /* Validate Plans */
-  const validatePlans = async () => {
+  /* Validate Plan */
+  const validatePlan = async () => {
     await mutation.mutateAsync(plan.results);
-    toast.success("Plans validated successfully!");
+    toast.success("Plan validated successfully!");
   };
 
   return {
     plan,
     mutation,
-    validatePlans,
+    validatePlan,
     progress,
     target,
   };
