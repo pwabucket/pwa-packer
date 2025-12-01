@@ -473,7 +473,7 @@ const useRefillMutation = () => {
       /* Step 5: Calculate statistics */
       const stats = calculateStats(results);
 
-      return { results, ...stats };
+      return { results, ...stats, token: data.token };
     },
   });
 

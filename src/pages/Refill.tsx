@@ -57,7 +57,7 @@ const Refill = () => {
           </p>
           <p className="text-lime-300">
             Total Amount: {truncateDecimals(mutation.data?.totalSentValue, 8)}{" "}
-            {token.toUpperCase()}
+            {mutation.data?.token.toUpperCase()}
           </p>
         </div>
       )}
