@@ -43,6 +43,7 @@ const SendFormFields = ({
   showSkipValidated = true,
 }: SendFormFieldsProps) => {
   const amount = form.watch("amount") || 100;
+  const difference = form.watch("difference") || 0;
 
   return (
     <>
@@ -124,8 +125,8 @@ const SendFormFields = ({
               </div>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If set to {field.value} and amount is {amount}, accounts will
-                send between {new Decimal(amount).minus(field.value).toString()}{" "}
+                If set to {difference} and amount is {amount}, accounts will
+                send between {new Decimal(amount).minus(difference).toString()}{" "}
                 and {amount} USDT randomly. The remaining balance will be
                 refilled into other accounts.
               </p>

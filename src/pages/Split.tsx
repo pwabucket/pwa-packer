@@ -32,7 +32,7 @@ const parseToSmallUnit = (amount: Decimal) => {
 
 /** Calculate Required BNB for Split and Transaction Fees */
 const calculateRequiredBNB = (amount: string, accountCount: number) => {
-  const amountToSplit = new Decimal(amount);
+  const amountToSplit = new Decimal(amount || 0);
   if (amountToSplit.gt(0) && accountCount > 0) {
     /* Calculate Required Split Amount */
     const requiredSplitAmount =
@@ -214,7 +214,7 @@ const Split = () => {
                       Each:{" "}
                       {selectedAccounts.length > 0
                         ? parseToSmallUnit(
-                            new Decimal(field.value).div(
+                            new Decimal(field.value || 0).div(
                               selectedAccounts.length
                             )
                           )
