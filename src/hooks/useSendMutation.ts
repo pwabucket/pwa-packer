@@ -52,7 +52,7 @@ interface RefillTransaction {
 }
 
 const useSendMutation = () => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
   const password = usePassword()!;
@@ -72,7 +72,9 @@ const useSendMutation = () => {
       );
 
       return {
-        hasBalance: balance.gte(new Decimal(Packer.MINIMUM_DEPOSIT_AMOUNT)),
+        hasBalance: balance.gte(
+          new Decimal(getProvider(account.provider).MINIMUM_DEPOSIT_AMOUNT)
+        ),
         balance,
       };
     } catch (error) {
@@ -158,6 +160,7 @@ const useSendMutation = () => {
     if (!account.url) return null;
 
     try {
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url);
       await packer.initialize();
 
@@ -188,17 +191,17 @@ const useSendMutation = () => {
     try {
       /* Delay before validation */
       await delayForSeconds(delay);
-
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url);
       await packer.initialize();
 
       /* Check activity */
-      let validation = await packer.getParticipation();
+      let validation = await packer.confirmParticipation();
 
       /* Retry if not validated */
       if (!validation.participating) {
         await delayForSeconds(delay);
-        validation = await packer.getParticipation();
+        validation = await packer.confirmParticipation();
       }
 
       return validation;

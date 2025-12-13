@@ -1,17 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import bcrypt from "bcryptjs";
-import type { Account, ProviderType } from "../types";
+import type { Account } from "../types";
 import { getLocalStorageKeyForAccountPrivateKey } from "../lib/utils";
 
 export type AppStore = {
   /** Dashboard Style */
   dashboardStyle: "normal" | "sticky";
   setDashboardStyle: (style: "normal" | "sticky") => void;
-
-  /** Provider */
-  provider: ProviderType;
-  setProvider: (provider: ProviderType) => void;
 
   /** Accounts */
   accounts: Account[];
@@ -49,10 +45,6 @@ const useAppStore = create(
       /** Dashboard Style */
       dashboardStyle: "normal",
       setDashboardStyle: (style) => set({ dashboardStyle: style }),
-
-      /** Provider */
-      provider: "leonardo",
-      setProvider: (provider) => set({ provider }),
 
       /** Accounts */
       accounts: [],

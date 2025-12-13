@@ -36,7 +36,7 @@ interface StatusCheckFormData {
 
 /** StatusCheck Page Component */
 const StatusCheck = () => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
   const { target, setTarget, progress, incrementProgress, resetProgress } =
@@ -130,6 +130,7 @@ const StatusCheck = () => {
         skipped: true,
       };
     try {
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url!);
       await packer.initialize();
       const status = await packer.getAccountStatus();

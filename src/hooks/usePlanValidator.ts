@@ -12,7 +12,7 @@ import Decimal from "decimal.js";
 import { usePackerProvider } from "./usePackerProvider";
 
 const usePlanValidator = (plan: PlanFileContent) => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -51,6 +51,7 @@ const usePlanValidator = (plan: PlanFileContent) => {
     plan: PlanResult
   ): Promise<PlanValidationResult> => {
     try {
+      const Packer = getProvider(plan.account.provider);
       const packer = new Packer(plan.account.url!);
       await packer.initialize();
 

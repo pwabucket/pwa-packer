@@ -54,6 +54,7 @@ const ExistingAccountForm = ({
     const updatedAccount: Account = {
       id: account.id,
       title: data.title,
+      provider: data.provider,
       url: data.url,
       depositAddress: data.depositAddress,
       walletAddress: getWalletAddressFromPrivateKey(data.privateKey),
@@ -105,6 +106,7 @@ const ExistingAccountForm = ({
           <AccountForm
             initialValues={{
               title: account.title,
+              provider: account.provider,
               url: account.url,
               depositAddress: account.depositAddress,
               privateKey,

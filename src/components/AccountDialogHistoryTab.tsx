@@ -7,7 +7,7 @@ import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
 import Decimal from "decimal.js";
 import { usePackerProvider } from "../hooks/usePackerProvider";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
 
   /* Check authentication status */
   const authenticated = useIsAuthenticated();
@@ -17,6 +17,7 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
     enabled: Boolean(authenticated && account.url),
     queryKey: ["withdraw-activity-list", account.id],
     queryFn: async () => {
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url!);
       await packer.initialize();
       const result = await packer.getWithdrawalHistory();

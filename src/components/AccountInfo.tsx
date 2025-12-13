@@ -61,7 +61,7 @@ const InfoItem = ({
 };
 
 const AccountInfo = ({ account }: { account: Account }) => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
 
   /* Check authentication status */
   const authenticated = useIsAuthenticated();
@@ -75,6 +75,7 @@ const AccountInfo = ({ account }: { account: Account }) => {
     enabled: Boolean(authenticated && account.url),
     queryKey: ["account-info", account.id],
     queryFn: async () => {
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url!);
       await packer.initialize();
       const info = await packer.getAccountInfo();

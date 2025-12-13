@@ -25,6 +25,7 @@ const NewAccountForm = ({ onCreated }: NewAccountFormProps) => {
     const newAccount: Account = {
       id: uuid(),
       title: data.title,
+      provider: data.provider,
       url: data.url,
       depositAddress: data.depositAddress,
       walletAddress: getWalletAddressFromPrivateKey(data.privateKey),

@@ -52,7 +52,7 @@ interface PreparedResult extends PreparedAccount {
 
 /** Plan Creator Component */
 const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
   const accountsChooser = useAccountsChooser();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
@@ -101,6 +101,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
 
     try {
       /* Instantiate */
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url);
 
       /* Initialize */
@@ -394,15 +395,18 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
         amount: new Decimal(0),
       }));
 
-    const minimum = new Decimal(Packer.MINIMUM_DEPOSIT_AMOUNT);
     const maximum = floorToWholeNumber(new Decimal(data.maximum));
     const total = floorToWholeNumber(new Decimal(data.total));
-    const difference = maximum.minus(minimum);
 
     let needed = total;
 
     for (const item of availableAccounts) {
       if (needed.lte(0)) break;
+      const minimum = new Decimal(
+        getProvider(item.account.provider).MINIMUM_DEPOSIT_AMOUNT
+      );
+      const difference = maximum.minus(minimum);
+
       const randomAmount = floorToWholeNumber(
         Decimal.random().times(difference.plus(1)).plus(minimum)
       );

@@ -1,11 +1,24 @@
+import { useCallback } from "react";
 import { DicaprioProvider } from "../providers/DicaprioProvider";
 import { LeonardoProvider } from "../providers/LeonardoProvider";
-import { useAppStore } from "../store/useAppStore";
+import type { ProviderType } from "../types";
 
 const usePackerProvider = () => {
-  const provider = useAppStore((state) => state.provider);
+  const getProvider = useCallback(
+    (provider: ProviderType = "leonardo") =>
+      provider === "leonardo" ? LeonardoProvider : DicaprioProvider,
+    []
+  );
 
-  return provider === "leonardo" ? LeonardoProvider : DicaprioProvider;
+  const createProvider = useCallback(
+    (provider: ProviderType = "leonardo", url: string) => {
+      const Provider = getProvider(provider);
+      return new Provider(url);
+    },
+    [getProvider]
+  );
+
+  return { getProvider, createProvider };
 };
 
 export { usePackerProvider };

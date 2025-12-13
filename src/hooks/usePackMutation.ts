@@ -18,7 +18,7 @@ interface PackStats {
 }
 
 const usePackMutation = () => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
 
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
@@ -39,6 +39,7 @@ const usePackMutation = () => {
 
     try {
       /* Initialize packer and fetch data */
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url);
       await packer.initialize();
 

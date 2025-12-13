@@ -11,7 +11,7 @@ import type {
 } from "../types";
 
 const useValidationMutation = () => {
-  const Packer = usePackerProvider();
+  const { getProvider } = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -27,6 +27,7 @@ const useValidationMutation = () => {
     }
 
     try {
+      const Packer = getProvider(account.provider);
       const packer = new Packer(account.url);
       await packer.initialize();
 
