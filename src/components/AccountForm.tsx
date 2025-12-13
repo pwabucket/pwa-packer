@@ -37,11 +37,7 @@ const AccountFormSchema = yup
   .object({
     title: yup.string().required().label("Title"),
     depositAddress: yup.string().required().label("Deposit Address"),
-    provider: yup
-      .string()
-      .required()
-      .oneOf(["leonardo", "dicaprio"])
-      .label("Provider"),
+    provider: yup.string().required().oneOf(["leonardo"]).label("Provider"),
     url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
   })
@@ -132,7 +128,6 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
               <Label htmlFor="provider">Provider</Label>
               <Select id="provider" {...field}>
                 <Select.Option value="leonardo">Leonardo</Select.Option>
-                <Select.Option value="dicaprio">Dicaprio</Select.Option>
               </Select>
               <FormFieldError message={fieldState.error?.message} />
             </div>
