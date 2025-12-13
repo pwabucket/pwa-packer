@@ -10,17 +10,16 @@ import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
 import type {
   Account,
-  Activity,
+  ParticipationResult,
   SendResult,
   SendStats,
-  ValidationResult,
 } from "../types";
 import { useProgress } from "./useProgress";
-import { Packer } from "../lib/Packer";
 import { WalletReader } from "../lib/WalletReader";
 import toast from "react-hot-toast";
 import { executeUsdtTransfers } from "../lib/transfers";
 import Decimal from "decimal.js";
+import { usePackerProvider } from "./usePackerProvider";
 
 interface SendMutationData {
   accounts: Account[];
@@ -41,8 +40,9 @@ interface PreparedAccount {
   balance: Decimal;
   amount: Decimal;
   amountNeeded: Decimal;
+  receiver: string;
   error?: unknown;
-  validation: Activity | null;
+  validation: ParticipationResult | null;
 }
 
 interface RefillTransaction {
@@ -52,6 +52,7 @@ interface RefillTransaction {
 }
 
 const useSendMutation = () => {
+  const Packer = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
   const password = usePassword()!;
@@ -71,7 +72,7 @@ const useSendMutation = () => {
       );
 
       return {
-        hasBalance: balance.gte(new Decimal(1)),
+        hasBalance: balance.gte(new Decimal(Packer.MINIMUM_DEPOSIT_AMOUNT)),
         balance,
       };
     } catch (error) {
@@ -153,18 +154,22 @@ const useSendMutation = () => {
   };
 
   /** Get account validation */
-  const getValidation = async (account: Account): Promise<Activity | null> => {
+  const getValidation = async (account: Account) => {
     if (!account.url) return null;
 
     try {
       const packer = new Packer(account.url);
       await packer.initialize();
 
+      const [receiver, activity] = await Promise.all([
+        await packer.getDepositAddress(),
+        await packer.getParticipation(),
+      ]);
       /* Check activity */
-      return await packer.getActivity();
+      return { receiver, activity };
     } catch (error) {
       console.error(
-        `Validation check failed for ${account.title} (W:${account.walletAddress}) (D:${account.depositAddress}):`,
+        `Validation check failed for ${account.title} (W:${account.walletAddress}):`,
         error
       );
       return null;
@@ -177,7 +182,7 @@ const useSendMutation = () => {
   const validateTransaction = async (
     account: Account,
     delay: number
-  ): Promise<ValidationResult | null> => {
+  ): Promise<ParticipationResult | null> => {
     if (!account.url) return null;
 
     try {
@@ -188,12 +193,12 @@ const useSendMutation = () => {
       await packer.initialize();
 
       /* Check activity */
-      let validation = await packer.checkActivity();
+      let validation = await packer.getParticipation();
 
       /* Retry if not validated */
-      if (!validation.activity) {
+      if (!validation.participating) {
         await delayForSeconds(delay);
-        validation = await packer.checkActivity();
+        validation = await packer.getParticipation();
       }
 
       return validation;
@@ -214,7 +219,8 @@ const useSendMutation = () => {
     checkValidation: boolean = true
   ): Promise<PreparedAccount> => {
     /* Initialize validation */
-    let validation: Activity | null = null;
+    let validation: ParticipationResult | null = null;
+    let receiver = account.depositAddress;
 
     try {
       /* Parallel fetch validation and balance */
@@ -225,7 +231,8 @@ const useSendMutation = () => {
 
       /* Check if already validated */
       if (checkValidation) {
-        validation = validationResult;
+        receiver = validationResult?.receiver!;
+        validation = validationResult?.activity!;
       }
 
       /* Check balance */
@@ -239,6 +246,7 @@ const useSendMutation = () => {
           balance,
           amount: new Decimal(0),
           amountNeeded: new Decimal(0),
+          receiver,
           validation,
           error: "Insufficient balance",
         };
@@ -292,6 +300,7 @@ const useSendMutation = () => {
         balance,
         amountNeeded,
         validation,
+        receiver,
       };
     } catch (error: unknown) {
       console.error(
@@ -308,6 +317,7 @@ const useSendMutation = () => {
         balance: new Decimal(0),
         amountNeeded: new Decimal(0),
         validation,
+        receiver,
       };
     }
   };
@@ -319,8 +329,7 @@ const useSendMutation = () => {
     prepared: PreparedAccount,
     data: SendMutationData
   ): Promise<SendResult> => {
-    const { account, amount, balance, amountNeeded } = prepared;
-    const receiver = account.depositAddress;
+    const { account, amount, receiver, balance, amountNeeded } = prepared;
     let hashResult: HashResult | null = null;
 
     try {
@@ -334,7 +343,7 @@ const useSendMutation = () => {
       hashResult = txResult.hashResult;
 
       /* Validate if enabled */
-      let validation: ValidationResult | null = null;
+      let validation: ParticipationResult | null = null;
       if (data.validate && account.url && txResult.status) {
         validation = await validateTransaction(account, data.delay);
       }
@@ -532,7 +541,7 @@ const useSendMutation = () => {
 
       /* Apply skipValidated filter */
       const availableAccounts = preparedAccounts.filter((item) => {
-        if (data.skipValidated && item.validation?.activity) {
+        if (data.skipValidated && item.validation?.participating) {
           return false;
         }
         return true;

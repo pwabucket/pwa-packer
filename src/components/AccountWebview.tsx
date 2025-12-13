@@ -14,6 +14,7 @@ import { AccountSwitcher } from "./AccountSwitcher";
 import { AccountInfo } from "./AccountInfo";
 import { AccountDialogHistoryTab } from "./AccountDialogHistoryTab";
 import { TabTrigger } from "./TabTrigger";
+import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface AccountWebviewProps {
   account: Account;
@@ -25,11 +26,10 @@ interface WebviewAreaProps {
 }
 
 const WebviewArea = ({ account }: WebviewAreaProps) => {
-  const getHashUrl = (hash: string) => {
+  const Packer = usePackerProvider();
+  const getPageUrl = (page: string) => {
     try {
-      const url = new URL(account.url!);
-      url.hash = hash;
-      return url.toString();
+      return Packer.getPageUrl(page, account.url!);
     } catch {
       return account.url!;
     }
@@ -58,7 +58,7 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
           {/* Activity */}
           <Tabs.Content value="activity" className="grow min-w-0 min-h-0">
             <iframe
-              src={getHashUrl("#/Activity")}
+              src={getPageUrl("activity")}
               className="size-full bg-neutral-800/50"
               referrerPolicy="no-referrer"
             />
@@ -67,7 +67,7 @@ const WebviewArea = ({ account }: WebviewAreaProps) => {
           {/* Withdrawals */}
           <Tabs.Content value="withdrawals" className="grow min-w-0 min-h-0">
             <iframe
-              src={getHashUrl("#/Withdrawal")}
+              src={getPageUrl("withdrawals")}
               className="size-full bg-neutral-800/50"
               referrerPolicy="no-referrer"
             />

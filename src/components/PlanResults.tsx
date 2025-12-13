@@ -105,9 +105,7 @@ const PlanResultItem = ({
                 <p>
                   <span className="text-lime-400">
                     {formatCurrency(
-                      new Decimal(
-                        result.activity.activity?.activityBalance || 0
-                      )
+                      new Decimal(result.activity.activity?.balance || 0)
                     )}
                   </span>
                 </p>

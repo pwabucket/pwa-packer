@@ -5,12 +5,10 @@ import * as yup from "yup";
 import { useAccountsChooser } from "./useAccountsChooser";
 import type {
   Account,
-  Activity,
   PlanAccountStatus,
   PlanFileContent,
   PlanStats,
 } from "../types";
-import { Packer } from "../lib/Packer";
 import { format, startOfWeek } from "date-fns";
 import {
   chunkArrayGenerator,
@@ -26,6 +24,7 @@ import { WalletReader } from "../lib/WalletReader";
 import { usePassword } from "./usePassword";
 import { executeUsdtTransfers } from "../lib/transfers";
 import Decimal from "decimal.js";
+import { usePackerProvider } from "./usePackerProvider";
 
 /** Plan Form Schema */
 const PlanFormSchema = yup
@@ -53,6 +52,7 @@ interface PreparedResult extends PreparedAccount {
 
 /** Plan Creator Component */
 const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
+  const Packer = usePackerProvider();
   const accountsChooser = useAccountsChooser();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
@@ -107,11 +107,9 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
       await packer.initialize();
 
       /* Get activity */
-      const activity: Activity = await packer.getActivity();
-
-      const result = await packer.getWithdrawActivityList();
-      const list = result.data.list;
-      const streak = getActivityStreak(list);
+      const activity = await packer.getParticipation();
+      const result = await packer.getWithdrawalHistory();
+      const streak = getActivityStreak(result);
 
       return {
         activity,
@@ -184,22 +182,22 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
       (total, item) => total.plus(item.amount),
       new Decimal(0)
     );
-    const firstActivity = results.filter(
+    const firstActivityCount = results.filter(
       (item) => item.activity.streak === 0
     ).length;
-    const secondActivity = results.filter(
+    const secondActivityCount = results.filter(
       (item) => item.activity.streak === 1
     ).length;
-    const consistentActivity = results.filter(
+    const consistentActivityCount = results.filter(
       (item) => item.activity.streak >= 2
     ).length;
 
     return {
       totalAccounts,
       totalAmount,
-      firstActivity,
-      secondActivity,
-      consistentActivity,
+      firstActivityCount,
+      secondActivityCount,
+      consistentActivityCount,
     };
   };
 
@@ -389,14 +387,14 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
     data: PlanFormData
   ) => {
     const availableAccounts = preparedAccounts
-      .filter((item) => item.status && !item.activity.activity?.activity)
+      .filter((item) => item.status && !item.activity.activity?.participating)
       .sort((a, b) => a.activity.streak - b.activity.streak)
       .map((item) => ({
         ...item,
         amount: new Decimal(0),
       }));
 
-    const minimum = new Decimal(1);
+    const minimum = new Decimal(Packer.MINIMUM_DEPOSIT_AMOUNT);
     const maximum = floorToWholeNumber(new Decimal(data.maximum));
     const total = floorToWholeNumber(new Decimal(data.total));
     const difference = maximum.minus(minimum);

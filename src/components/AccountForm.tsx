@@ -11,7 +11,6 @@ import {
   copyToClipboard,
   getWalletAddressFromPrivateKey,
 } from "../lib/utils";
-import { Packer } from "../lib/Packer";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
@@ -20,6 +19,7 @@ import {
   MdAccountBalanceWallet,
   MdOutlineContentCopy,
 } from "react-icons/md";
+import { usePackerProvider } from "../hooks/usePackerProvider";
 
 /** Account Form Data */
 interface AccountFormData {
@@ -47,6 +47,8 @@ interface AccountFormProps {
 
 /** Account Form Component */
 const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
+  const Packer = usePackerProvider();
+
   /** Form */
   const form = useForm({
     resolver: yupResolver(AccountFormSchema),
@@ -67,15 +69,10 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
       /* Initialize Packer */
       await packer.initialize();
 
-      /* Get Data */
-      const { data } = await packer.validate();
+      /* Get Address */
+      const address = await packer.getDepositAddress();
 
-      if (data.activityAddress) {
-        return data.activityAddress;
-      } else {
-        const wallet = await packer.getActivityWallet();
-        return wallet.msg;
-      }
+      return address;
     },
   });
 

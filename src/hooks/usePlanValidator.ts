@@ -1,18 +1,18 @@
 import toast from "react-hot-toast";
 import type {
-  Activity,
   PlanFileContent,
   PlanResult,
   PlanValidationResult,
 } from "../types";
 import { useMutation } from "@tanstack/react-query";
 import { useProgress } from "./useProgress";
-import { Packer } from "../lib/Packer";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 import { getActivityStreak } from "../lib/activity";
 import Decimal from "decimal.js";
+import { usePackerProvider } from "./usePackerProvider";
 
 const usePlanValidator = (plan: PlanFileContent) => {
+  const Packer = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -30,7 +30,7 @@ const usePlanValidator = (plan: PlanFileContent) => {
 
     const availableAmount = results.reduce(
       (total, item) =>
-        total.plus(new Decimal(item.activity.activity?.activityBalance || 0)),
+        total.plus(new Decimal(item.activity.activity?.balance || 0)),
       new Decimal(0)
     );
     const successfulCount = results.filter((item) => item.validation).length;
@@ -54,16 +54,15 @@ const usePlanValidator = (plan: PlanFileContent) => {
       const packer = new Packer(plan.account.url!);
       await packer.initialize();
 
-      const activity: Activity = await packer.getActivity();
-      const result = await packer.getWithdrawActivityList();
-      const list = result.data.list;
-      const streak = getActivityStreak(list);
+      const activity = await packer.getParticipation();
+      const withdrawalHistory = await packer.getWithdrawalHistory();
+      const streak = getActivityStreak(withdrawalHistory);
 
       let validation = false;
-      if (activity.activity) {
+      if (activity.participating) {
         const planAmount = new Decimal(plan.amount);
         const activityAmount = new Decimal(activity.amount);
-        const activityBalance = new Decimal(activity.activityBalance || 0);
+        const activityBalance = new Decimal(activity.balance || 0);
 
         validation =
           activityBalance.gt(new Decimal(0)) || activityAmount.gte(planAmount);

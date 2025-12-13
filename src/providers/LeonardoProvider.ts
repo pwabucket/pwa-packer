@@ -1,34 +1,15 @@
-import axios, { type AxiosInstance } from "axios";
-import { extractTgWebAppData } from "./utils";
+import type {
+  PackerProviderInstance,
+  ParticipationResult,
+  WithdrawalHistory,
+  WithdrawalInfo,
+  WithdrawalResult,
+} from "../types";
+import { BaseProvider } from "./BaseProvider";
 
-interface InitDataUnsafe {
-  query_id?: string;
-  user?: {
-    id: number;
-    first_name: string;
-    last_name?: string;
-    username?: string;
-    language_code?: string;
-    allows_write_to_pm?: boolean;
-    photo_url?: string;
-  };
-  auth_date?: number;
-  signature?: string;
-  hash?: string;
-  [key: string]: unknown;
-}
-
-interface TelegramWebAppData {
-  platform: string | null;
-  version: string | null;
-  initData: string | null;
-  initDataUnsafe: InitDataUnsafe | null;
-}
-
-class Packer {
-  private url: URL;
-  protected api: AxiosInstance;
-  protected telegramWebApp: TelegramWebAppData;
+class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
+  /* Minimum Deposit Amount */
+  static MINIMUM_DEPOSIT_AMOUNT = 1;
 
   /* Static Map to Cache Custom Code per Origin */
   static customCodeMap = new Map<string, string>();
@@ -37,61 +18,30 @@ class Packer {
   static initializationPromises = new Map<string, Promise<void>>();
 
   constructor(url: string) {
-    /* Parse URL */
-    this.url = new URL(url);
-
-    /* Telegram WebApp Data */
-    this.telegramWebApp = extractTgWebAppData(url);
-
-    /* Axios Instance */
-    this.api = axios.create({
-      baseURL: this.url.origin,
-    });
+    super(url);
 
     /* Authorization Header */
     this.api.defaults.headers.common["Authorization"] =
       this.telegramWebApp.initData || "";
-
-    /* Request Interceptor */
-    this.api.interceptors.request.use((config) => {
-      /* If No Llama URL is Set, Return Original Config */
-      if (!import.meta.env.VITE_LLAMA_URL) {
-        return config;
-      }
-
-      /* Llama URL from Environment Variables */
-      const llamaURL = new URL(import.meta.env.VITE_LLAMA_URL);
-
-      /* Set Original URL as Query Parameter */
-      llamaURL.searchParams.set(
-        "url",
-        new URL(config.url || "", config.baseURL).href
-      );
-
-      /* Update Config URL to Llama URL */
-      config.url = llamaURL.href;
-
-      return config;
-    });
   }
 
   async initialize() {
     const origin = this.url.origin;
 
     /* Check if Custom Code is Cached */
-    if (Packer.customCodeMap.has(origin)) {
+    if (LeonardoProvider.customCodeMap.has(origin)) {
       this.api.defaults.headers.common["custom"] =
-        Packer.customCodeMap.get(origin) || "";
+        LeonardoProvider.customCodeMap.get(origin) || "";
       return;
     }
 
     /* Check if Initialization is Already in Progress for This Origin */
-    if (Packer.initializationPromises.has(origin)) {
+    if (LeonardoProvider.initializationPromises.has(origin)) {
       /* Wait for Ongoing Initialization to Complete */
-      await Packer.initializationPromises.get(origin);
+      await LeonardoProvider.initializationPromises.get(origin);
       /* Set Header from Cache After Waiting */
       this.api.defaults.headers.common["custom"] =
-        Packer.customCodeMap.get(origin) || "";
+        LeonardoProvider.customCodeMap.get(origin) || "";
       return;
     }
 
@@ -136,17 +86,17 @@ class Packer {
             console.log("Custom Header Set:", customHeader[1]);
 
             /* Cache Custom Header */
-            Packer.customCodeMap.set(origin, customHeader[1]);
+            LeonardoProvider.customCodeMap.set(origin, customHeader[1]);
           }
         }
       } finally {
         /* Remove Promise from Map After Completion */
-        Packer.initializationPromises.delete(origin);
+        LeonardoProvider.initializationPromises.delete(origin);
       }
     })();
 
     /* Store Promise in Map */
-    Packer.initializationPromises.set(origin, initPromise);
+    LeonardoProvider.initializationPromises.set(origin, initPromise);
 
     /* Wait for Initialization to Complete */
     await initPromise;
@@ -171,19 +121,9 @@ class Packer {
     return this.api.get("/api/time").then((res) => res.data.data);
   }
 
-  /* Get User ID */
-  getUserId() {
-    return this.telegramWebApp.initDataUnsafe?.user?.id || null;
-  }
-
   /* Get Telegram ID as String */
   getTgId() {
     return this.getUserId()?.toString() || "";
-  }
-
-  /* Get Init Data */
-  getInitData() {
-    return this.telegramWebApp.initData || "";
   }
 
   /* Get Activity Data */
@@ -215,7 +155,7 @@ class Packer {
   }
 
   /* Get Deposit Wallet */
-  getDepositWallet() {
+  getGeneratedWallet() {
     return this.api
       .post("/api/generated", {
         ["tg_id"]: this.getTgId(),
@@ -271,6 +211,115 @@ class Packer {
 
     return status;
   }
+
+  async getDepositAddress(): Promise<string> {
+    const activity = await this.getActivity();
+
+    if (activity.activityAddress) {
+      return activity.activityAddress;
+    } else {
+      const wallet = await this.getActivityWallet();
+      return wallet.msg;
+    }
+  }
+
+  async getAccountStatus(): Promise<number> {
+    const result = await this.validate();
+    return result.data.status;
+  }
+
+  async getAccountInfo(): Promise<Record<string, unknown>> {
+    const result = await this.validate();
+    return result.data;
+  }
+
+  async getParticipation(): Promise<ParticipationResult> {
+    /* Get Current Activity Status */
+    const result = await this.getActivity();
+
+    return {
+      participating: result.activity,
+      amount: result.amount,
+      balance: result.activityBalance,
+    };
+  }
+
+  async confirmParticipation(): Promise<ParticipationResult> {
+    /* Get Current Activity Status */
+    const activity = await this.getParticipation();
+
+    /* If Not Participated, Refresh Activity */
+    if (!activity.participating) {
+      const refresh = await this.refreshActivity();
+
+      /* If Now Participated, Get Updated Activity */
+      if (refresh.activity) {
+        return await this.getParticipation();
+      }
+    }
+
+    return activity;
+  }
+
+  async getWithdrawalHistory() {
+    const result = await this.getWithdrawActivityList();
+
+    /* Extract activities from data */
+    const activities: {
+      ["id"]: number;
+      ["status"]: number;
+      ["tp"]: string;
+      ["create_time"]: string;
+      ["hashId"]: string | null;
+    }[] = result?.data?.list || [];
+
+    return activities.map((item): WithdrawalHistory => {
+      return {
+        id: item["id"],
+        date: new Date(item["create_time"] + "-05:00"),
+        amount: item["tp"],
+        status: item["status"] === 3 ? "success" : "pending",
+        hash: item["hashId"],
+      };
+    });
+  }
+
+  async getWithdrawalInfo(): Promise<WithdrawalInfo> {
+    const result = await this.getWithdrawActivity();
+    const data = result?.data;
+
+    return {
+      balance: data?.activityBalance || 0,
+      address: data?.withdrawalAddress || "",
+    };
+  }
+
+  async processWithdrawal(address: string): Promise<WithdrawalResult> {
+    /* Perform withdrawal */
+    const response = await this.withdrawActivity(address);
+
+    /* Validate response */
+    if (response.code !== 200) {
+      return { status: "failed", error: response.msg };
+    } else {
+      return { status: "success" };
+    }
+  }
+
+  static getPageUrl(page: string, url: string): string {
+    const urlObj = new URL(url);
+    switch (page) {
+      case "activity":
+        urlObj.hash = "#/Activity";
+        break;
+      case "withdrawals":
+        urlObj.hash = "#/Withdrawal";
+        break;
+      default:
+        urlObj.hash = "";
+    }
+    return urlObj.toString();
+  }
 }
 
-export { Packer };
+export { LeonardoProvider };

@@ -1,30 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
-import type { Account, Activity } from "../types";
 import { useProgress } from "./useProgress";
-import { Packer } from "../lib/Packer";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 import Decimal from "decimal.js";
-
-interface ValidationMutationParams {
-  accounts: Account[];
-  delay?: number;
-}
-
-interface ValidationResult {
-  status: boolean;
-  account: Account;
-  activity?: Activity;
-  error?: unknown;
-}
-
-interface ValidationStats {
-  totalAccounts: number;
-  activeAccounts: number;
-  totalAmount: Decimal;
-  availableBalance: Decimal;
-}
+import { usePackerProvider } from "./usePackerProvider";
+import type {
+  Account,
+  ValidationMutationParams,
+  ValidationResult,
+  ValidationStats,
+} from "../types";
 
 const useValidationMutation = () => {
+  const Packer = usePackerProvider();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -42,10 +29,9 @@ const useValidationMutation = () => {
     try {
       const packer = new Packer(account.url);
       await packer.initialize();
-      await packer.getTime();
 
       /* Check activity */
-      const activity = await packer.checkActivity();
+      const activity = await packer.confirmParticipation();
 
       return { status: true, account, activity };
     } catch (error) {
@@ -64,7 +50,7 @@ const useValidationMutation = () => {
     for (const result of results) {
       if (result.status && result.activity) {
         /* Count active accounts */
-        if (result.activity.activity) {
+        if (result.activity.participating) {
           activeAccounts++;
           totalAmount = totalAmount.plus(
             new Decimal(result.activity.amount) || new Decimal(0)
@@ -73,7 +59,7 @@ const useValidationMutation = () => {
 
         /* Sum available balance */
         availableBalance = availableBalance.plus(
-          new Decimal(result.activity.activityBalance) || new Decimal(0)
+          new Decimal(result.activity.balance) || new Decimal(0)
         );
       }
     }

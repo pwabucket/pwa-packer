@@ -40,15 +40,15 @@ const PlanCreator = ({
             <p className="text-blue-300">
               Accounts: (
               <span className="text-green-300">
-                {mutation.data.stats.firstActivity}
+                {mutation.data.stats.firstActivityCount}
               </span>{" "}
               /{" "}
               <span className="text-amber-300">
-                {mutation.data.stats.secondActivity}
+                {mutation.data.stats.secondActivityCount}
               </span>{" "}
               /{" "}
               <span className="text-red-300">
-                {mutation.data.stats.consistentActivity}
+                {mutation.data.stats.consistentActivityCount}
               </span>
               ) ({mutation.data.stats.totalAccounts})
             </p>

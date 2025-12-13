@@ -12,9 +12,9 @@ import {
   MdOutlineOpenInNew,
 } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
-import { Packer } from "../lib/Packer";
 import { Collapsible } from "radix-ui";
 import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
+import { usePackerProvider } from "../hooks/usePackerProvider";
 
 const InfoItem = ({
   title,
@@ -61,6 +61,8 @@ const InfoItem = ({
 };
 
 const AccountInfo = ({ account }: { account: Account }) => {
+  const Packer = usePackerProvider();
+
   /* Check authentication status */
   const authenticated = useIsAuthenticated();
 
@@ -69,20 +71,20 @@ const AccountInfo = ({ account }: { account: Account }) => {
     return extractTgWebAppData(account.url!)["initDataUnsafe"]["user"];
   }, [account.url]);
 
-  const statusQuery = useQuery({
+  const infoQuery = useQuery({
     enabled: Boolean(authenticated && account.url),
-    queryKey: ["account-status", account.id],
+    queryKey: ["account-info", account.id],
     queryFn: async () => {
       const packer = new Packer(account.url!);
       await packer.initialize();
-      const status = await packer.validate();
-      return status;
+      const info = await packer.getAccountInfo();
+      return info;
     },
   });
 
   const status = useMemo(() => {
-    if (!statusQuery.data) return null;
-    const data = statusQuery.data.data;
+    if (!infoQuery.data) return null;
+    const data = infoQuery.data;
     const results = Object.fromEntries(
       Object.entries(data).map(([key, value]) => {
         const formattedKey = key
@@ -94,7 +96,7 @@ const AccountInfo = ({ account }: { account: Account }) => {
     );
 
     return results;
-  }, [statusQuery.data]);
+  }, [infoQuery.data]);
 
   return (
     <div className="flex flex-col divide-y divide-neutral-800 text-sm">
@@ -123,7 +125,9 @@ const AccountInfo = ({ account }: { account: Account }) => {
       </div>
       <InfoItem
         title="Account Status"
-        value={statusQuery.data ? statusQuery.data.data.status : "Loading..."}
+        value={
+          infoQuery.data ? infoQuery.data.status?.toString() : "Loading..."
+        }
         className="text-teal-300"
       />
       <InfoItem title="ID" value={`${user?.id}`} className="text-purple-300" />

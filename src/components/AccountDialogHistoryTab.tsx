@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Packer } from "../lib/Packer";
 import type { Account } from "../types";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import { cn, formatCurrency, transactionHashLink } from "../lib/utils";
 import { format } from "date-fns";
 import { useIsAuthenticated } from "../hooks/useIsAuthenticated";
 import Decimal from "decimal.js";
+import { usePackerProvider } from "../hooks/usePackerProvider";
 const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
+  const Packer = usePackerProvider();
+
   /* Check authentication status */
   const authenticated = useIsAuthenticated();
 
@@ -17,56 +19,47 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
     queryFn: async () => {
       const packer = new Packer(account.url!);
       await packer.initialize();
-      const data = await packer.getWithdrawActivityList();
-      return data;
+      const result = await packer.getWithdrawalHistory();
+      return result;
     },
   });
 
-  /* Extract activities from query data */
-  const activities: {
-    ["id"]: number;
-    ["status"]: number;
-    ["tp"]: string;
-    ["create_time"]: string;
-    ["hashId"]: string | null;
-  }[] = query.data?.data?.list || [];
-
   return query.data ? (
     <div className="flex flex-col divide-y divide-neutral-700">
-      {activities.map((activity) => (
-        <div key={activity.id} className="p-2 flex gap-2 items-center">
+      {query.data.map((item) => (
+        <div key={item.id} className="p-2 flex gap-2 items-center">
           <div className="grow min-w-0 flex flex-col gap-1">
             {/* Amount */}
             <p
               className={cn(
                 "font-bold text-sm",
-                activity.status === 3 ? "text-lime-400" : "text-orange-400"
+                item.status === "success" ? "text-lime-400" : "text-orange-400"
               )}
             >
-              {formatCurrency(new Decimal(activity.tp))}
+              {formatCurrency(new Decimal(item.amount))}
             </p>
 
             {/* Status */}
             <p
               className={cn(
                 "text-xs",
-                activity.status === 3 ? "text-green-400" : "text-orange-400"
+                item.status === "success" ? "text-green-400" : "text-orange-400"
               )}
             >
-              {activity.status === 3 ? "Completed" : "Pending"}
+              {item.status === "success" ? "Completed" : "Pending"}
             </p>
 
-            {/* Created Time */}
+            {/* Created Date */}
             <p className="text-xs text-neutral-400">
-              {format(new Date(activity.create_time + "-05:00"), "PPpp")}
+              {format(new Date(item.date), "PPpp")}
             </p>
           </div>
 
           {/* Open explorer */}
           <div className="size-10 flex items-center justify-center">
-            {activity.hashId && (
+            {item.hash && (
               <a
-                href={transactionHashLink(activity.hashId)}
+                href={transactionHashLink(item.hash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View on Blockchain Explorer"

@@ -8,17 +8,10 @@ import {
   MdRemoveCircle,
 } from "react-icons/md";
 import { cn, formatCurrency } from "../lib/utils";
-import type { Account, Activity } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
 import Decimal from "decimal.js";
-
-interface ValidationResult {
-  status: boolean;
-  account: Account;
-  activity?: Activity;
-  error?: unknown;
-}
+import type { ValidationResult } from "../types";
 
 /** Validation Results Props Interface */
 interface ValidationResultsProps {
@@ -82,16 +75,14 @@ const ValidationResults = ({ results }: ValidationResultsProps) => {
               {/* Available Amount */}
               <span className="text-lime-300 text-xs flex items-center gap-1 truncate flex-row-reverse">
                 <span className="font-bold">AV:</span>{" "}
-                {formatCurrency(
-                  new Decimal(result.activity?.activityBalance || 0)
-                )}
+                {formatCurrency(new Decimal(result.activity?.balance || 0))}
               </span>
             </p>
 
             {/* Status Icon */}
             <span className="shrink-0">
               {result.status ? (
-                result.activity?.activity ? (
+                result.activity?.participating ? (
                   <MdCheckCircle className="size-6 text-lime-400" />
                 ) : (
                   <MdRemoveCircle className="size-6 text-yellow-500" />

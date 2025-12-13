@@ -11,10 +11,10 @@ import { Input } from "../components/Input";
 import { FormFieldError } from "../components/FormFieldError";
 import type { Account } from "../types";
 import { useProgress } from "../hooks/useProgress";
-import { Packer } from "../lib/Packer";
 import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 import { Progress } from "../components/Progress";
+import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface StatusCheckResult {
   account: Account;
@@ -36,6 +36,7 @@ interface StatusCheckFormData {
 
 /** StatusCheck Page Component */
 const StatusCheck = () => {
+  const Packer = usePackerProvider();
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
   const { target, setTarget, progress, incrementProgress, resetProgress } =
@@ -131,18 +132,13 @@ const StatusCheck = () => {
     try {
       const packer = new Packer(account.url!);
       await packer.initialize();
-      const status = await packer.validate();
+      const status = await packer.getAccountStatus();
 
-      console.log(
-        "Status Check:",
-        account.title,
-        status.data.status,
-        expectedValue
-      );
+      console.log("Status Check:", account.title, status, expectedValue);
 
       return {
         account,
-        status: status.data.status === expectedValue,
+        status: status === expectedValue,
         skipped: false,
       };
     } catch {

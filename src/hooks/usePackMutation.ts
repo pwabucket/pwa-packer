@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import type { Account, PackResult } from "../types";
 import { useProgress } from "./useProgress";
-import { Packer } from "../lib/Packer";
 import { delayForSeconds } from "../lib/utils";
 import { Decimal } from "decimal.js";
+import { usePackerProvider } from "./usePackerProvider";
 
 /** Parameters for Pack Mutation */
 interface PackMutationParams {
@@ -18,6 +18,8 @@ interface PackStats {
 }
 
 const usePackMutation = () => {
+  const Packer = usePackerProvider();
+
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
 
@@ -40,10 +42,9 @@ const usePackMutation = () => {
       const packer = new Packer(account.url);
       await packer.initialize();
 
-      const activity = await packer.getActivity();
-      const withdrawal = await packer.getWithdrawActivity();
-      const withdrawActivity = withdrawal?.data;
-      const amount = new Decimal(withdrawActivity?.activityBalance || 0);
+      const activity = await packer.getParticipation();
+      const withdrawalInfo = await packer.getWithdrawalInfo();
+      const amount = new Decimal(withdrawalInfo?.balance || 0);
 
       /* Skip if no balance */
       if (amount.lte(0)) {
@@ -53,23 +54,22 @@ const usePackMutation = () => {
           account,
           amount,
           activity,
-          withdrawActivity,
+          withdrawalInfo,
         };
       }
 
       /* Determine withdrawal address */
-      const withdrawalAddress =
-        withdrawActivity.withdrawalAddress || account.walletAddress;
+      const withdrawalAddress = withdrawalInfo.address || account.walletAddress;
 
       /* Perform withdrawal */
-      const packResponse = await packer.withdrawActivity(withdrawalAddress);
+      const packResponse = await packer.processWithdrawal(withdrawalAddress);
 
       /* Validate response */
-      if (packResponse.code !== 200) {
+      if (packResponse.status !== "success") {
         return {
           status: false,
           account,
-          error: `Pack failed with message: ${packResponse.msg}`,
+          error: `Pack failed with message: ${packResponse.error}`,
         };
       }
 
@@ -79,7 +79,7 @@ const usePackMutation = () => {
         account,
         amount,
         activity,
-        withdrawActivity,
+        withdrawalInfo,
         response: packResponse,
       };
     } catch (error) {
