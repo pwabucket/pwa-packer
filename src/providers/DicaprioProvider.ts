@@ -89,7 +89,7 @@ class DicaprioProvider extends BaseProvider implements PackerProviderInstance {
   }
 
   async getAccountInfo(): Promise<Record<string, unknown>> {
-    return {};
+    return this.getDetail();
   }
 
   async getParticipation(): Promise<ParticipationResult> {
