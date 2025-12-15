@@ -76,7 +76,7 @@ const AccountInfo = ({ account }: { account: Account }) => {
     queryKey: ["account-info", account.id],
     queryFn: async () => {
       if (!account.provider || !account.url) {
-        return null;
+        return {};
       }
 
       const Packer = getProvider(account.provider);
