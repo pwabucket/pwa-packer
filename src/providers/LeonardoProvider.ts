@@ -127,7 +127,7 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
   }
 
   /* Get Activity Data */
-  getActivity() {
+  getCurrentActivity() {
     return this.api
       .post("/api/activity", {
         ["tg_id"]: this.getTgId(),
@@ -146,7 +146,7 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
   }
 
   /* Get Activity Wallet */
-  getActivityWallet() {
+  generateActivityWallet() {
     return this.api
       .post("/api/generatedActivityWallet", {
         ["tg_id"]: this.getTgId(),
@@ -197,7 +197,7 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
     activityBalance: number;
   }> {
     /* Get Current Activity Status */
-    const status = await this.getActivity();
+    const status = await this.getCurrentActivity();
 
     /* If Not Participated, Refresh Activity */
     if (!status.activity) {
@@ -205,7 +205,7 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
 
       /* If Now Participated, Get Updated Activity */
       if (refresh.activity) {
-        return await this.getActivity();
+        return await this.getCurrentActivity();
       }
     }
 
@@ -213,12 +213,12 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
   }
 
   async getDepositAddress(): Promise<string> {
-    const activity = await this.getActivity();
+    const activity = await this.getCurrentActivity();
 
     if (activity.activityAddress) {
       return activity.activityAddress;
     } else {
-      const wallet = await this.getActivityWallet();
+      const wallet = await this.generateActivityWallet();
       return wallet.msg;
     }
   }
@@ -235,7 +235,7 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
 
   async getParticipation(): Promise<ParticipationResult> {
     /* Get Current Activity Status */
-    const result = await this.getActivity();
+    const result = await this.getCurrentActivity();
 
     return {
       participating: result.activity,
