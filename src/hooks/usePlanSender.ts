@@ -34,7 +34,10 @@ const usePlanSender = (plan: PlanFileContent) => {
     /* Send Funds */
     await sendMutation.mutation.mutateAsync({
       ...data,
-      accounts: selector.selectedAccounts,
+      accounts: selector.selectedAccounts.map((account) => ({
+        account,
+        receiver: account.depositAddress,
+      })),
     });
 
     /* Show Summary Alert */

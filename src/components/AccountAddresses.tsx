@@ -37,11 +37,11 @@ const AccountAddresses = ({ account, canCopy }: AccountAddressesProps) => {
       {/* Deposit Address */}
       <span className="text-orange-300 text-xs flex items-center gap-1 truncate">
         <span className="font-bold">D:</span>{" "}
-        {truncateAddress(account.depositAddress)}
+        {truncateAddress(account.depositAddress || "")}
         {canCopy && (
           <>
             {" "}
-            <AccountAddressCopyButton address={account.depositAddress} />
+            <AccountAddressCopyButton address={account.depositAddress || ""} />
           </>
         )}
       </span>

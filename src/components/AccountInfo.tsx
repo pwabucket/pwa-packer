@@ -75,6 +75,10 @@ const AccountInfo = ({ account }: { account: Account }) => {
     enabled: Boolean(authenticated && account.url),
     queryKey: ["account-info", account.id],
     queryFn: async () => {
+      if (!account.provider || !account.url) {
+        return null;
+      }
+
       const Packer = getProvider(account.provider);
       const packer = new Packer(account.url!);
       await packer.initialize();
@@ -156,9 +160,9 @@ const AccountInfo = ({ account }: { account: Account }) => {
       />
       <InfoItem
         title="Deposit Address"
-        value={account.depositAddress}
+        value={account.depositAddress || "N/A"}
         className="text-orange-300"
-        href={walletAddressLink(account.depositAddress)}
+        href={walletAddressLink(account.depositAddress || "")}
       />
 
       <Collapsible.Root>

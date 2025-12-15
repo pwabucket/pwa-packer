@@ -26,8 +26,8 @@ import { Select } from "./Select";
 /** Account Form Data */
 interface AccountFormData {
   title: string;
-  depositAddress: string;
-  provider?: ProviderType;
+  depositAddress?: string | null;
+  provider?: ProviderType | "";
   url?: string;
   privateKey: string;
 }
@@ -36,8 +36,14 @@ interface AccountFormData {
 const AccountFormSchema = yup
   .object({
     title: yup.string().required().label("Title"),
-    depositAddress: yup.string().required().label("Deposit Address"),
-    provider: yup.string().required().oneOf(["leonardo"]).label("Provider"),
+    depositAddress: yup.string().nullable().label("Deposit Address"),
+    provider: yup
+      .string()
+      .oneOf([
+        "", // None
+        "leonardo",
+      ])
+      .label("Provider"),
     url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
   })
@@ -59,7 +65,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
     defaultValues: {
       title: initialValues?.title || "",
       depositAddress: initialValues?.depositAddress || "",
-      provider: initialValues?.provider || "leonardo",
+      provider: initialValues?.provider || "",
       url: initialValues?.url || "",
       privateKey: initialValues?.privateKey || "",
     },
@@ -68,16 +74,18 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
   const mutation = useMutation({
     mutationKey: ["get-deposit-address"],
     mutationFn: async (url: string) => {
-      /* Create Packer Instance */
-      const packer = createProvider(provider, url);
+      if (provider) {
+        /* Create Packer Instance */
+        const packer = createProvider(provider, url);
 
-      /* Initialize Packer */
-      await packer.initialize();
+        /* Initialize Packer */
+        await packer.initialize();
 
-      /* Get Address */
-      const address = await packer.getDepositAddress();
+        /* Get Address */
+        const address = await packer.getDepositAddress();
 
-      return address;
+        return address;
+      }
     },
   });
 
@@ -127,6 +135,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
             <div className="flex flex-col gap-2">
               <Label htmlFor="provider">Provider</Label>
               <Select id="provider" {...field}>
+                <Select.Option value="">(None)</Select.Option>
                 <Select.Option value="leonardo">Leonardo</Select.Option>
               </Select>
               <FormFieldError message={fieldState.error?.message} />

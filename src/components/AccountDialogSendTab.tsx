@@ -12,13 +12,17 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const password = usePassword();
 
   /** Form */
-  const sendForm = useSendForm();
+  const sendForm = useSendForm({
+    address: account.depositAddress,
+  });
 
   /* Mutation for Sending Funds */
   const sendMutation = useSendMutation();
 
+  const receiver = sendForm.form.watch("address") || account.depositAddress;
+
   /** Handle Form Submit */
-  const handleFormSubmit = async (data: SendFormData) => {
+  const handleFormSubmit = async ({ address, ...data }: SendFormData) => {
     /* Validate Password */
     if (!password) {
       toast.error("Password is not set in memory.");
@@ -33,7 +37,12 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
 
     await sendMutation.mutation.mutateAsync({
       ...data,
-      accounts: [account],
+      accounts: [
+        {
+          account,
+          receiver: address || account.depositAddress,
+        },
+      ],
     });
 
     /* Show Summary Alert */
@@ -62,11 +71,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             <span className="text-lime-300 text-xs">
               W: {account.walletAddress}
             </span>{" "}
-            to{" "}
-            <span className="text-orange-300 text-xs">
-              D: {account.depositAddress}
-            </span>
-            .
+            to <span className="text-orange-300 text-xs">D: {receiver}</span>.
           </p>
 
           {/** Send Form Fields */}

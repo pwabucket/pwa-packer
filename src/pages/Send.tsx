@@ -31,7 +31,10 @@ const Send = () => {
 
     const { results } = await sendMutation.mutation.mutateAsync({
       ...data,
-      accounts: selector.selectedAccounts,
+      accounts: selector.selectedAccounts.map((account) => ({
+        account,
+        receiver: account.depositAddress,
+      })),
     });
 
     /* Count Successful Sends */
@@ -55,6 +58,7 @@ const Send = () => {
         selector={selector}
         sendMutation={sendMutation}
         sendForm={sendForm}
+        showAddress={false}
       />
     </InnerPageLayout>
   );

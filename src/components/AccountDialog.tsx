@@ -61,10 +61,10 @@ const AccountDetailsDialog = ({ account }: AccountDetailsDialogProps) => {
         {/* Deposit Address */}
         <ItemInfo
           title="Deposit Address"
-          value={account.depositAddress}
+          value={account.depositAddress || "N/A"}
           icon={<span>🏦</span>}
           valueClassName="text-orange-300"
-          href={walletAddressLink(account.depositAddress)}
+          href={walletAddressLink(account.depositAddress || "")}
         />
 
         {/* Private Key */}

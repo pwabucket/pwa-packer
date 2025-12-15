@@ -51,6 +51,10 @@ const usePlanValidator = (plan: PlanFileContent) => {
     plan: PlanResult
   ): Promise<PlanValidationResult> => {
     try {
+      if (!plan.account.provider || !plan.account.url) {
+        throw new Error("No URL provided");
+      }
+
       const Packer = getProvider(plan.account.provider);
       const packer = new Packer(plan.account.url!);
       await packer.initialize();

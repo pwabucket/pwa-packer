@@ -92,7 +92,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   };
 
   const checkActivity = async (account: Account) => {
-    if (!account.url) {
+    if (!account.provider || !account.url) {
       return {
         activity: null,
         streak: 0,
@@ -403,7 +403,9 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
     for (const item of availableAccounts) {
       if (needed.lte(0)) break;
       const minimum = new Decimal(
-        getProvider(item.account.provider).MINIMUM_DEPOSIT_AMOUNT
+        item.account.provider
+          ? getProvider(item.account.provider).MINIMUM_DEPOSIT_AMOUNT
+          : 1
       );
       const difference = maximum.minus(minimum);
 

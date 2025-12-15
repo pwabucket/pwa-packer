@@ -92,7 +92,7 @@ const AccountItem = ({ account }: { account: Account }) => {
                       Wallet: {truncateAddress(account.walletAddress)}
                     </p>
                     <p className="text-xs text-orange-300 font-mono truncate">
-                      Deposit: {truncateAddress(account.depositAddress)}
+                      Deposit: {truncateAddress(account.depositAddress || "")}
                     </p>
                   </div>
 

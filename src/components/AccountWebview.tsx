@@ -28,6 +28,8 @@ interface WebviewAreaProps {
 const WebviewArea = ({ account }: WebviewAreaProps) => {
   const { getProvider } = usePackerProvider();
   const getPageUrl = (page: string) => {
+    if (!account.provider || !account.url) return account.url || "";
+
     try {
       return getProvider(account.provider).getPageUrl(page, account.url!);
     } catch {

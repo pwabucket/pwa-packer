@@ -123,7 +123,7 @@ const StatusCheck = () => {
     account: Account,
     expectedValue: number
   ): Promise<StatusCheckResult> => {
-    if (!account.url)
+    if (!account.provider || !account.url)
       return {
         account,
         status: false,

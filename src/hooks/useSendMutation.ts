@@ -21,8 +21,13 @@ import { executeUsdtTransfers } from "../lib/transfers";
 import Decimal from "decimal.js";
 import { usePackerProvider } from "./usePackerProvider";
 
+interface SendTarget {
+  account: Account;
+  receiver?: string | null;
+}
+
 interface SendMutationData {
-  accounts: Account[];
+  accounts: SendTarget[];
   amount: string;
   difference: string;
   delay: number;
@@ -73,7 +78,11 @@ const useSendMutation = () => {
 
       return {
         hasBalance: balance.gte(
-          new Decimal(getProvider(account.provider).MINIMUM_DEPOSIT_AMOUNT)
+          new Decimal(
+            account.provider
+              ? getProvider(account.provider).MINIMUM_DEPOSIT_AMOUNT
+              : 1
+          )
         ),
         balance,
       };
@@ -157,7 +166,7 @@ const useSendMutation = () => {
 
   /** Get account validation */
   const getValidation = async (account: Account) => {
-    if (!account.url) return null;
+    if (!account.provider || !account.url) return null;
 
     try {
       const Packer = getProvider(account.provider);
@@ -186,7 +195,7 @@ const useSendMutation = () => {
     account: Account,
     delay: number
   ): Promise<ParticipationResult | null> => {
-    if (!account.url) return null;
+    if (!account.provider || !account.url) return null;
 
     try {
       /* Delay before validation */
@@ -216,14 +225,16 @@ const useSendMutation = () => {
 
   /** Prepare account by checking balance and determining amount to send */
   const prepareAccount = async (
-    account: Account,
+    target: SendTarget,
     data: SendMutationData,
     applyDifference: boolean = true,
     checkValidation: boolean = true
   ): Promise<PreparedAccount> => {
     /* Initialize validation */
     let validation: ParticipationResult | null = null;
-    let receiver = account.depositAddress;
+    let receiver = target.receiver || "";
+
+    const { account } = target;
 
     try {
       /* Parallel fetch validation and balance */
@@ -440,16 +451,16 @@ const useSendMutation = () => {
    * Prepare accounts by checking balances and determining amounts
    */
   const getPreparedAccounts = async (
-    accounts: Account[],
+    targets: SendTarget[],
     data: SendMutationData,
     applyDifference: boolean = true,
     checkValidation: boolean = true
   ) => {
     const preparedAccounts = [];
-    for (const chunk of chunkArrayGenerator(accounts, 10)) {
+    for (const chunk of chunkArrayGenerator(targets, 10)) {
       const chunkResults = await Promise.all(
-        chunk.map((account) =>
-          prepareAccount(account, data, applyDifference, checkValidation)
+        chunk.map((target) =>
+          prepareAccount(target, data, applyDifference, checkValidation)
         )
       );
       preparedAccounts.push(...chunkResults);
@@ -618,7 +629,10 @@ const useSendMutation = () => {
           );
 
           /* Re-prepare skipped accounts to get updated balances after refill */
-          const skippedAccountList = skippedAccounts.map((acc) => acc.account);
+          const skippedAccountList = skippedAccounts.map((acc) => ({
+            account: acc.account,
+            receiver: acc.receiver,
+          }));
           const refilledPrepared = await getPreparedAccounts(
             skippedAccountList,
             data,

@@ -3,9 +3,9 @@ import type { ProviderType } from "./packer";
 export interface Account {
   id: string;
   title: string;
-  depositAddress: string;
   walletAddress: string;
-  provider?: ProviderType;
+  depositAddress?: string | null;
+  provider?: ProviderType | "";
   url?: string;
 }
 

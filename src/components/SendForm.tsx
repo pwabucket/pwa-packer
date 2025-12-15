@@ -17,6 +17,7 @@ interface SendFormProps {
   selector: ReturnType<typeof useAccountsSelector>;
   sendMutation: ReturnType<typeof useSendMutation>;
   sendForm: ReturnType<typeof useSendForm>;
+  showAddress?: boolean;
   showAmount?: boolean;
   showDifference?: boolean;
   showValidate?: boolean;
@@ -28,6 +29,7 @@ const SendForm = ({
   selector,
   sendMutation,
   sendForm,
+  showAddress,
   showAmount,
   showDifference,
   showValidate,
@@ -94,6 +96,7 @@ const SendForm = ({
               <SendFormFields
                 sendForm={sendForm}
                 disabled={sendMutation.mutation.isPending}
+                showAddress={showAddress}
                 showAmount={showAmount}
                 showDifference={showDifference}
                 showValidate={showValidate}

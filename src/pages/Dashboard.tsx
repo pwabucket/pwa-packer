@@ -78,7 +78,7 @@ const Dashboard = () => {
           return (
             account.title.toLowerCase().includes(searchTerm) ||
             account.walletAddress.toLowerCase().includes(searchTerm) ||
-            account.depositAddress.toLowerCase().includes(searchTerm) ||
+            account.depositAddress?.toLowerCase().includes(searchTerm) ||
             searchUser(account, searchTerm)
           );
         })

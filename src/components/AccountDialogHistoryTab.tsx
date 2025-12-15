@@ -17,6 +17,10 @@ const AccountDialogHistoryTab = ({ account }: { account: Account }) => {
     enabled: Boolean(authenticated && account.url),
     queryKey: ["withdraw-activity-list", account.id],
     queryFn: async () => {
+      if (!account.provider || !account.url) {
+        return [];
+      }
+
       const Packer = getProvider(account.provider);
       const packer = new Packer(account.url!);
       await packer.initialize();

@@ -28,7 +28,7 @@ const usePackMutation = () => {
    */
   const processAccount = async (account: Account): Promise<PackResult> => {
     /* Validate account has URL */
-    if (!account.url) {
+    if (!account.provider || !account.url) {
       return {
         status: false,
         skipped: true,

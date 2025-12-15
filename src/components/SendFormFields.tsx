@@ -15,6 +15,7 @@ import type { useSendForm } from "../hooks/useSendForm";
 interface SendFormFieldsProps {
   disabled?: boolean;
   sendForm: ReturnType<typeof useSendForm>;
+  showAddress?: boolean;
   showAmount?: boolean;
   showDifference?: boolean;
   showValidate?: boolean;
@@ -37,6 +38,7 @@ const FormControlButton = (props: React.ComponentProps<"button">) => (
 const SendFormFields = ({
   disabled,
   sendForm: { form, append, remove },
+  showAddress = true,
   showAmount = true,
   showDifference = true,
   showValidate = true,
@@ -47,6 +49,26 @@ const SendFormFields = ({
 
   return (
     <>
+      {/* Address */}
+      {showAddress && (
+        <Controller
+          name="address"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="address">Receiver Address</Label>
+              <Input
+                {...field}
+                id="address"
+                autoComplete="off"
+                placeholder="Address"
+                disabled={disabled}
+              />
+              <FormFieldError message={fieldState.error?.message} />
+            </div>
+          )}
+        />
+      )}
+
       {/* Amount */}
       {showAmount && (
         <Controller

@@ -22,7 +22,7 @@ const useValidationMutation = () => {
     account: Account
   ): Promise<ValidationResult> => {
     /* Skip if no URL */
-    if (!account.url) {
+    if (!account.provider || !account.url) {
       return { status: false, account, error: "No URL provided" };
     }
 
