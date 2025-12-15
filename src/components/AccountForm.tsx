@@ -186,7 +186,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                   <MdOutlineContentCopy className="size-4" />
                 </button>
               </div>
-              {field.value && (
+              {provider && field.value && (
                 <div className="flex justify-end">
                   <button
                     disabled={mutation.isPending}
