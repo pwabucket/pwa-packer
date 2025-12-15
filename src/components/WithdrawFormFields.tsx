@@ -22,8 +22,8 @@ const WithdrawFormFields = ({ disabled }: WithdrawFormFieldsProps) => {
               Withdraw (Per Account)
             </Label>
             <p className="text-xs text-neutral-400 text-center px-4">
-              The amount of USDT to withdraw from each account. If left blank,
-              the entire available balance will be withdrawn.
+              The amount of USDT to withdraw. If left blank, the entire
+              available balance will be withdrawn.
             </p>
             <Input
               {...field}

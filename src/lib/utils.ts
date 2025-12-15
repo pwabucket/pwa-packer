@@ -248,11 +248,11 @@ export function* chunkArrayGenerator<T>(arr: T[], size: number) {
 }
 
 export function walletAddressLink(address: string) {
-  return `https://bscscan.com/address/${address}`;
+  return address ? `https://bscscan.com/address/${address}` : "";
 }
 
 export function transactionHashLink(txHash: string) {
-  return `https://bscscan.com/tx/${txHash}`;
+  return txHash ? `https://bscscan.com/tx/${txHash}` : "";
 }
 
 export function downloadFile(content: Blob | File, filename: string) {

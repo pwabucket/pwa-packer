@@ -70,14 +70,22 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             A transfer will be initiated from{" "}
             <span className="text-lime-300 text-xs">
               W: {account.walletAddress}
-            </span>{" "}
-            to <span className="text-orange-300 text-xs">D: {receiver}</span>.
+            </span>
+            {receiver ? (
+              <>
+                {" "}
+                to <span className="text-orange-300 text-xs">{receiver}</span>
+              </>
+            ) : null}
+            .
           </p>
 
           {/** Send Form Fields */}
           <SendFormFields
             sendForm={sendForm}
             disabled={sendMutation.mutation.isPending}
+            showDelay={false}
+            showMode={false}
             showDifference={false}
           />
         </form>

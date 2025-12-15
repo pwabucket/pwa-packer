@@ -216,7 +216,7 @@ const useSendMutation = () => {
       return validation;
     } catch (error) {
       console.error(
-        `Validation failed for ${account.title} (W:${account.walletAddress}) (D:${account.depositAddress}):`,
+        `Validation failed for ${account.title} (W:${account.walletAddress}):`,
         error
       );
       return null;

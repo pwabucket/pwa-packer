@@ -91,9 +91,11 @@ const AccountItem = ({ account }: { account: Account }) => {
                     <p className="text-xs text-lime-300 font-mono truncate">
                       Wallet: {truncateAddress(account.walletAddress)}
                     </p>
-                    <p className="text-xs text-orange-300 font-mono truncate">
-                      Deposit: {truncateAddress(account.depositAddress || "")}
-                    </p>
+                    {account.depositAddress && (
+                      <p className="text-xs text-orange-300 font-mono truncate">
+                        Deposit: {truncateAddress(account.depositAddress || "")}
+                      </p>
+                    )}
                   </div>
 
                   {/* Balance Info */}

@@ -17,6 +17,8 @@ interface SendFormFieldsProps {
   sendForm: ReturnType<typeof useSendForm>;
   showAddress?: boolean;
   showAmount?: boolean;
+  showMode?: boolean;
+  showDelay?: boolean;
   showDifference?: boolean;
   showValidate?: boolean;
   showSkipValidated?: boolean;
@@ -39,7 +41,9 @@ const SendFormFields = ({
   disabled,
   sendForm: { form, append, remove },
   showAddress = true,
+  showMode = true,
   showAmount = true,
+  showDelay = true,
   showDifference = true,
   showValidate = true,
   showSkipValidated = true,
@@ -91,8 +95,8 @@ const SendFormFields = ({
               />
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                The maximum amount of USDT to send from each account. Accounts
-                with less than this amount will send their entire balance.
+                The maximum amount of USDT to send. If the balance is less than
+                this amount, the entire balance will be sent.
               </p>
             </div>
           )}
@@ -147,10 +151,9 @@ const SendFormFields = ({
               </div>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If set to {difference} and amount is {amount}, accounts will
-                send between {new Decimal(amount).minus(difference).toString()}{" "}
-                and {amount} USDT randomly. The remaining balance will be
-                refilled into other accounts.
+                If set to {difference} and amount is {amount}, amount sent will
+                be between {new Decimal(amount).minus(difference).toString()}{" "}
+                and {amount} USDT randomly.
               </p>
             </div>
           )}
@@ -158,57 +161,61 @@ const SendFormFields = ({
       )}
 
       {/* Mode */}
-      <Controller
-        name="mode"
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
-              {["single", "batch"].map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  className={cn(
-                    "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "p-2 border rounded-full cursor-pointer",
-                    field.value === mode
-                      ? "border-yellow-500 text-yellow-500 font-bold"
-                      : "border-neutral-700"
-                  )}
-                  onClick={() => field.onChange(mode)}
-                  disabled={disabled}
-                >
-                  {mode === "single" ? "Single Mode" : "Batch Mode"}
-                </button>
-              ))}
+      {showMode && (
+        <Controller
+          name="mode"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                {["single", "batch"].map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={cn(
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "p-2 border rounded-full cursor-pointer",
+                      field.value === mode
+                        ? "border-yellow-500 text-yellow-500 font-bold"
+                        : "border-neutral-700"
+                    )}
+                    onClick={() => field.onChange(mode)}
+                    disabled={disabled}
+                  >
+                    {mode === "single" ? "Single Mode" : "Batch Mode"}
+                  </button>
+                ))}
+              </div>
+              <FormFieldError message={fieldState.error?.message} />
             </div>
-            <FormFieldError message={fieldState.error?.message} />
-          </div>
-        )}
-      />
+          )}
+        />
+      )}
 
       {/* Delay */}
-      <Controller
-        name="delay"
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-1">
-            <Label className="text-center">
-              Delay per transaction (seconds)
-            </Label>
-            <Slider
-              min={0}
-              max={60}
-              step={5}
-              value={[field.value]}
-              onValueChange={([value]) => field.onChange(value)}
-              disabled={disabled}
-            />
-            <p className="text-xs text-center text-neutral-400">
-              {field.value} seconds
-            </p>
-            <FormFieldError message={fieldState.error?.message} />
-          </div>
-        )}
-      />
+      {showDelay && (
+        <Controller
+          name="delay"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-1">
+              <Label className="text-center">
+                Delay per transaction (seconds)
+              </Label>
+              <Slider
+                min={0}
+                max={60}
+                step={5}
+                value={[field.value]}
+                onValueChange={([value]) => field.onChange(value)}
+                disabled={disabled}
+              />
+              <p className="text-xs text-center text-neutral-400">
+                {field.value} seconds
+              </p>
+              <FormFieldError message={fieldState.error?.message} />
+            </div>
+          )}
+        />
+      )}
 
       {/* Validate */}
       {showValidate && (
@@ -248,8 +255,8 @@ const SendFormFields = ({
               </LabelToggle>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If enabled, accounts that have already been validated will be
-                skipped during the sending process.
+                If enabled, this prevents sending if the account has already
+                been validated.
               </p>
             </div>
           )}
