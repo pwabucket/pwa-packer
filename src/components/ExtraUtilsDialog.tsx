@@ -11,7 +11,6 @@ import {
   MdOutlineMerge,
   MdRadar,
   MdOutlineCalendarMonth,
-  MdOutlineSettings,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -81,16 +80,6 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlinePassword className="size-5" />}
         >
           <Link replace to="/password" />
-        </ActionButton>
-
-        {/* Settings */}
-        <ActionButton
-          asChild
-          title="Update settings"
-          label="Settings"
-          icon={<MdOutlineSettings className="size-5" />}
-        >
-          <Link replace to="/settings" />
         </ActionButton>
 
         {/* Update URLs */}
