@@ -7,7 +7,7 @@ import type {
   WithdrawalResult,
 } from "../types";
 import { BaseTelegramProvider } from "./BaseTelegramProvider";
-import { addDays, isAfter, startOfWeek } from "date-fns";
+import { addWeeks, isAfter, startOfWeek, setHours } from "date-fns";
 
 class DaVinciProvider
   extends BaseTelegramProvider
@@ -96,9 +96,13 @@ class DaVinciProvider
         weekStartsOn: DaVinciProvider.WEEK_STARTS_ON,
       });
 
-      const availableAt = addDays(weekStart, 7);
+      /* Calculate availability date */
+      const utcDate = new Date();
+      utcDate.setUTCHours(16);
+      const availableAt = setHours(addWeeks(weekStart, 1), utcDate.getHours());
 
-      console.log({ availableAt, now: new Date() });
+      /* Log dates for debugging */
+      console.log({ weekStart, availableAt });
 
       if (isAfter(new Date(), availableAt)) {
         balance = new Decimal(current.amount).times(new Decimal("1.3"));
@@ -143,22 +147,20 @@ class DaVinciProvider
       createdAt: string;
     }[] = result.depositHistory30in48;
 
-    return list
-      .filter((item) => item.status !== "pending")
-      .map(
-        (item): WithdrawalHistory => ({
-          id: item.id,
-          date: new Date(item.createdAt),
-          amount: new Decimal(item.amount),
-          status:
-            item.status === "confirmed"
-              ? "success"
-              : item.status === "pending"
-              ? "pending"
-              : "failed",
-          hash: item.txHash || null,
-        })
-      );
+    return list.map(
+      (item): WithdrawalHistory => ({
+        id: item.id,
+        date: new Date(item.createdAt),
+        amount: new Decimal(item.amount),
+        status:
+          item.status === "confirmed"
+            ? "success"
+            : item.status === "pending"
+            ? "pending"
+            : "failed",
+        hash: item.txHash || null,
+      })
+    );
   }
 
   async getWithdrawalInfo(): Promise<WithdrawalInfo> {
