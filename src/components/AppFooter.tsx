@@ -37,7 +37,7 @@ const ProvidersDialog = () => {
   const accountsByProvider = useMemo(
     () =>
       accounts.reduce((result, account) => {
-        const provider = account.provider ?? "default";
+        const provider = account.provider || "default";
 
         if (!result[provider]) {
           result[provider] = [];

@@ -8,7 +8,7 @@ const useProviderAccounts = () => {
   /** Filter Accounts by Provider */
   const providerAccounts = useMemo(() => {
     return accounts.filter(
-      (account) => (account.provider ?? "default") === provider
+      (account) => (account.provider || "default") === provider
     );
   }, [accounts, provider]);
 

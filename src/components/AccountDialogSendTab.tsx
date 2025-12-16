@@ -10,7 +10,7 @@ import { MdReceipt } from "react-icons/md";
 
 const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const password = usePassword();
-  const provider = account.provider ?? "default";
+  const provider = account.provider || "default";
 
   /** Form */
   const sendForm = useSendForm({

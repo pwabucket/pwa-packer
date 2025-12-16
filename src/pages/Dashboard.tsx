@@ -79,7 +79,7 @@ const Dashboard = () => {
   /* Accounts for Current Provider */
   const providerAccounts = useMemo(() => {
     return accounts.filter(
-      (account) => (account.provider ?? "default") === provider
+      (account) => (account.provider || "default") === provider
     );
   }, [accounts, provider]);
 
