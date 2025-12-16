@@ -261,8 +261,8 @@ const SendFormFields = ({
               </LabelToggle>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If enabled, the tool will attempt to refill accounts with
-                insufficient balance.
+                If enabled, the tool will attempt to refill accounts with the
+                differences.
               </p>
             </div>
           )}
