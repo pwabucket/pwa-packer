@@ -1,9 +1,6 @@
 import axios, { type AxiosInstance } from "axios";
 
 abstract class BaseProvider {
-  /* Minimum Deposit Amount */
-  static MINIMUM_DEPOSIT_AMOUNT = 1;
-
   protected url: URL;
   protected api: AxiosInstance;
 

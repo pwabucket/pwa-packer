@@ -11,6 +11,9 @@ class LeonardoProvider
   extends BaseTelegramProvider
   implements PackerProviderInstance
 {
+  /* Minimum Deposit Amount */
+  static MINIMUM_DEPOSIT_AMOUNT = 1;
+
   /* Static Map to Cache Custom Code per Origin */
   static customCodeMap = new Map<string, string>();
 

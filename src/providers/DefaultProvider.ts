@@ -7,6 +7,9 @@ import type {
 import { BaseProvider } from "./BaseProvider";
 
 class DefaultProvider extends BaseProvider implements PackerProviderInstance {
+  /* Minimum Deposit Amount */
+  static MINIMUM_DEPOSIT_AMOUNT = 0.01;
+
   async initialize(): Promise<void> {
     return;
   }

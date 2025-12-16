@@ -10,6 +10,9 @@ class DaVinciProvider
   extends BaseTelegramProvider
   implements PackerProviderInstance
 {
+  /* Minimum Deposit Amount */
+  static MINIMUM_DEPOSIT_AMOUNT = 30;
+
   async initialize(): Promise<void> {
     return;
   }
