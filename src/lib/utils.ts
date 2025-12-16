@@ -255,6 +255,10 @@ export function transactionHashLink(txHash: string) {
   return txHash ? `https://bscscan.com/tx/${txHash}` : "";
 }
 
+export function isWalletAddress(address: string) {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
 export function downloadFile(content: Blob | File, filename: string) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(content);

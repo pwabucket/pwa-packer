@@ -4,6 +4,7 @@ import {
   cn,
   copyToClipboard,
   extractTgWebAppData,
+  isWalletAddress,
   walletAddressLink,
 } from "../lib/utils";
 import {
@@ -190,7 +191,7 @@ const AccountInfo = ({ account }: { account: Account }) => {
                 value={String(value)}
                 className="text-rose-300"
                 href={
-                  key.endsWith("Address")
+                  key.endsWith("Address") && isWalletAddress(String(value))
                     ? walletAddressLink(String(value))
                     : undefined
                 }
