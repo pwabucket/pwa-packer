@@ -1,41 +1,15 @@
 import axios, { type AxiosInstance } from "axios";
-import { extractTgWebAppData } from "../lib/utils";
-
-interface InitDataUnsafe {
-  query_id?: string;
-  user?: {
-    id: number;
-    first_name: string;
-    last_name?: string;
-    username?: string;
-    language_code?: string;
-    allows_write_to_pm?: boolean;
-    photo_url?: string;
-  };
-  auth_date?: number;
-  signature?: string;
-  hash?: string;
-  [key: string]: unknown;
-}
-
-interface TelegramWebAppData {
-  platform: string | null;
-  version: string | null;
-  initData: string | null;
-  initDataUnsafe: InitDataUnsafe | null;
-}
 
 abstract class BaseProvider {
+  /* Minimum Deposit Amount */
+  static MINIMUM_DEPOSIT_AMOUNT = 1;
+
   protected url: URL;
   protected api: AxiosInstance;
-  protected telegramWebApp: TelegramWebAppData;
 
   constructor(url: string) {
     /* Parse URL */
     this.url = new URL(url);
-
-    /* Telegram WebApp Data */
-    this.telegramWebApp = extractTgWebAppData(url);
 
     /* Axios Instance */
     this.api = axios.create({
@@ -46,16 +20,7 @@ abstract class BaseProvider {
     this.configureLlamaInterceptor();
   }
 
-  /* Get User ID */
-  getUserId() {
-    return this.telegramWebApp.initDataUnsafe?.user?.id || null;
-  }
-
-  /* Get Init Data */
-  getInitData() {
-    return this.telegramWebApp.initData || "";
-  }
-
+  /* Configure Llama Interceptor */
   configureLlamaInterceptor() {
     /* Request Interceptor */
     this.api.interceptors.request.use((config) => {

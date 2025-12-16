@@ -53,23 +53,27 @@ const Dashboard = () => {
 
   /* Function to Search User Info in Account */
   const searchUser = useCallback((account: Account, searchTerm: string) => {
-    const user = account.url
-      ? extractTgWebAppData(account.url)["initDataUnsafe"]["user"]
-      : null;
+    try {
+      const user = account.url
+        ? extractTgWebAppData(account.url)?.["initDataUnsafe"]?.["user"]
+        : null;
 
-    if (!user) return false;
+      if (!user) return false;
 
-    const userId = user.id.toString();
-    const userFullName = `${user.first_name} ${
-      user.last_name ?? ""
-    }`.toLowerCase();
-    const username = user.username ? user.username.toLowerCase() : null;
+      const userId = user.id.toString();
+      const userFullName = `${user.first_name} ${
+        user.last_name ?? ""
+      }`.toLowerCase();
+      const username = user.username ? user.username.toLowerCase() : null;
 
-    return (
-      userId.includes(searchTerm) ||
-      userFullName.includes(searchTerm) ||
-      username?.includes?.(searchTerm)
-    );
+      return (
+        userId.includes(searchTerm) ||
+        userFullName.includes(searchTerm) ||
+        username?.includes?.(searchTerm)
+      );
+    } catch {
+      return false;
+    }
   }, []);
 
   /* Accounts for Current Provider */

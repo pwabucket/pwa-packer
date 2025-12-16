@@ -5,12 +5,12 @@ import type {
   WithdrawalInfo,
   WithdrawalResult,
 } from "../types";
-import { BaseProvider } from "./BaseProvider";
+import { BaseTelegramProvider } from "./BaseTelegramProvider";
 
-class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
-  /* Minimum Deposit Amount */
-  static MINIMUM_DEPOSIT_AMOUNT = 1;
-
+class LeonardoProvider
+  extends BaseTelegramProvider
+  implements PackerProviderInstance
+{
   /* Static Map to Cache Custom Code per Origin */
   static customCodeMap = new Map<string, string>();
 
