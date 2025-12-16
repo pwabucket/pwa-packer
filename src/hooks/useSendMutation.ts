@@ -5,6 +5,7 @@ import {
   downloadJsonFile,
   floorToWholeNumber,
   getPrivateKey,
+  isWalletAddress,
 } from "../lib/utils";
 import HashMaker, { type HashResult } from "../lib/HashMaker";
 import { useMutation } from "@tanstack/react-query";
@@ -355,6 +356,10 @@ const useSendMutation = () => {
     let hashResult: HashResult | null = null;
 
     try {
+      if (!receiver || !isWalletAddress(receiver)) {
+        throw new Error("Invalid receiver address");
+      }
+
       /* Send transaction */
       const txResult = await sendTransaction({
         account,
