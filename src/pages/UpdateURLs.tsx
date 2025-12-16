@@ -71,6 +71,8 @@ const UpdateURLs = () => {
           origin
         );
 
+        console.log("Updating account:", account.id, "to URL:", newURL.href);
+
         return {
           ...account,
           url: newURL.href,
