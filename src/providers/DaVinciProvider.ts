@@ -1,6 +1,8 @@
+import Decimal from "decimal.js";
 import type {
   PackerProviderInstance,
   ParticipationResult,
+  WithdrawalHistory,
   WithdrawalInfo,
   WithdrawalResult,
 } from "../types";
@@ -23,6 +25,17 @@ class DaVinciProvider
       .then((res) => res.data);
   }
 
+  initiateWithdrawal(wallet: string) {
+    return this.api
+      .post(`/api/withdraw`, {
+        initData: this.getInitData(),
+        amount: null,
+        type: 3,
+        wallet,
+      })
+      .then((res) => res.data);
+  }
+
   generateDepositAddress() {
     return this.api
       .post(`/api/deposit`, {
@@ -35,6 +48,12 @@ class DaVinciProvider
   getGeneratedDepositAddress() {
     return this.api
       .get(`/api/deposit?id=${this.getUserId()}&type=1`)
+      .then((res) => res.data);
+  }
+
+  getParticipationHistory() {
+    return this.api
+      .get(`/api/history-30-in-48?userId=${this.getUserId()}&page=1&limit=10`)
       .then((res) => res.data);
   }
 
@@ -63,6 +82,18 @@ class DaVinciProvider
   }
 
   async getParticipation(): Promise<ParticipationResult> {
+    const { ["depositHistory30in48"]: list } =
+      await this.getParticipationHistory();
+    const current = list.find((item: any) => item.status === "pending");
+
+    if (current) {
+      return {
+        participating: true,
+        amount: new Decimal(current.amount),
+        balance: new Decimal(0),
+      };
+    }
+
     return {
       participating: false,
       amount: 0,
@@ -71,25 +102,62 @@ class DaVinciProvider
   }
 
   async confirmParticipation(): Promise<ParticipationResult> {
+    const { deposit } = await this.getGeneratedDepositAddress();
+    if (deposit && deposit.txHash && deposit.tracked) {
+      return {
+        participating: true,
+        amount: new Decimal(deposit.amount),
+        balance: new Decimal(0),
+      };
+    }
+
     return {
-      participating: true,
-      amount: 0,
-      balance: 0,
+      participating: false,
+      amount: new Decimal(0),
+      balance: new Decimal(0),
     };
   }
 
-  async getWithdrawalHistory() {
-    return [];
+  async getWithdrawalHistory(): Promise<WithdrawalHistory[]> {
+    const result = await this.getParticipationHistory();
+    const list: {
+      id: number;
+      userId: number;
+      amount: string;
+      txHash: string | null;
+      status: "pending" | "claimed" | "failed";
+      claimedAt: string | null;
+      createdAt: string;
+    }[] = result.depositHistory30in48;
+
+    return list
+      .filter((item) => item.status !== "pending")
+      .map(
+        (item): WithdrawalHistory => ({
+          id: item.id,
+          date: new Date(item.createdAt),
+          amount: new Decimal(item.amount),
+          status:
+            item.status === "claimed"
+              ? "success"
+              : item.status === "pending"
+              ? "pending"
+              : "failed",
+          hash: item.txHash || null,
+        })
+      );
   }
 
   async getWithdrawalInfo(): Promise<WithdrawalInfo> {
+    const { user } = await this.getUser();
     return {
-      address: "",
-      balance: 0,
+      address: user.withdrawalAddress || "",
+      balance: new Decimal(user.availableBalance || 0),
     };
   }
 
-  async processWithdrawal(_address: string): Promise<WithdrawalResult> {
+  async processWithdrawal(address: string): Promise<WithdrawalResult> {
+    await this.initiateWithdrawal(address);
     return { status: "success" };
   }
 
