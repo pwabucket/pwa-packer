@@ -90,6 +90,7 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             showRefill={false}
             showDifference={false}
             showAllowLesserAmount={false}
+            showAddress={provider === "default"}
             showValidate={provider !== "default"}
             showSkipValidated={provider !== "default"}
           />
