@@ -67,6 +67,12 @@ const UpdateProvider = () => {
     /* Update Accounts */
     const updatedAccounts = accounts.map((account) => {
       if (selectedAccounts.includes(account)) {
+        console.log(
+          "Updating account:",
+          account.id,
+          "to provider:",
+          data.provider
+        );
         return {
           ...account,
           provider: data.provider,
