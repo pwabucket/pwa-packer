@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Account } from "../types";
 
 const useAccountsSelector = (accounts: Account[]) => {
@@ -27,6 +27,11 @@ const useAccountsSelector = (accounts: Account[]) => {
     },
     [accounts]
   );
+
+  /** Reset selected accounts */
+  useEffect(() => {
+    setSelectedAccounts(accounts);
+  }, [accounts, setSelectedAccounts]);
 
   return {
     accounts,
