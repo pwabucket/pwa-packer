@@ -86,6 +86,14 @@ const ProvidersDialog = () => {
         >
           Leonardo
         </ProviderOption>
+
+        <ProviderOption
+          active={provider === "davinci"}
+          count={accountsByProvider["davinci"]?.length || 0}
+          onClick={() => setProvider("davinci")}
+        >
+          DaVinci
+        </ProviderOption>
       </div>
     </PopupDialog>
   );

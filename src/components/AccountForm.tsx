@@ -41,7 +41,7 @@ const AccountFormSchema = yup
     provider: yup
       .string()
       .required()
-      .oneOf(["default", "leonardo"])
+      .oneOf(["default", "leonardo", "davinci"])
       .label("Provider"),
     url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
@@ -137,6 +137,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
               <Select id="provider" {...field}>
                 <Select.Option value="default">Default</Select.Option>
                 <Select.Option value="leonardo">Leonardo</Select.Option>
+                <Select.Option value="davinci">DaVinci</Select.Option>
               </Select>
               <FormFieldError message={fieldState.error?.message} />
             </div>

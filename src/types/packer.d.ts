@@ -2,7 +2,7 @@ import type Decimal from "decimal.js";
 
 export type WithdrawalStatus = "success" | "pending" | "failed";
 
-export type ProviderType = "default" | "leonardo";
+export type ProviderType = "default" | "leonardo" | "davinci";
 
 export interface ParticipationResult {
   participating: boolean;
