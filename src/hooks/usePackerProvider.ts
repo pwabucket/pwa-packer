@@ -1,14 +1,6 @@
 import { useCallback } from "react";
-import { LeonardoProvider } from "../providers/LeonardoProvider";
 import type { ProviderType } from "../types";
-import { DefaultProvider } from "../providers/DefaultProvider";
-import { DaVinciProvider } from "../providers/DaVinciProvider";
-
-const PROVIDERS = {
-  default: DefaultProvider,
-  leonardo: LeonardoProvider,
-  davinci: DaVinciProvider,
-};
+import { PROVIDERS } from "../lib/providers";
 
 const usePackerProvider = () => {
   const getProvider = useCallback(

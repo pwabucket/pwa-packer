@@ -23,6 +23,7 @@ import { usePackerProvider } from "../hooks/usePackerProvider";
 import type { ProviderType } from "../types";
 import { Select } from "./Select";
 import { useAppStore } from "../store/useAppStore";
+import { PROVIDER_NAMES } from "../lib/providers";
 
 /** Account Form Data */
 interface AccountFormData {
@@ -41,7 +42,7 @@ const AccountFormSchema = yup
     provider: yup
       .string()
       .required()
-      .oneOf(["default", "leonardo", "davinci"])
+      .oneOf(Object.keys(PROVIDER_NAMES) as ProviderType[])
       .label("Provider"),
     url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
@@ -135,9 +136,11 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
             <div className="flex flex-col gap-2">
               <Label htmlFor="provider">Provider</Label>
               <Select id="provider" {...field}>
-                <Select.Option value="default">Default</Select.Option>
-                <Select.Option value="leonardo">Leonardo</Select.Option>
-                <Select.Option value="davinci">DaVinci</Select.Option>
+                {Object.entries(PROVIDER_NAMES).map(([key, name]) => (
+                  <Select.Option key={key} value={key}>
+                    {name}
+                  </Select.Option>
+                ))}
               </Select>
               <FormFieldError message={fieldState.error?.message} />
             </div>

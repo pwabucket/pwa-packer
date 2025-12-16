@@ -7,6 +7,7 @@ import { MdOutlineClose } from "react-icons/md";
 import { PopupDialog } from "./PopupDialog";
 import { useMemo } from "react";
 import type { Account, ProviderType } from "../types";
+import { PROVIDER_NAMES } from "../lib/providers";
 
 interface ProviderOptionProps extends Dialog.DialogCloseProps {
   active: boolean;
@@ -71,29 +72,16 @@ const ProvidersDialog = () => {
       </div>
 
       <div className="flex flex-col gap-2">
-        <ProviderOption
-          active={provider === "default"}
-          count={accountsByProvider["default"]?.length || 0}
-          onClick={() => setProvider("default")}
-        >
-          Default
-        </ProviderOption>
-
-        <ProviderOption
-          active={provider === "leonardo"}
-          count={accountsByProvider["leonardo"]?.length || 0}
-          onClick={() => setProvider("leonardo")}
-        >
-          Leonardo
-        </ProviderOption>
-
-        <ProviderOption
-          active={provider === "davinci"}
-          count={accountsByProvider["davinci"]?.length || 0}
-          onClick={() => setProvider("davinci")}
-        >
-          DaVinci
-        </ProviderOption>
+        {Object.entries(PROVIDER_NAMES).map(([key, name]) => (
+          <ProviderOption
+            key={key}
+            active={provider === key}
+            count={accountsByProvider[key as ProviderType]?.length || 0}
+            onClick={() => setProvider(key as ProviderType)}
+          >
+            {name}
+          </ProviderOption>
+        ))}
       </div>
     </PopupDialog>
   );
@@ -131,7 +119,7 @@ const AppFooter = () => {
               )}
             >
               {/* Provider Display */}
-              <div>{provider === "default" ? "Default" : "Leonardo"}</div>
+              <div>{PROVIDER_NAMES[provider]}</div>
 
               <LuChevronsUpDown className="size-5 text-neutral-400 shrink-0" />
             </Dialog.Trigger>
