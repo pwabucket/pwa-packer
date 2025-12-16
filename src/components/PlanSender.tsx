@@ -18,8 +18,11 @@ const PlanSender = ({ plan }: { plan: PlanFileContent }) => {
         sendMutation={sendMutation}
         sendForm={sendForm}
         showAmount={false}
+        showRefill={false}
+        showAddress={false}
         showDifference={false}
         showSkipValidated={false}
+        showAllowLesserAmount={false}
       />
     </div>
   );

@@ -2,18 +2,11 @@ import * as yup from "yup";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { HEXADECIMAL_CHARS } from "../lib/utils";
+import type { SendConfig } from "../types";
 
 /** Send Form Data Interface */
-interface SendFormData {
+interface SendFormData extends SendConfig {
   address?: string | null;
-  amount: string;
-  difference: string;
-  mode: "single" | "batch";
-  delay: number;
-  targetCharacters: string[];
-  gasLimit: "average" | "fast" | "instant";
-  validate: boolean;
-  skipValidated: boolean;
 }
 
 /** Send Form Schema */
@@ -52,6 +45,8 @@ const SendFormSchema = yup
       .default("fast")
       .label("Gas Fee"),
 
+    allowLesserAmount: yup.boolean().required().label("Allow Lesser Amount"),
+    refill: yup.boolean().required().label("Refill"),
     validate: yup.boolean().required().label("Validate"),
     skipValidated: yup.boolean().required().label("Skip Validated"),
   })
@@ -65,7 +60,7 @@ const useSendForm = (defaultValues: Partial<SendFormData> = {}) => {
       amount: defaultValues.amount || "",
       difference: defaultValues.difference || "0",
       mode: defaultValues.mode || ("single" as const),
-      delay: defaultValues.delay || (5 as const),
+      delay: defaultValues.delay ?? (5 as const),
       gasLimit: defaultValues.gasLimit || ("fast" as const),
       targetCharacters: defaultValues.targetCharacters || [
         "a",
@@ -75,8 +70,10 @@ const useSendForm = (defaultValues: Partial<SendFormData> = {}) => {
         "e",
         "f",
       ],
-      validate: defaultValues.validate || true,
-      skipValidated: defaultValues.skipValidated || true,
+      allowLesserAmount: defaultValues.allowLesserAmount ?? false,
+      refill: defaultValues.refill ?? false,
+      validate: defaultValues.validate ?? true,
+      skipValidated: defaultValues.skipValidated ?? true,
     },
     resolver: yupResolver(SendFormSchema),
   });

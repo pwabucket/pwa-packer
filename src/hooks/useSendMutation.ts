@@ -11,6 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import type {
   Account,
   ParticipationResult,
+  SendConfig,
   SendResult,
   SendStats,
 } from "../types";
@@ -26,16 +27,8 @@ interface SendTarget {
   receiver?: string | null;
 }
 
-interface SendMutationData {
+interface SendMutationData extends SendConfig {
   accounts: SendTarget[];
-  amount: string;
-  difference: string;
-  delay: number;
-  mode: "single" | "batch";
-  gasLimit: "average" | "fast" | "instant";
-  targetCharacters: string[];
-  validate: boolean;
-  skipValidated: boolean;
 }
 
 interface PreparedAccount {
@@ -273,16 +266,16 @@ const useSendMutation = () => {
       let amountNeeded: Decimal;
 
       /* Initial phase: Apply difference for randomization */
-      const maxDifference = new Decimal(data.difference);
-      if (applyDifference && maxDifference.gt(0)) {
-        const minAmount = maxAmount.minus(maxDifference);
+      const difference = new Decimal(data.difference);
+      if (applyDifference && difference.gt(0)) {
+        const minAmount = maxAmount.minus(difference);
 
         /* If balance >= minAmount, send random amount between minAmount and maxAmount (inclusive) */
         /* If balance < minAmount, send whatever balance is available */
         if (balance.gte(minAmount)) {
           /* Generate random value between minAmount and maxAmount */
           const randomAmount = Decimal.random()
-            .times(maxDifference.plus(1))
+            .times(difference.plus(1))
             .plus(minAmount);
           const cappedAmount = Decimal.min(randomAmount, balance);
 
@@ -300,11 +293,25 @@ const useSendMutation = () => {
           amountNeeded = balance.minus(amount);
         }
       } else {
-        /* Refilled accounts: Send whatever balance they have, but cap at maxAmount */
+        /* Send whatever balance they have, but cap at maxAmount */
         const cappedAmount = Decimal.min(balance, maxAmount);
         /* Floor to whole number for final send */
         amount = floorToWholeNumber(cappedAmount);
         amountNeeded = new Decimal(0);
+      }
+
+      if (!data.allowLesserAmount && amount.lt(maxAmount)) {
+        return {
+          status: false,
+          skipped: true,
+          account,
+          balance,
+          amount,
+          amountNeeded,
+          receiver,
+          validation,
+          error: `Amount to send (${amount.toString()}) is less than configured amount (${maxAmount.toString()})`,
+        };
       }
 
       return {
@@ -476,7 +483,7 @@ const useSendMutation = () => {
   const planRefillTransactions = (
     donorAccounts: PreparedAccount[],
     recipientAccounts: PreparedAccount[],
-    maxAmount: Decimal
+    amount: Decimal
   ): RefillTransaction[] => {
     const transactions: RefillTransaction[] = [];
 
@@ -487,7 +494,7 @@ const useSendMutation = () => {
 
     /* Process each recipient - fill ONE completely before moving to next */
     for (const recipient of recipientAccounts) {
-      let needed = maxAmount.minus(recipient.balance);
+      let needed = amount.minus(recipient.balance);
 
       /* Keep taking from donors until this recipient is filled to maxAmount or donors run out */
       for (const donor of availableDonors) {
@@ -508,7 +515,7 @@ const useSendMutation = () => {
 
       /** Calculated filled amount */
       const filledAmount = recipient.balance.plus(
-        maxAmount.minus(recipient.balance).minus(needed)
+        amount.minus(recipient.balance).minus(needed)
       );
 
       /* Only move to next recipient after trying to fill this one completely */
@@ -545,8 +552,8 @@ const useSendMutation = () => {
       /* Reset progress */
       resetProgress();
 
-      /* Max amount to send */
-      const maxAmount = new Decimal(data.amount);
+      /* Amount to send */
+      const amount = new Decimal(data.amount);
 
       /* Difference for randomization */
       const difference = new Decimal(data.difference);
@@ -598,11 +605,11 @@ const useSendMutation = () => {
       let phase2Results: SendResult[] = [];
       let refillStats = { success: 0, failed: 0 };
 
-      if (difference.gt(0) && skippedAccounts.length > 0) {
+      if (data.refill && difference.gt(0) && skippedAccounts.length > 0) {
         const refillTransactions = planRefillTransactions(
           accountsToProcess,
           skippedAccounts,
-          maxAmount
+          amount
         );
 
         /* Debug log for planned refill transactions */
@@ -634,6 +641,7 @@ const useSendMutation = () => {
             account: acc.account,
             receiver: acc.receiver,
           }));
+
           const refilledPrepared = await getPreparedAccounts(
             skippedAccountList,
             data,

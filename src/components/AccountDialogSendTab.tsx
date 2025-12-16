@@ -85,9 +85,11 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
           <SendFormFields
             sendForm={sendForm}
             disabled={sendMutation.mutation.isPending}
-            showDelay={false}
             showMode={false}
+            showDelay={false}
+            showRefill={false}
             showDifference={false}
+            showAllowLesserAmount={false}
             showValidate={provider !== "default"}
             showSkipValidated={provider !== "default"}
           />

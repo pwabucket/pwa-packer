@@ -20,6 +20,8 @@ interface SendFormFieldsProps {
   showMode?: boolean;
   showDelay?: boolean;
   showDifference?: boolean;
+  showAllowLesserAmount?: boolean;
+  showRefill?: boolean;
   showValidate?: boolean;
   showSkipValidated?: boolean;
 }
@@ -45,10 +47,12 @@ const SendFormFields = ({
   showAmount = true,
   showDelay = true,
   showDifference = true,
+  showAllowLesserAmount = true,
+  showRefill = true,
   showValidate = true,
   showSkipValidated = true,
 }: SendFormFieldsProps) => {
-  const amount = form.watch("amount") || 100;
+  const amount = form.watch("amount") || 0;
   const difference = form.watch("difference") || 0;
 
   return (
@@ -80,8 +84,8 @@ const SendFormFields = ({
           render={({ field, fieldState }) => (
             <div className="flex flex-col gap-2">
               <Label htmlFor="amount">
-                <img src={USDTIcon} className="size-4 inline-block" /> Max
-                amount to send
+                <img src={USDTIcon} className="size-4 inline-block" /> Amount to
+                send
               </Label>
               <Input
                 {...field}
@@ -94,10 +98,6 @@ const SendFormFields = ({
                 placeholder="Amount"
               />
               <FormFieldError message={fieldState.error?.message} />
-              <p className="text-xs text-neutral-400 text-center px-4">
-                The maximum amount of USDT to send. If the balance is less than
-                this amount, the entire balance will be sent.
-              </p>
             </div>
           )}
         />
@@ -151,9 +151,15 @@ const SendFormFields = ({
               </div>
               <FormFieldError message={fieldState.error?.message} />
               <p className="text-xs text-neutral-400 text-center px-4">
-                If set to {difference} and amount is {amount}, amount sent will
-                be between {new Decimal(amount).minus(difference).toString()}{" "}
-                and {amount} USDT randomly.
+                {new Decimal(field.value || 0).gt(0) ? (
+                  <>
+                    The final amount sent will be between{" "}
+                    {new Decimal(amount).minus(difference).toString()} and{" "}
+                    {amount} USDT.
+                  </>
+                ) : (
+                  <>The final amount sent will be exactly {amount} USDT.</>
+                )}
               </p>
             </div>
           )}
@@ -212,6 +218,52 @@ const SendFormFields = ({
                 {field.value} seconds
               </p>
               <FormFieldError message={fieldState.error?.message} />
+            </div>
+          )}
+        />
+      )}
+
+      {/* Allow Lesser Amount */}
+      {showAllowLesserAmount && (
+        <Controller
+          name="allowLesserAmount"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <LabelToggle
+                checked={field.value}
+                onChange={field.onChange}
+                disabled={disabled}
+              >
+                Allow Lesser Amount
+              </LabelToggle>
+              <FormFieldError message={fieldState.error?.message} />
+              <p className="text-xs text-neutral-400 text-center px-4">
+                If enabled, entire balance will be sent if it is less than the
+                specified amount.
+              </p>
+            </div>
+          )}
+        />
+      )}
+
+      {/* Refill */}
+      {showRefill && (
+        <Controller
+          name="refill"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <LabelToggle
+                checked={field.value}
+                onChange={field.onChange}
+                disabled={disabled}
+              >
+                Refill
+              </LabelToggle>
+              <FormFieldError message={fieldState.error?.message} />
+              <p className="text-xs text-neutral-400 text-center px-4">
+                If enabled, the tool will attempt to refill accounts with
+                insufficient balance.
+              </p>
             </div>
           )}
         />

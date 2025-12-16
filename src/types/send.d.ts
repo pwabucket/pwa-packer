@@ -21,3 +21,16 @@ export interface SendResult {
   validation?: ValidationResult | null;
   error?: unknown;
 }
+
+export interface SendConfig {
+  amount: string;
+  difference: string;
+  mode: "single" | "batch";
+  delay: number;
+  targetCharacters: string[];
+  gasLimit: "average" | "fast" | "instant";
+  allowLesserAmount: boolean;
+  refill: boolean;
+  validate: boolean;
+  skipValidated: boolean;
+}
