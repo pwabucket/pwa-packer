@@ -22,12 +22,13 @@ import {
 import { usePackerProvider } from "../hooks/usePackerProvider";
 import type { ProviderType } from "../types";
 import { Select } from "./Select";
+import { useAppStore } from "../store/useAppStore";
 
 /** Account Form Data */
 interface AccountFormData {
   title: string;
   depositAddress?: string | null;
-  provider?: ProviderType | "";
+  provider: ProviderType;
   url?: string;
   privateKey: string;
 }
@@ -39,10 +40,8 @@ const AccountFormSchema = yup
     depositAddress: yup.string().nullable().label("Deposit Address"),
     provider: yup
       .string()
-      .oneOf([
-        "", // None
-        "leonardo",
-      ])
+      .required()
+      .oneOf(["default", "leonardo"])
       .label("Provider"),
     url: yup.string().url().label("URL"),
     privateKey: yup.string().required().label("Private Key"),
@@ -57,6 +56,7 @@ interface AccountFormProps {
 
 /** Account Form Component */
 const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
+  const currentProvider = useAppStore((state) => state.provider);
   const { createProvider } = usePackerProvider();
 
   /** Form */
@@ -65,7 +65,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
     defaultValues: {
       title: initialValues?.title || "",
       depositAddress: initialValues?.depositAddress || "",
-      provider: initialValues?.provider || "",
+      provider: initialValues?.provider || currentProvider,
       url: initialValues?.url || "",
       privateKey: initialValues?.privateKey || "",
     },
@@ -74,7 +74,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
   const mutation = useMutation({
     mutationKey: ["get-deposit-address"],
     mutationFn: async (url: string) => {
-      if (provider) {
+      if (provider !== "default") {
         /* Create Packer Instance */
         const packer = createProvider(provider, url);
 
@@ -135,7 +135,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
             <div className="flex flex-col gap-2">
               <Label htmlFor="provider">Provider</Label>
               <Select id="provider" {...field}>
-                <Select.Option value="">(None)</Select.Option>
+                <Select.Option value="default">Default</Select.Option>
                 <Select.Option value="leonardo">Leonardo</Select.Option>
               </Select>
               <FormFieldError message={fieldState.error?.message} />
@@ -186,7 +186,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                   <MdOutlineContentCopy className="size-4" />
                 </button>
               </div>
-              {provider && field.value && (
+              {provider !== "default" && field.value && (
                 <div className="flex justify-end">
                   <button
                     disabled={mutation.isPending}

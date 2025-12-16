@@ -1,8 +1,8 @@
-import { useAppStore } from "../store/useAppStore";
 import { useAccountsSelector } from "./useAccountsSelector";
+import { useProviderAccounts } from "./useProviderAccounts";
 
 const useAccountsChooser = () => {
-  const accounts = useAppStore((state) => state.accounts);
+  const accounts = useProviderAccounts();
 
   return useAccountsSelector(accounts);
 };

@@ -5,7 +5,7 @@ export interface Account {
   title: string;
   walletAddress: string;
   depositAddress?: string | null;
-  provider?: ProviderType | "";
+  provider: ProviderType;
   url?: string;
 }
 

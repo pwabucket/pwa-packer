@@ -29,9 +29,11 @@ import { Input } from "../components/Input";
 import { useDebounce } from "react-use";
 import type { Account } from "../types";
 import { AccountsContext } from "../contexts/AccountsContext";
+import { AppFooter } from "../components/AppFooter";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
+  const provider = useAppStore((state) => state.provider);
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
 
@@ -70,11 +72,18 @@ const Dashboard = () => {
     );
   }, []);
 
+  /* Accounts for Current Provider */
+  const providerAccounts = useMemo(() => {
+    return accounts.filter(
+      (account) => (account.provider ?? "default") === provider
+    );
+  }, [accounts, provider]);
+
   /* Filtered Accounts based on Search */
   const filteredAccounts = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
     return search
-      ? accounts.filter((account) => {
+      ? providerAccounts.filter((account) => {
           return (
             account.title.toLowerCase().includes(searchTerm) ||
             account.walletAddress.toLowerCase().includes(searchTerm) ||
@@ -82,16 +91,30 @@ const Dashboard = () => {
             searchUser(account, searchTerm)
           );
         })
-      : accounts;
-  }, [accounts, search, searchUser]);
+      : providerAccounts;
+  }, [providerAccounts, search, searchUser]);
 
-  const toggleSearch = () => {
+  /* Reorder accounts */
+  const reorderAccounts = useCallback(
+    (newOrder: Account[]) => {
+      setAccounts([
+        ...accounts.filter(
+          (acc) => !newOrder.find((item) => item.id === acc.id)
+        ),
+        ...newOrder,
+      ]);
+    },
+    [accounts, setAccounts]
+  );
+
+  /* Toggle search */
+  const toggleSearch = useCallback(() => {
     setShowSearch(!showSearch);
     if (showSearch) {
       setSearch("");
       setTempSearch("");
     }
-  };
+  }, [showSearch]);
 
   /* Debounce Search Input */
   useDebounce(
@@ -229,7 +252,7 @@ const Dashboard = () => {
 
           {/* Account List Heading */}
           <h4 className="font-protest-guerrilla px-4 text-center">
-            Accounts ({accounts.length})
+            Accounts ({providerAccounts.length})
           </h4>
         </MainContainer>
       </div>
@@ -237,7 +260,7 @@ const Dashboard = () => {
       <MainContainer className="gap-4" wrapperClassName="pt-0">
         {/* Account List */}
         <div className="flex flex-col gap-2">
-          {accounts.length === 0 ? (
+          {providerAccounts.length === 0 ? (
             <p className="text-center text-sm text-neutral-400 px-4">
               No accounts available. Please create one.
             </p>
@@ -250,7 +273,7 @@ const Dashboard = () => {
             >
               <Reorder.Group
                 values={accounts}
-                onReorder={(newOrder) => !search && setAccounts(newOrder)}
+                onReorder={(newOrder) => !search && reorderAccounts(newOrder)}
                 className="flex flex-col gap-2"
               >
                 {filteredAccounts.map((account) => (
@@ -261,6 +284,8 @@ const Dashboard = () => {
           )}
         </div>
       </MainContainer>
+
+      <AppFooter />
     </div>
   );
 };

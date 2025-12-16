@@ -1,3 +1,4 @@
+import { AppFooter } from "../components/AppFooter";
 import { AppHeader } from "../components/AppHeader";
 import { MainContainer } from "../components/MainContainer";
 import { useNavigateBack } from "../hooks/useNavigateBack";
@@ -32,6 +33,8 @@ const InnerPageLayout = ({
       <MainContainer wrapperClassName={wrapperClassName} className={className}>
         {children}
       </MainContainer>
+
+      <AppFooter />
     </div>
   );
 };

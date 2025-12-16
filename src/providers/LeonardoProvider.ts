@@ -190,28 +190,6 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
       .then((res) => res.data.data);
   }
 
-  /* Check and Refresh Activity if Not Participated */
-  async checkActivity(): Promise<{
-    activity: boolean;
-    amount: number;
-    activityBalance: number;
-  }> {
-    /* Get Current Activity Status */
-    const status = await this.getCurrentActivity();
-
-    /* If Not Participated, Refresh Activity */
-    if (!status.activity) {
-      const refresh = await this.refreshActivity();
-
-      /* If Now Participated, Get Updated Activity */
-      if (refresh.activity) {
-        return await this.getCurrentActivity();
-      }
-    }
-
-    return status;
-  }
-
   async getDepositAddress(): Promise<string> {
     const activity = await this.getCurrentActivity();
 
@@ -221,6 +199,10 @@ class LeonardoProvider extends BaseProvider implements PackerProviderInstance {
       const wallet = await this.generateActivityWallet();
       return wallet.msg;
     }
+  }
+
+  async confirmDepositAddress(_address: string): Promise<string> {
+    return this.getDepositAddress();
   }
 
   async getAccountStatus(): Promise<number> {

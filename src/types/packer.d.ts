@@ -2,7 +2,7 @@ import type Decimal from "decimal.js";
 
 export type WithdrawalStatus = "success" | "pending" | "failed";
 
-export type ProviderType = "leonardo";
+export type ProviderType = "default" | "leonardo";
 
 export interface ParticipationResult {
   participating: boolean;
@@ -31,6 +31,7 @@ export interface WithdrawalResult {
 export interface PackerProviderInstance {
   initialize(): Promise<void>;
   getDepositAddress(): Promise<string>;
+  confirmDepositAddress(address: string): Promise<string>;
   getAccountStatus(): Promise<number>;
   getWithdrawalHistory(): Promise<WithdrawalHistory[]>;
   getWithdrawalInfo(): Promise<WithdrawalInfo>;

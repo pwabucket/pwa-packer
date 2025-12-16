@@ -12,6 +12,7 @@ import { FormFieldError } from "../components/FormFieldError";
 import { useAppStore } from "../store/useAppStore";
 import { useState } from "react";
 import type { Account } from "../types";
+import { useProviderAccounts } from "../hooks/useProviderAccounts";
 
 interface UpdateURLsResult {
   account: Account;
@@ -34,7 +35,7 @@ interface UpdateURLsFormData {
 const UpdateURLs = () => {
   const accountsChooser = useAccountsChooser();
   const { selectedAccounts } = accountsChooser;
-  const accounts = useAppStore((state) => state.accounts);
+  const accounts = useProviderAccounts();
   const setAccounts = useAppStore((state) => state.setAccounts);
   const [results, setResults] = useState<UpdateURLsResult[] | null>(null);
 

@@ -1,9 +1,9 @@
 import { useQueries, type UseQueryResult } from "@tanstack/react-query";
-import { useAppStore } from "../store/useAppStore";
 import { useCallback } from "react";
 import { fetchBalance } from "../lib/utils";
 import { useIsAuthenticated } from "./useIsAuthenticated";
 import type Decimal from "decimal.js";
+import { useProviderAccounts } from "./useProviderAccounts";
 
 interface BalanceResult {
   usdtBalance: Decimal;
@@ -15,7 +15,7 @@ const useTotalBalanceQueries = () => {
   const authenticated = useIsAuthenticated();
 
   /* Get accounts from the store */
-  const accounts = useAppStore((state) => state.accounts);
+  const accounts = useProviderAccounts();
 
   const combine = useCallback(
     (results: UseQueryResult<BalanceResult, Error>[]) => {

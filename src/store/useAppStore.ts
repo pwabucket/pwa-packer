@@ -1,10 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import bcrypt from "bcryptjs";
-import type { Account } from "../types";
+import type { Account, ProviderType } from "../types";
 import { getLocalStorageKeyForAccountPrivateKey } from "../lib/utils";
 
 export type AppStore = {
+  provider: ProviderType;
+  setProvider: (provider: ProviderType) => void;
+
   /** Dashboard Style */
   dashboardStyle: "normal" | "sticky";
   setDashboardStyle: (style: "normal" | "sticky") => void;
@@ -41,6 +44,10 @@ const useAppStore = create(
       /** Extras */
       isProcessing: false,
       setIsProcessing: (isProcessing) => set({ isProcessing }),
+
+      /** Provider */
+      provider: "default",
+      setProvider: (provider) => set({ provider }),
 
       /** Dashboard Style */
       dashboardStyle: "normal",

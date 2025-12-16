@@ -165,7 +165,8 @@ const useSendMutation = () => {
   };
 
   /** Get account validation */
-  const getValidation = async (account: Account) => {
+  const getValidation = async (target: SendTarget) => {
+    const { account } = target;
     if (!account.provider || !account.url) return null;
 
     try {
@@ -174,7 +175,7 @@ const useSendMutation = () => {
       await packer.initialize();
 
       const [receiver, activity] = await Promise.all([
-        await packer.getDepositAddress(),
+        await packer.confirmDepositAddress(target.receiver || ""),
         await packer.getParticipation(),
       ]);
       /* Check activity */
@@ -239,7 +240,7 @@ const useSendMutation = () => {
     try {
       /* Parallel fetch validation and balance */
       const [validationResult, balanceResult] = await Promise.all([
-        checkValidation ? getValidation(account) : Promise.resolve(null),
+        checkValidation ? getValidation(target) : Promise.resolve(null),
         checkBalance(account),
       ]);
 
