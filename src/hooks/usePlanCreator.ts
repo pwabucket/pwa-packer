@@ -6,6 +6,7 @@ import type {
   Account,
   PlanAccountStatus,
   PlanFileContent,
+  PlanParameters,
   PlanStats,
 } from "../types";
 import { format, startOfWeek } from "date-fns";
@@ -30,17 +31,11 @@ import { useProviderAccountsChooser } from "./useProviderAccountsChooser";
 const PlanFormSchema = yup
   .object({
     total: yup.string().required().label("Total"),
-    maximum: yup.string().required().label("Maximum"),
+    amount: yup.string().required().label("Amount"),
+    allowLesserAmount: yup.boolean().required().label("Allow Lesser Amount"),
     fill: yup.boolean().required().label("Fill"),
   })
   .required();
-
-/** Plan Form Data */
-interface PlanFormData {
-  total: string;
-  maximum: string;
-  fill: boolean;
-}
 
 interface PreparedAccount extends PlanAccountStatus {
   balance: Decimal;
@@ -60,11 +55,12 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   const password = usePassword()!;
 
   /** Form */
-  const form = useForm<PlanFormData>({
+  const form = useForm<PlanParameters>({
     resolver: yupResolver(PlanFormSchema),
     defaultValues: {
       total: "",
-      maximum: "",
+      amount: "",
+      allowLesserAmount: false,
       fill: true,
     },
   });
@@ -385,7 +381,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
 
   const planAvailableAccounts = (
     preparedAccounts: PreparedAccount[],
-    data: PlanFormData
+    data: PlanParameters
   ) => {
     const availableAccounts = preparedAccounts
       .filter((item) => item.status && !item.activity.activity?.participating)
@@ -395,24 +391,31 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
         amount: new Decimal(0),
       }));
 
-    const maximum = floorToWholeNumber(new Decimal(data.maximum));
+    const maximum = floorToWholeNumber(new Decimal(data.amount));
     const total = floorToWholeNumber(new Decimal(data.total));
 
     let needed = total;
 
     for (const item of availableAccounts) {
       if (needed.lte(0)) break;
-      const minimum = new Decimal(
-        item.account.provider
-          ? getProvider(item.account.provider).MINIMUM_DEPOSIT_AMOUNT
-          : 1
-      );
-      const difference = maximum.minus(minimum);
 
-      const randomAmount = floorToWholeNumber(
-        Decimal.random().times(difference.plus(1)).plus(minimum)
-      );
-      const amount = Decimal.min(needed, randomAmount);
+      let amount = maximum;
+
+      if (data.allowLesserAmount) {
+        const minimum = new Decimal(
+          item.account.provider
+            ? getProvider(item.account.provider).MINIMUM_DEPOSIT_AMOUNT
+            : 1
+        );
+        const difference = maximum.minus(minimum);
+
+        const randomAmount = floorToWholeNumber(
+          Decimal.random().times(difference.plus(1)).plus(minimum)
+        );
+        amount = Decimal.min(needed, randomAmount);
+      } else if (needed.lt(maximum)) {
+        break;
+      }
       item.amount = amount;
       needed = needed.minus(amount);
     }
@@ -423,6 +426,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
       );
 
       if (usableAccounts.length === 0) break;
+      if (!data.allowLesserAmount) break;
       const randomAccount = randomItem(usableAccounts);
       randomAccount.amount = randomAccount.amount.plus(1);
       needed = needed.minus(1);
@@ -434,7 +438,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   /** Mutation */
   const mutation = useMutation({
     mutationKey: ["plan-accounts"],
-    mutationFn: async (data: PlanFormData) => {
+    mutationFn: async (data: PlanParameters) => {
       resetProgress();
       setTarget(selectedAccounts.length);
       const preparedAccounts = await getPreparedAccounts(selectedAccounts);
@@ -471,7 +475,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   });
 
   /** Handle Form Submit */
-  const handleFormSubmit = async (data: PlanFormData) => {
+  const handleFormSubmit = async (data: PlanParameters) => {
     const result = await mutation.mutateAsync(data);
     onCreate(result.plan);
     toast.success("Plan created and downloaded successfully!");

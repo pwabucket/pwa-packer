@@ -29,7 +29,9 @@ export interface PlanStats {
 
 export interface PlanParameters {
   total: string;
-  maximum: string;
+  amount: string;
+  allowLesserAmount: boolean;
+  fill: boolean;
 }
 
 export interface PlanFileContent {

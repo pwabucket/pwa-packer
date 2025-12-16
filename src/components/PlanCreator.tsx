@@ -84,25 +84,45 @@ const PlanCreator = ({
               )}
             />
 
-            {/* Maximum */}
+            {/* Amount */}
             <Controller
-              name="maximum"
+              name="amount"
               render={({ field, fieldState }) => (
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="maximum">Maximum Amount</Label>
+                  <Label htmlFor="amount">Amount</Label>
                   <Input
                     {...field}
-                    id="maximum"
+                    id="amount"
                     type="number"
                     inputMode="decimal"
                     autoComplete="off"
-                    placeholder="Maximum Amount"
+                    placeholder="Amount"
                     disabled={mutation.isPending}
                   />
                   <FormFieldError message={fieldState.error?.message} />
                   <p className="text-xs text-neutral-400 text-center px-4">
-                    This is the maximum amount to send from each account.
-                    Accounts will not exceed this amount.
+                    This is the desired amount to send from each account.
+                  </p>
+                </div>
+              )}
+            />
+
+            {/* Allow Lesser Amount */}
+            <Controller
+              name="allowLesserAmount"
+              render={({ field, fieldState }) => (
+                <div className="flex flex-col gap-2">
+                  <LabelToggle
+                    checked={field.value}
+                    onChange={field.onChange}
+                    disabled={mutation.isPending}
+                  >
+                    Allow Lesser Amount
+                  </LabelToggle>
+                  <FormFieldError message={fieldState.error?.message} />
+                  <p className="text-xs text-neutral-400 text-center px-4">
+                    If enabled, final amount can be less than the desired
+                    amount.
                   </p>
                 </div>
               )}

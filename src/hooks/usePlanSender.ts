@@ -11,7 +11,8 @@ const usePlanSender = (plan: PlanFileContent) => {
 
   /** Form */
   const sendForm = useSendForm({
-    amount: plan.parameters.maximum,
+    amount: plan.parameters.amount,
+    allowLesserAmount: plan.parameters.allowLesserAmount,
   });
 
   /* Mutation for Sending Funds */
@@ -50,7 +51,8 @@ const usePlanSender = (plan: PlanFileContent) => {
   /** Initialize Form and Selection on Plan Change */
   useEffect(() => {
     if (plan) {
-      setValue("amount", plan.parameters.maximum);
+      setValue("amount", plan.parameters.amount);
+      setValue("allowLesserAmount", plan.parameters.allowLesserAmount);
       toggleAllAccounts(true);
     }
   }, [plan, setValue, toggleAllAccounts]);
