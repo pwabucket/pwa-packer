@@ -104,7 +104,7 @@ const Password = () => {
   };
 
   return (
-    <InnerPageLayout title="Password" className="gap-2">
+    <InnerPageLayout title="Password" className="gap-2" showFooter={false}>
       {/* Security Info Section */}
       <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-4">
         <MdSecurity className="size-6 text-blue-400 shrink-0" />

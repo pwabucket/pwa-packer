@@ -9,6 +9,7 @@ interface InnerPageLayoutProps {
   children?: React.ReactNode;
   wrapperClassName?: string;
   className?: string;
+  showFooter?: boolean;
 }
 
 const InnerPageLayout = ({
@@ -16,10 +17,12 @@ const InnerPageLayout = ({
   children,
   wrapperClassName,
   className,
+  showFooter = true,
 }: InnerPageLayoutProps) => {
   const navigateBack = useNavigateBack();
   return (
     <div className="flex flex-col min-h-dvh">
+      {/* Header */}
       <AppHeader
         leftContent={
           <AppHeader.Button onClick={() => navigateBack()}>
@@ -34,7 +37,8 @@ const InnerPageLayout = ({
         {children}
       </MainContainer>
 
-      <AppFooter />
+      {/* Footer */}
+      {showFooter && <AppFooter />}
     </div>
   );
 };
