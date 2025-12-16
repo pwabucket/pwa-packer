@@ -7,6 +7,7 @@ import type {
   WithdrawalResult,
 } from "../types";
 import { BaseTelegramProvider } from "./BaseTelegramProvider";
+import { addDays, isAfter, startOfWeek } from "date-fns";
 
 class DaVinciProvider
   extends BaseTelegramProvider
@@ -90,10 +91,23 @@ class DaVinciProvider
     const current = list.find((item: any) => item.status === "pending");
 
     if (current) {
+      let balance = new Decimal(0);
+      const weekStart = startOfWeek(new Date(current.createdAt), {
+        weekStartsOn: DaVinciProvider.WEEK_STARTS_ON,
+      });
+
+      const availableAt = addDays(weekStart, 7);
+
+      console.log({ availableAt, now: new Date() });
+
+      if (isAfter(new Date(), availableAt)) {
+        balance = new Decimal(current.amount).times(new Decimal("1.3"));
+      }
+
       return {
         participating: true,
         amount: new Decimal(current.amount),
-        balance: new Decimal(0),
+        balance,
       };
     }
 
@@ -114,11 +128,7 @@ class DaVinciProvider
       };
     }
 
-    return {
-      participating: false,
-      amount: new Decimal(0),
-      balance: new Decimal(0),
-    };
+    return this.getParticipation();
   }
 
   async getWithdrawalHistory(): Promise<WithdrawalHistory[]> {
@@ -128,7 +138,7 @@ class DaVinciProvider
       userId: number;
       amount: string;
       txHash: string | null;
-      status: "pending" | "claimed" | "failed";
+      status: "pending" | "confirmed" | "failed";
       claimedAt: string | null;
       createdAt: string;
     }[] = result.depositHistory30in48;
@@ -141,7 +151,7 @@ class DaVinciProvider
           date: new Date(item.createdAt),
           amount: new Decimal(item.amount),
           status:
-            item.status === "claimed"
+            item.status === "confirmed"
               ? "success"
               : item.status === "pending"
               ? "pending"
@@ -153,9 +163,17 @@ class DaVinciProvider
 
   async getWithdrawalInfo(): Promise<WithdrawalInfo> {
     const { user } = await this.getUser();
+    const activity = await this.getParticipation();
+
+    if (activity.participating) {
+      return {
+        address: user.withdrawalAddress || "",
+        balance: activity.balance,
+      };
+    }
     return {
       address: user.withdrawalAddress || "",
-      balance: new Decimal(user.availableBalance || 0),
+      balance: new Decimal(0),
     };
   }
 
