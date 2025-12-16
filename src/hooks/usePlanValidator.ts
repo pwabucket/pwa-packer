@@ -61,7 +61,10 @@ const usePlanValidator = (plan: PlanFileContent) => {
 
       const activity = await packer.getParticipation();
       const withdrawalHistory = await packer.getWithdrawalHistory();
-      const streak = getActivityStreak(withdrawalHistory);
+      const streak = getActivityStreak(
+        withdrawalHistory,
+        Packer.WEEK_STARTS_ON
+      );
 
       let validation = false;
       if (activity.participating) {

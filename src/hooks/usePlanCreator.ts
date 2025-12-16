@@ -110,7 +110,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
       /* Get activity */
       const activity = await packer.getParticipation();
       const result = await packer.getWithdrawalHistory();
-      const streak = getActivityStreak(result);
+      const streak = getActivityStreak(result, Packer.WEEK_STARTS_ON);
 
       return {
         activity,

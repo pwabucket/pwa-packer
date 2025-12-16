@@ -14,6 +14,9 @@ class LeonardoProvider
   /* Minimum Deposit Amount */
   static MINIMUM_DEPOSIT_AMOUNT = 1;
 
+  /* Week Starts On (0 = Sunday, 1 = Monday) */
+  static WEEK_STARTS_ON: 0 | 1 = 1;
+
   /* Static Map to Cache Custom Code per Origin */
   static customCodeMap = new Map<string, string>();
 

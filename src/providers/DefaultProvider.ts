@@ -10,6 +10,9 @@ class DefaultProvider extends BaseProvider implements PackerProviderInstance {
   /* Minimum Deposit Amount */
   static MINIMUM_DEPOSIT_AMOUNT = 0.01;
 
+  /* Week Starts On (0 = Sunday, 1 = Monday) */
+  static WEEK_STARTS_ON: 0 | 1 = 0;
+
   async initialize(): Promise<void> {
     return;
   }
