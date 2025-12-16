@@ -10,6 +10,7 @@ import { MdReceipt } from "react-icons/md";
 
 const AccountDialogSendTab = ({ account }: { account: Account }) => {
   const password = usePassword();
+  const provider = account.provider ?? "default";
 
   /** Form */
   const sendForm = useSendForm({
@@ -87,8 +88,8 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             showDelay={false}
             showMode={false}
             showDifference={false}
-            showValidate={Boolean(account.provider)}
-            showSkipValidated={Boolean(account.provider)}
+            showValidate={provider !== "default"}
+            showSkipValidated={provider !== "default"}
           />
         </form>
       </FormProvider>
