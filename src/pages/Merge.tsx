@@ -9,7 +9,6 @@ import { getPrivateKey, getWalletAddressFromPrivateKey } from "../lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
 import { AccountsChooser } from "../components/AccountsChooser";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
@@ -19,6 +18,7 @@ import { TokenButton } from "../components/TokenButton";
 import { usePassword } from "../hooks/usePassword";
 import { launchParcel } from "../lib/parcel";
 import useLocationToggle from "../hooks/useLocationToggle";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 /** Merge Form Schema */
 const MergeFormSchema = yup
@@ -43,7 +43,7 @@ interface MergeFormData {
 const Merge = () => {
   const password = usePassword();
 
-  const accountsChooser = useAccountsChooser();
+  const accountsChooser = useProviderAccountsChooser();
 
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();

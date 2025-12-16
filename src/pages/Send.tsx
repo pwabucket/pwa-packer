@@ -1,13 +1,13 @@
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useSendForm, type SendFormData } from "../hooks/useSendForm";
 import { useSendMutation } from "../hooks/useSendMutation";
 import { SendForm } from "../components/SendForm";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 /** Send Page Component */
 const Send = () => {
-  const selector = useAccountsChooser();
+  const selector = useProviderAccountsChooser();
 
   /** Send Form */
   const sendForm = useSendForm();

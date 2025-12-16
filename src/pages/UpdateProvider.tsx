@@ -4,53 +4,58 @@ import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AccountsChooser } from "../components/AccountsChooser";
+import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { Label } from "../components/Label";
-import { Input } from "../components/Input";
 import { FormFieldError } from "../components/FormFieldError";
 import { useAppStore } from "../store/useAppStore";
 import { useState } from "react";
-import type { Account } from "../types";
-import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
+import type { Account, ProviderType } from "../types";
+import { PROVIDER_NAMES } from "../lib/providers";
+import { Select } from "../components/Select";
 
-interface UpdateURLsResult {
+interface UpdateProviderResult {
   account: Account;
   status: boolean;
 }
 
-/** URLs Update Form Schema */
-const UpdateURLsFormSchema = yup
+/** Provider Update Form Schema */
+const UpdateProviderFormSchema = yup
   .object({
-    url: yup.string().required().label("URL"),
+    provider: yup
+      .string()
+      .required()
+      .oneOf(Object.keys(PROVIDER_NAMES) as ProviderType[])
+      .label("Provider"),
   })
   .required();
 
-/** URLs Update Form Data */
-interface UpdateURLsFormData {
-  url: string;
+/** Provider Update Form Data */
+interface UpdateProviderFormData {
+  provider: ProviderType;
 }
 
-/** UpdateURLs Page Component */
-const UpdateURLs = () => {
+/** UpdateProvider Page Component */
+const UpdateProvider = () => {
   const accounts = useAppStore((state) => state.accounts);
   const setAccounts = useAppStore((state) => state.setAccounts);
 
-  const selector = useProviderAccountsChooser();
+  const selector = useAccountsChooser();
   const { selectedAccounts } = selector;
 
-  const [results, setResults] = useState<UpdateURLsResult[] | null>(null);
+  const [results, setResults] = useState<UpdateProviderResult[] | null>(null);
 
   /** Form */
-  const form = useForm<UpdateURLsFormData>({
-    resolver: yupResolver(UpdateURLsFormSchema),
+  const form = useForm<UpdateProviderFormData>({
+    resolver: yupResolver(UpdateProviderFormSchema),
     defaultValues: {
-      url: "",
+      provider: "default",
     },
   });
 
   /** Handle Form Submit */
-  const handleFormSubmit = async (data: UpdateURLsFormData) => {
-    /* UpdateURLs Accounts */
+  const handleFormSubmit = async (data: UpdateProviderFormData) => {
+    /* UpdateProvider Accounts */
     if (selectedAccounts.length === 0) {
       toast.error("No accounts selected.");
       return;
@@ -59,21 +64,12 @@ const UpdateURLs = () => {
     /* Clear Previous Results */
     setResults(null);
 
-    /* Get Origin from New URL */
-    const origin = new URL(data.url).origin;
-
     /* Update Accounts */
     const updatedAccounts = accounts.map((account) => {
-      if (selectedAccounts.includes(account) && account.url) {
-        const oldURL = new URL(account.url);
-        const newURL = new URL(
-          oldURL.pathname + oldURL.search + oldURL.hash,
-          origin
-        );
-
+      if (selectedAccounts.includes(account)) {
         return {
           ...account,
-          url: newURL.href,
+          provider: data.provider,
         };
       }
       return account;
@@ -98,11 +94,14 @@ const UpdateURLs = () => {
   };
 
   return (
-    <InnerPageLayout title="Update URLs" className="gap-2">
+    <InnerPageLayout
+      title="Update Provider"
+      className="gap-2"
+      showFooter={false}
+    >
       {/* Description */}
-      <p className="text-sm text-blue-300 text-center">
-        Enter the new URL of one of the accounts to update the origin for all
-        selected accounts.
+      <p className="text-sm text-yellow-300 text-center">
+        Choose a new provider for the selected accounts.
       </p>
 
       <FormProvider {...form}>
@@ -110,26 +109,26 @@ const UpdateURLs = () => {
           onSubmit={form.handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-2"
         >
-          {/* URL */}
+          {/* Provider */}
           <Controller
-            name="url"
+            name="provider"
             render={({ field, fieldState }) => (
-              <>
-                <Label htmlFor="url">URL</Label>
-                <Input
-                  {...field}
-                  id="url"
-                  autoComplete="off"
-                  placeholder="URL"
-                />
-
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="provider">Provider</Label>
+                <Select id="provider" {...field}>
+                  {Object.entries(PROVIDER_NAMES).map(([key, name]) => (
+                    <Select.Option key={key} value={key}>
+                      {name}
+                    </Select.Option>
+                  ))}
+                </Select>
                 <FormFieldError message={fieldState.error?.message} />
-              </>
+              </div>
             )}
           />
 
           {/* Submit Button */}
-          <Button type="submit">Update URLs for Selected Accounts</Button>
+          <Button type="submit">Update Provider</Button>
 
           {/* Accounts Chooser */}
           <AccountsChooser {...selector} results={results || undefined} />
@@ -139,4 +138,4 @@ const UpdateURLs = () => {
   );
 };
 
-export { UpdateURLs };
+export { UpdateProvider };

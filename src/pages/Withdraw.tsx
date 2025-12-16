@@ -2,7 +2,6 @@ import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { FormProvider } from "react-hook-form";
 import { useAppStore } from "../store/useAppStore";
 import { AccountsChooser } from "../components/AccountsChooser";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { WithdrawFormFields } from "../components/WithdrawFormFields";
 import {
@@ -12,12 +11,13 @@ import {
 import { useWithdrawalMutation } from "../hooks/useWithdrawalMutation";
 import { Progress } from "../components/Progress";
 import { formatCurrency } from "../lib/utils";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 const Withdraw = () => {
   const password = useAppStore((state) => state.password);
 
-  const accountsChooser = useAccountsChooser();
-  const { selectedAccounts } = accountsChooser;
+  const selector = useProviderAccountsChooser();
+  const { selectedAccounts } = selector;
 
   /** Form */
   const { form } = useWithdrawalForm();
@@ -83,7 +83,7 @@ const Withdraw = () => {
 
           {/* Accounts Chooser */}
           <AccountsChooser
-            {...accountsChooser}
+            {...selector}
             disabled={mutation.isPending}
             results={mutation.data?.results}
           />

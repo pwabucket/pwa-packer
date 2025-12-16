@@ -18,14 +18,8 @@ const PlanCreator = ({
 }: {
   onCreate: (data: PlanFileContent) => void;
 }) => {
-  const {
-    form,
-    mutation,
-    handleFormSubmit,
-    accountsChooser,
-    progress,
-    target,
-  } = usePlanCreator(onCreate);
+  const { form, mutation, handleFormSubmit, selector, progress, target } =
+    usePlanCreator(onCreate);
 
   return (
     <div className="flex flex-col gap-4">
@@ -144,10 +138,7 @@ const PlanCreator = ({
             {mutation.isPending && <Progress max={target} current={progress} />}
 
             {/* Accounts Chooser */}
-            <AccountsChooser
-              {...accountsChooser}
-              disabled={mutation.isPending}
-            />
+            <AccountsChooser {...selector} disabled={mutation.isPending} />
           </form>
         </FormProvider>
       )}

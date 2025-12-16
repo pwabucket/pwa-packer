@@ -14,7 +14,6 @@ import { ethers } from "ethers";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
 import { AccountsChooser } from "../components/AccountsChooser";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { useProgress } from "../hooks/useProgress";
 import { Progress } from "../components/Progress";
@@ -24,6 +23,7 @@ import { TokenButton } from "../components/TokenButton";
 import { launchParcel } from "../lib/parcel";
 import useLocationToggle from "../hooks/useLocationToggle";
 import Decimal from "decimal.js";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 /** Parse Amount to Smallest Unit */
 const parseToSmallUnit = (amount: Decimal) => {
@@ -73,7 +73,7 @@ interface SplitFormData {
 /** Split Page Component */
 const Split = () => {
   const { target, progress, resetProgress } = useProgress();
-  const accountsChooser = useAccountsChooser();
+  const accountsChooser = useProviderAccountsChooser();
   const { selectedAccounts } = accountsChooser;
   const [showIframe, setShowIframe] = useLocationToggle("split-iframe-dialog");
 

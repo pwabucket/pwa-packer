@@ -11,6 +11,7 @@ import {
   MdOutlineMerge,
   MdRadar,
   MdOutlineCalendarMonth,
+  MdRssFeed,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
@@ -80,6 +81,16 @@ const ExtraUtilsDialog = () => {
           icon={<MdOutlinePassword className="size-5" />}
         >
           <Link replace to="/password" />
+        </ActionButton>
+
+        {/* Update Provider */}
+        <ActionButton
+          asChild
+          title="Update Provider"
+          label="Provider"
+          icon={<MdRssFeed className="size-5" />}
+        >
+          <Link replace to="/update-provider" />
         </ActionButton>
 
         {/* Update URLs */}

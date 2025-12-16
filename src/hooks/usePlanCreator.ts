@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
-import { useAccountsChooser } from "./useAccountsChooser";
 import type {
   Account,
   PlanAccountStatus,
@@ -25,6 +24,7 @@ import { usePassword } from "./usePassword";
 import { executeUsdtTransfers } from "../lib/transfers";
 import Decimal from "decimal.js";
 import { usePackerProvider } from "./usePackerProvider";
+import { useProviderAccountsChooser } from "./useProviderAccountsChooser";
 
 /** Plan Form Schema */
 const PlanFormSchema = yup
@@ -53,10 +53,10 @@ interface PreparedResult extends PreparedAccount {
 /** Plan Creator Component */
 const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
   const { getProvider } = usePackerProvider();
-  const accountsChooser = useAccountsChooser();
+  const selector = useProviderAccountsChooser();
   const { target, progress, setTarget, resetProgress, incrementProgress } =
     useProgress();
-  const { selectedAccounts } = accountsChooser;
+  const { selectedAccounts } = selector;
   const password = usePassword()!;
 
   /** Form */
@@ -479,7 +479,7 @@ const usePlanCreator = (onCreate: (data: PlanFileContent) => void) => {
 
   return {
     form,
-    accountsChooser,
+    selector,
     mutation,
     progress,
     target,

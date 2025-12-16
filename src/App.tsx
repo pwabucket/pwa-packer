@@ -22,7 +22,7 @@ import { Refill } from "./pages/Refill";
 import { Merge } from "./pages/Merge";
 import { StatusCheck } from "./pages/StatusCheck";
 import { Plan } from "./pages/Plan";
-import { Settings } from "./pages/Settings";
+import { UpdateProvider } from "./pages/UpdateProvider";
 
 const INACTIVITY_DURATION = 2 * 60 * 1000;
 
@@ -57,8 +57,8 @@ function App() {
           <Route path="send" element={<Send />} />
           <Route path="split" element={<Split />} />
           <Route path="merge" element={<Merge />} />
-          <Route path="settings" element={<Settings />} />
           <Route path="password" element={<Password />} />
+          <Route path="update-provider" element={<UpdateProvider />} />
           <Route path="update-urls" element={<UpdateURLs />} />
           <Route path="status-check" element={<StatusCheck />} />
           <Route path="validate" element={<Validate />} />

@@ -4,7 +4,6 @@ import { Button } from "../components/Button";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AccountsChooser } from "../components/AccountsChooser";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { Label } from "../components/Label";
 import { Input } from "../components/Input";
@@ -15,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { chunkArrayGenerator, delayForSeconds } from "../lib/utils";
 import { Progress } from "../components/Progress";
 import { usePackerProvider } from "../hooks/usePackerProvider";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 interface StatusCheckResult {
   account: Account;
@@ -37,7 +37,7 @@ interface StatusCheckFormData {
 /** StatusCheck Page Component */
 const StatusCheck = () => {
   const { getProvider } = usePackerProvider();
-  const accountsChooser = useAccountsChooser();
+  const accountsChooser = useProviderAccountsChooser();
   const { selectedAccounts } = accountsChooser;
   const { target, setTarget, progress, incrementProgress, resetProgress } =
     useProgress();

@@ -1,5 +1,4 @@
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import { AccountsChooser } from "../components/AccountsChooser";
 import { Button } from "../components/Button";
 import { useValidationMutation } from "../hooks/useValidationMutation";
@@ -11,14 +10,15 @@ import { MdSearch } from "react-icons/md";
 import { usePendingActivity } from "../hooks/usePendingActivity";
 import { formatCurrency } from "../lib/utils";
 import useLocationToggle from "../hooks/useLocationToggle";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 /** Validate Page Component */
 const Validate = () => {
   const [showResults, setShowResults] = useLocationToggle(
     "validate-results-dialog"
   );
-  const accountsChooser = useAccountsChooser();
-  const { selectedAccounts } = accountsChooser;
+  const selector = useProviderAccountsChooser();
+  const { selectedAccounts } = selector;
 
   const { mutation, target, progress } = useValidationMutation();
 
@@ -87,7 +87,7 @@ const Validate = () => {
 
       {/* Accounts Chooser */}
       <AccountsChooser
-        {...accountsChooser}
+        {...selector}
         disabled={mutation.isPending}
         results={mutation.data?.results}
       />

@@ -1,8 +1,8 @@
+import { useAccounts } from "./useAccounts";
 import { useAccountsSelector } from "./useAccountsSelector";
-import { useProviderAccounts } from "./useProviderAccounts";
 
 const useAccountsChooser = () => {
-  const accounts = useProviderAccounts();
+  const accounts = useAccounts();
 
   return useAccountsSelector(accounts);
 };

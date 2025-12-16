@@ -2,18 +2,18 @@ import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { FormProvider } from "react-hook-form";
 import { useAppStore } from "../store/useAppStore";
 import { AccountsChooser } from "../components/AccountsChooser";
-import { useAccountsChooser } from "../hooks/useAccountsChooser";
 import toast from "react-hot-toast";
 import { RefillFormFields } from "../components/RefillFormFields";
 import { useRefillForm, type RefillFormData } from "../hooks/useRefillForm";
 import { useRefillMutation } from "../hooks/useRefillMutation";
 import { Progress } from "../components/Progress";
 import { truncateDecimals } from "../lib/utils";
+import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
 
 const Refill = () => {
   const password = useAppStore((state) => state.password);
 
-  const accountsChooser = useAccountsChooser();
+  const accountsChooser = useProviderAccountsChooser();
   const { selectedAccounts } = accountsChooser;
 
   /** Form */
