@@ -87,6 +87,8 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
             showDelay={false}
             showMode={false}
             showDifference={false}
+            showValidate={Boolean(account.provider)}
+            showSkipValidated={Boolean(account.provider)}
           />
         </form>
       </FormProvider>
