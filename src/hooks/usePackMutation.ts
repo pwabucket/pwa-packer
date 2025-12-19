@@ -9,6 +9,7 @@ import { usePackerProvider } from "./usePackerProvider";
 interface PackMutationParams {
   accounts: Account[];
   delay: number;
+  force: boolean;
 }
 
 interface PackStats {
@@ -26,7 +27,10 @@ const usePackMutation = () => {
   /**
    * Process a single account pack operation
    */
-  const processAccount = async (account: Account): Promise<PackResult> => {
+  const processAccount = async (
+    account: Account,
+    force: boolean
+  ): Promise<PackResult> => {
     /* Validate account has URL */
     if (!account.provider || !account.url) {
       return {
@@ -38,9 +42,11 @@ const usePackMutation = () => {
     }
 
     try {
+      console.log("Force flag for account:", account.title, force);
+
       /* Initialize packer and fetch data */
       const Packer = getProvider(account.provider);
-      const packer = new Packer(account.url);
+      const packer = new Packer(account.url, force);
       await packer.initialize();
 
       const activity = await packer.getParticipation();
@@ -120,7 +126,7 @@ const usePackMutation = () => {
 
       /* Process accounts sequentially */
       for (const account of data.accounts) {
-        const result = await processAccount(account);
+        const result = await processAccount(account, data.force);
         results.push(result);
         incrementProgress();
 

@@ -5,8 +5,8 @@ import { BaseProvider } from "./BaseProvider";
 abstract class BaseTelegramProvider extends BaseProvider {
   protected telegramWebApp: TelegramWebAppData;
 
-  constructor(url: string) {
-    super(url);
+  constructor(url: string, force: boolean = false) {
+    super(url, force);
 
     /* Telegram WebApp Data */
     this.telegramWebApp = extractTgWebAppData(url);

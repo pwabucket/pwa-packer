@@ -23,8 +23,8 @@ class LeonardoProvider
   /* Static Map to Track Ongoing Initialization per Origin */
   static initializationPromises = new Map<string, Promise<void>>();
 
-  constructor(url: string) {
-    super(url);
+  constructor(url: string, force: boolean = false) {
+    super(url, force);
 
     /* Authorization Header */
     this.api.defaults.headers.common["Authorization"] =

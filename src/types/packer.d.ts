@@ -42,6 +42,6 @@ export interface PackerProviderInstance {
 }
 
 export interface PackerProvider {
-  new (url: string): PackerProviderInstance;
+  new (url: string, force?: boolean): PackerProviderInstance;
   getPageUrl(page: string, url: string): string;
 }

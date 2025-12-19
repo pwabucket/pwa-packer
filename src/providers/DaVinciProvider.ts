@@ -104,7 +104,7 @@ class DaVinciProvider
       /* Log dates for debugging */
       console.log({ weekStart, availableAt });
 
-      if (isAfter(new Date(), availableAt)) {
+      if (this.force || isAfter(new Date(), availableAt)) {
         balance = new Decimal(current.amount).times(new Decimal("1.3"));
       }
 

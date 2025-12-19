@@ -2,11 +2,19 @@ import axios, { type AxiosInstance } from "axios";
 
 abstract class BaseProvider {
   protected url: URL;
+  protected force: boolean;
   protected api: AxiosInstance;
 
-  constructor(url: string) {
+  constructor(url: string, force: boolean = false) {
     /* Parse URL */
     this.url = new URL(url);
+
+    /* Force Flag */
+    this.force = force;
+
+    if (this.force) {
+      console.warn("Force flag is enabled for this provider instance.");
+    }
 
     /* Axios Instance */
     this.api = axios.create({
