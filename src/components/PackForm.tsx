@@ -161,8 +161,8 @@ const PackForm = ({ selector }: PackFormProps) => {
                   <FormFieldError message={fieldState.error?.message} />
                   <p className="text-xs text-neutral-400 text-center px-4">
                     <span className="text-red-500 font-bold">DANGER:</span> If
-                    enabled, the tool will force packing of accounts even if
-                    they do not meet the usual criteria.
+                    enabled, the tool will try to force packing of accounts even
+                    if they do not meet the usual criteria.
                   </p>
                 </div>
               )}
