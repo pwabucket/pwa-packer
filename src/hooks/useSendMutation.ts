@@ -264,14 +264,19 @@ const useSendMutation = () => {
         };
       }
 
-      const maxAmount = new Decimal(data.amount);
+      const requiredAmount = new Decimal(data.amount);
 
       let amount: Decimal;
       let amountNeeded: Decimal;
 
       /* Initial phase: Apply difference for randomization */
       const difference = new Decimal(data.difference);
-      if (applyDifference && difference.gt(0)) {
+
+      /* Determine if we can apply difference */
+      const canApplyDifference = applyDifference && difference.gt(0);
+
+      if (canApplyDifference) {
+        const maxAmount = new Decimal(data.amount);
         const minAmount = maxAmount.minus(difference);
 
         /* If balance >= minAmount, send random amount between minAmount and maxAmount (inclusive) */
@@ -297,14 +302,19 @@ const useSendMutation = () => {
           amountNeeded = balance.minus(amount);
         }
       } else {
-        /* Send whatever balance they have, but cap at maxAmount */
-        const cappedAmount = Decimal.min(balance, maxAmount);
+        /* Send whatever balance they have, but cap at requiredAmount */
+        const cappedAmount = Decimal.min(balance, requiredAmount);
         /* Floor to whole number for final send */
         amount = floorToWholeNumber(cappedAmount);
         amountNeeded = new Decimal(0);
       }
 
-      if (!data.allowLesserAmount && amount.lt(maxAmount)) {
+      /* Check for lesser amount if not allowed */
+      const isLesserAmount =
+        !data.allowLesserAmount && amount.lt(requiredAmount);
+
+      /* Return skipped if lesser amount is not allowed */
+      if (isLesserAmount) {
         return {
           status: false,
           skipped: true,
@@ -314,7 +324,7 @@ const useSendMutation = () => {
           amountNeeded,
           receiver,
           validation,
-          error: `Amount to send (${amount.toString()}) is less than configured amount (${maxAmount.toString()})`,
+          error: `Amount to send (${amount.toString()}) is less than configured amount (${requiredAmount.toString()})`,
         };
       }
 
@@ -486,7 +496,7 @@ const useSendMutation = () => {
 
   /**
    * Plan refill transactions to fill skipped accounts
-   * Fills each recipient to maxAmount completely before moving to the next recipient
+   * Fills each recipient to requiredAmount completely before moving to the next recipient
    */
   const planRefillTransactions = (
     donorAccounts: PreparedAccount[],
@@ -613,7 +623,12 @@ const useSendMutation = () => {
       let phase2Results: SendResult[] = [];
       let refillStats = { success: 0, failed: 0 };
 
-      if (data.refill && difference.gt(0) && skippedAccounts.length > 0) {
+      /* Determine if refill is needed */
+      const shouldRefill =
+        data.refill && difference.gt(0) && skippedAccounts.length > 0;
+
+      /* Process refill if needed */
+      if (shouldRefill) {
         const refillTransactions = planRefillTransactions(
           accountsToProcess,
           skippedAccounts,
