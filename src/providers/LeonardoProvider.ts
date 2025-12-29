@@ -23,6 +23,10 @@ class LeonardoProvider
   /* Static Map to Track Ongoing Initialization per Origin */
   static initializationPromises = new Map<string, Promise<void>>();
 
+  /* Page URLs */
+  static ACTIVITY_PAGE = "#/Activity";
+  static WITHDRAWAL_PAGE = "#/Withdrawal";
+
   constructor(url: string, force: boolean = false) {
     super(url, force);
 
@@ -197,10 +201,10 @@ class LeonardoProvider
   }
 
   async getDepositAddress(): Promise<string> {
-    const activity = await this.getCurrentActivity();
+    const info = await this.getAccountInfo();
 
-    if (activity.activityAddress) {
-      return activity.activityAddress;
+    if (info.activityAddress) {
+      return info.activityAddress as string;
     } else {
       const wallet = await this.generateActivityWallet();
       return wallet.msg;
@@ -298,10 +302,10 @@ class LeonardoProvider
     const urlObj = new URL(url);
     switch (page) {
       case "activity":
-        urlObj.hash = "#/Activity";
+        urlObj.hash = this.ACTIVITY_PAGE;
         break;
       case "withdrawals":
-        urlObj.hash = "#/Withdrawal";
+        urlObj.hash = this.WITHDRAWAL_PAGE;
         break;
       default:
         urlObj.hash = "";
