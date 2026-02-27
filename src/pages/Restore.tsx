@@ -1,13 +1,13 @@
-import { useCallback } from "react";
-import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { toast } from "react-hot-toast";
 import type { BackupData } from "../types";
-import { restoreBackupData } from "../lib/utils";
-import { useNavigate } from "react-router";
 import BackupIcon from "../assets/backup.svg";
-import { MdOutlineWarning } from "react-icons/md";
 import { DragZone } from "../components/DragZone";
+import { InnerPageLayout } from "../layouts/InnerPageLayout";
+import { MdOutlineWarning } from "react-icons/md";
+import { restoreBackupData } from "../lib/utils";
+import { toast } from "react-hot-toast";
+import { useCallback } from "react";
 import { useJsonDropzone } from "../hooks/useJsonDropzone";
+import { useNavigate } from "react-router";
 
 /* Warning Icon Component */
 const WarningIcon = () => (
@@ -46,13 +46,13 @@ const Restore = () => {
 
           toast.promise(
             restoreBackupData(data).then(() =>
-              navigate("/", { replace: true })
+              navigate("/", { replace: true }),
             ),
             {
               loading: "Restoring backup...",
               success: "Backup restored!",
               error: "Failed to restore backup.",
-            }
+            },
           );
         } catch {
           toast.error("Invalid backup file!");
@@ -60,13 +60,13 @@ const Restore = () => {
       });
       reader.readAsText(file);
     },
-    [navigate]
+    [navigate],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useJsonDropzone(onDrop);
 
   return (
-    <InnerPageLayout title="Restore" className="gap-6">
+    <InnerPageLayout title="Restore" className="gap-6" showFooter={false}>
       <img src={BackupIcon} alt="Restore Backup" className="size-28 mx-auto" />
       <WarningSection />
       <DragZone
