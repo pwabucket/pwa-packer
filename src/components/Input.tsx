@@ -10,9 +10,8 @@ const Input = (props: React.ComponentProps<"input">) => {
         "focus:outline-none focus:ring-2 focus:ring-yellow-500",
         "disabled:opacity-50 disabled:cursor-not-allowed",
 
-        "autofill:bg-clip-text",
+        "autofill:bg-clip-text autofill:caret-white",
         "autofill:inset-ring-30 autofill:inset-ring-transparent",
-        "autofill:caret-white",
         "autofill:[-webkit-text-fill-color:var(--color-white)]",
         props.className,
       )}
