@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { cn } from "../lib/utils";
+import { useState } from "react";
 
 const Input = (props: React.ComponentProps<"input">) => {
   return (
@@ -9,7 +9,12 @@ const Input = (props: React.ComponentProps<"input">) => {
         "px-4 py-2 rounded-full border border-neutral-700",
         "focus:outline-none focus:ring-2 focus:ring-yellow-500",
         "disabled:opacity-50 disabled:cursor-not-allowed",
-        props.className
+
+        "autofill:bg-clip-text",
+        "autofill:inset-ring-30 autofill:inset-ring-transparent",
+        "autofill:caret-white",
+        "autofill:[-webkit-text-fill-color:var(--color-white)]",
+        props.className,
       )}
     />
   );
@@ -30,7 +35,7 @@ const PasswordInput = (props: React.ComponentProps<"input">) => {
       <div
         className={cn(
           "absolute right-0 w-14",
-          "flex justify-center items-center top-1/2 -translate-y-1/2"
+          "flex justify-center items-center top-1/2 -translate-y-1/2",
         )}
       >
         <button
