@@ -6,6 +6,7 @@ import { useSwapMutation } from "../hooks/useSwapMutation";
 import { useSwapQuote } from "../hooks/useSwapQuote";
 import type { Account } from "../types";
 import { transactionHashLink } from "../lib/utils";
+import { MdOutlineOpenInNew } from "react-icons/md";
 
 const AccountDialogSwapTab = ({ account }: { account: Account }) => {
   /** Form */
@@ -43,6 +44,7 @@ const AccountDialogSwapTab = ({ account }: { account: Account }) => {
           data.direction === "BNB_TO_USDT" ? "USDT" : "BNB"
         }`,
       );
+      form.reset();
     } catch (error: any) {
       console.error("Swap failed:", error);
       toast.error(
@@ -54,7 +56,7 @@ const AccountDialogSwapTab = ({ account }: { account: Account }) => {
   return (
     <>
       {mutation.isSuccess && (
-        <div className="flex flex-col text-center text-sm mb-4">
+        <div className="flex flex-col text-center text-sm mb-4 gap-1">
           <p className="text-green-400">Swap completed!</p>
           <p className="text-blue-300 text-xs break-all">
             Tx:{" "}
@@ -62,8 +64,10 @@ const AccountDialogSwapTab = ({ account }: { account: Account }) => {
               href={transactionHashLink(mutation.data?.txHash)}
               target="_blank"
               rel="noopener noreferrer"
+              className="hover:underline"
             >
               {mutation.data?.txHash}
+              <MdOutlineOpenInNew className="inline-block size-3 opacity-30" />
             </a>
           </p>
           <p className="text-lime-300">
