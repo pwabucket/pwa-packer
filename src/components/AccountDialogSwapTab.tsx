@@ -5,6 +5,7 @@ import { useSwapForm, type SwapFormData } from "../hooks/useSwapForm";
 import { useSwapMutation } from "../hooks/useSwapMutation";
 import { useSwapQuote } from "../hooks/useSwapQuote";
 import type { Account } from "../types";
+import { transactionHashLink } from "../lib/utils";
 
 const AccountDialogSwapTab = ({ account }: { account: Account }) => {
   /** Form */
@@ -56,7 +57,14 @@ const AccountDialogSwapTab = ({ account }: { account: Account }) => {
         <div className="flex flex-col text-center text-sm mb-4">
           <p className="text-green-400">Swap completed!</p>
           <p className="text-blue-300 text-xs break-all">
-            Tx: {mutation.data?.txHash}
+            Tx:{" "}
+            <a
+              href={transactionHashLink(mutation.data?.txHash)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {mutation.data?.txHash}
+            </a>
           </p>
           <p className="text-lime-300">
             {mutation.data?.amountIn}{" "}
