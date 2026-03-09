@@ -14,12 +14,12 @@ const AppHeader = ({
   return (
     <header
       className={cn(
-        "sticky top-0 px-4 z-20 h-12",
+        "sticky top-0 z-20 h-12",
         "flex items-center justify-center",
-        "bg-neutral-900 border-b border-neutral-700"
+        "bg-neutral-900 border-b border-neutral-700",
       )}
     >
-      <div className="w-full max-w-sm mx-auto flex items-center gap-4">
+      <div className="w-full max-w-md mx-auto flex items-center gap-4 px-4">
         {/* Left Content */}
         <div className="size-10 shrink-0">{leftContent}</div>
 
@@ -39,7 +39,7 @@ const AppHeaderButton = (props: React.ComponentProps<"button">) => {
       {...props}
       className={cn(
         "size-full cursor-pointer hover:bg-neutral-800",
-        "flex items-center justify-center rounded-full"
+        "flex items-center justify-center rounded-full",
       )}
     />
   );

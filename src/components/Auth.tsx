@@ -1,17 +1,19 @@
-import { useState } from "react";
+import * as yup from "yup";
+
+import { Controller, FormProvider, useForm } from "react-hook-form";
+
 import AppIcon from "../assets/icon.svg";
 import { Button } from "../components/Button";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { PasswordInput } from "../components/Input";
-import * as yup from "yup";
-import { useAppStore } from "../store/useAppStore";
-import { Link } from "react-router";
-import { Label } from "../components/Label";
 import { FormFieldError } from "../components/FormFieldError";
-import toast from "react-hot-toast";
+import { Label } from "../components/Label";
+import { Link } from "react-router";
 import { MdOutlineRestore } from "react-icons/md";
+import { PasswordInput } from "../components/Input";
 import { SiGithub } from "react-icons/si";
+import toast from "react-hot-toast";
+import { useAppStore } from "../store/useAppStore";
+import { useState } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 /** Auth Page Component */
 const Auth = ({ onSuccessfulLogin }: { onSuccessfulLogin?: () => void }) => {
@@ -19,8 +21,8 @@ const Auth = ({ onSuccessfulLogin }: { onSuccessfulLogin?: () => void }) => {
   const isNewUser = !passwordHash;
 
   return (
-    <div className="flex flex-col min-h-dvh items-center justify-center gap-4 p-4">
-      <div className="flex flex-col gap-4 w-full max-w-sm">
+    <div className="flex flex-col min-h-dvh items-center justify-center gap-4">
+      <div className="flex flex-col gap-4 w-full max-w-md p-4">
         <img src={AppIcon} alt="Packer" className="size-24 mx-auto" />
         <h1 className="text-center text-5xl font-protest-guerrilla">Packer</h1>
 

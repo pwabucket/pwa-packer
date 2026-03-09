@@ -1,13 +1,14 @@
+import type { Account, ProviderType } from "../types";
+
 import { Dialog } from "radix-ui";
-import useLocationToggle from "../hooks/useLocationToggle";
-import { cn } from "../lib/utils";
-import { useAppStore } from "../store/useAppStore";
 import { LuChevronsUpDown } from "react-icons/lu";
 import { MdOutlineClose } from "react-icons/md";
-import { PopupDialog } from "./PopupDialog";
-import { useMemo } from "react";
-import type { Account, ProviderType } from "../types";
 import { PROVIDER_NAMES } from "../lib/providers";
+import { PopupDialog } from "./PopupDialog";
+import { cn } from "../lib/utils";
+import { useAppStore } from "../store/useAppStore";
+import useLocationToggle from "../hooks/useLocationToggle";
+import { useMemo } from "react";
 
 interface ProviderOptionProps extends Dialog.DialogCloseProps {
   active: boolean;
@@ -23,7 +24,7 @@ const ProviderOption = ({ active, count, ...props }: ProviderOptionProps) => (
       "font-bold",
       active
         ? "bg-yellow-500 text-black"
-        : "bg-neutral-800 hover:bg-neutral-700"
+        : "bg-neutral-800 hover:bg-neutral-700",
     )}
   >
     <div className="grow">{props.children}</div> ({count})
@@ -37,16 +38,19 @@ const ProvidersDialog = () => {
 
   const accountsByProvider = useMemo(
     () =>
-      accounts.reduce((result, account) => {
-        const provider = account.provider || "default";
+      accounts.reduce(
+        (result, account) => {
+          const provider = account.provider || "default";
 
-        if (!result[provider]) {
-          result[provider] = [];
-        }
-        result[provider].push(account);
-        return result;
-      }, {} as Record<ProviderType, Account[]>),
-    [accounts]
+          if (!result[provider]) {
+            result[provider] = [];
+          }
+          result[provider].push(account);
+          return result;
+        },
+        {} as Record<ProviderType, Account[]>,
+      ),
+    [accounts],
   );
 
   return (
@@ -64,7 +68,7 @@ const ProvidersDialog = () => {
         <Dialog.Close
           className={cn(
             "size-8 shrink-0 flex items-center justify-center",
-            "rounded-full hover:bg-neutral-800 hover:text-red-500 cursor-pointer"
+            "rounded-full hover:bg-neutral-800 hover:text-red-500 cursor-pointer",
           )}
         >
           <MdOutlineClose className="size-6" />
@@ -99,10 +103,10 @@ const AppFooter = () => {
         className={cn(
           "flex items-center h-14",
           "bg-neutral-950",
-          "fixed bottom-0 inset-x-0 z-10"
+          "fixed bottom-0 inset-x-0 z-10",
         )}
       >
-        <div className="w-full max-w-sm mx-auto flex items-center justify-center gap-4">
+        <div className="w-full max-w-md mx-auto flex items-center justify-center gap-4">
           <Dialog.Root
             open={showProvidersDialog}
             onOpenChange={toggleProvidersDialog}
@@ -115,7 +119,7 @@ const AppFooter = () => {
                 "hover:text-yellow-500",
                 "hover:border-yellow-500",
                 "cursor-pointer",
-                "transition-colors duration-200"
+                "transition-colors duration-200",
               )}
             >
               {/* Provider Display */}
