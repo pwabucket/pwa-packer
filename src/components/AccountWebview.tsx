@@ -1,19 +1,21 @@
 import { Dialog, Tabs } from "radix-ui";
+import { useCallback, useState } from "react";
+
 import type { Account } from "../types";
-import { PopupDialog } from "./PopupDialog";
-import { cn } from "../lib/utils";
-import { HiOutlineXMark } from "react-icons/hi2";
-import { AccountBalance } from "./AccountBalance";
 import { AccountAddresses } from "./AccountAddresses";
 import { AccountAvatar } from "./AccountAvatar";
-import { useCallback, useState } from "react";
-import { AccountDialogSendTab } from "./AccountDialogSendTab";
-import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
-import { MdOutlineArrowBackIos } from "react-icons/md";
-import { AccountSwitcher } from "./AccountSwitcher";
-import { AccountInfo } from "./AccountInfo";
+import { AccountBalance } from "./AccountBalance";
 import { AccountDialogHistoryTab } from "./AccountDialogHistoryTab";
+import { AccountDialogSendTab } from "./AccountDialogSendTab";
+import { AccountDialogSwapTab } from "./AccountDialogSwapTab";
+import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
+import { AccountInfo } from "./AccountInfo";
+import { AccountSwitcher } from "./AccountSwitcher";
+import { HiOutlineXMark } from "react-icons/hi2";
+import { MdOutlineArrowBackIos } from "react-icons/md";
+import { PopupDialog } from "./PopupDialog";
 import { TabTrigger } from "./TabTrigger";
+import { cn } from "../lib/utils";
 import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface AccountWebviewProps {
@@ -99,9 +101,10 @@ const WebviewAside = ({ account }: { account: Account }) => {
       defaultValue="send"
       className="flex flex-col size-full overflow-hidden"
     >
-      <Tabs.List className="grid grid-cols-3 shrink-0">
+      <Tabs.List className="grid grid-cols-4 shrink-0">
         <WebviewAsideTabTrigger title="Send" value="send" />
         <WebviewAsideTabTrigger title="Withdraw" value="withdraw" />
+        <WebviewAsideTabTrigger title="Swap" value="swap" />
         <WebviewAsideTabTrigger title="History" value="history" />
       </Tabs.List>
 
@@ -112,6 +115,9 @@ const WebviewAside = ({ account }: { account: Account }) => {
 
         <Tabs.Content value="withdraw">
           <AccountDialogWithdrawTab account={account} />
+        </Tabs.Content>
+        <Tabs.Content value="swap">
+          <AccountDialogSwapTab account={account} />
         </Tabs.Content>
         <Tabs.Content value="history">
           <AccountDialogHistoryTab account={account} />
@@ -138,7 +144,7 @@ const AccountHeader = ({
             className={cn(
               "size-full bg-neutral-800 rounded-full",
               "flex justify-center items-center",
-              "cursor-pointer hover:bg-neutral-700/80 transition-colors duration-200 ease-in-out"
+              "cursor-pointer hover:bg-neutral-700/80 transition-colors duration-200 ease-in-out",
             )}
             onClick={toggleAside}
           >
@@ -169,7 +175,7 @@ const AccountHeader = ({
           title="Close URL"
           className={cn(
             "size-full text-neutral-400 hover:text-yellow-500 cursor-pointer",
-            "flex justify-center items-center"
+            "flex justify-center items-center",
           )}
         >
           <HiOutlineXMark className="size-5" />
@@ -191,7 +197,7 @@ const AccountWebview = ({
   return (
     <PopupDialog
       onInteractOutside={(ev) => ev.preventDefault()}
-      className="p-0 h-full max-h-[768px] overflow-hidden gap-0"
+      className="p-0 h-full max-h-192 overflow-hidden gap-0"
     >
       <AccountHeader
         isOpened={showAside}
@@ -203,7 +209,7 @@ const AccountWebview = ({
           className={cn(
             "grid grid-cols-2 w-[200%] h-full",
             showAside ? "translate-x-[-50%]" : "translate-x-0",
-            "transition-transform duration-500 ease-in-out"
+            "transition-transform duration-500 ease-in-out",
           )}
         >
           <WebviewArea account={account} />

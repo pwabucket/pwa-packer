@@ -1,28 +1,29 @@
 import { Route, Routes } from "react-router";
-import { Welcome } from "./pages/Welcome";
-import { Dashboard } from "./pages/Dashboard";
+
 import { AccountCreationPage } from "./pages/AccountCreationPage";
-import { ProtectedRoutes } from "./routes/ProtectedRoutes";
 import { AccountEditPage } from "./pages/AccountEditPage";
-import { Withdraw } from "./pages/Withdraw";
+import { Dashboard } from "./pages/Dashboard";
+import { Merge } from "./pages/Merge";
+import { Pack } from "./pages/Pack";
+import { Password } from "./pages/Password";
+import { Plan } from "./pages/Plan";
+import { ProtectedRoutes } from "./routes/ProtectedRoutes";
+import { Refill } from "./pages/Refill";
+import { Restore } from "./pages/Restore";
 import { Send } from "./pages/Send";
 import { Split } from "./pages/Split";
-import { useInactivity } from "./hooks/useInactivity";
+import { StatusCheck } from "./pages/StatusCheck";
 import { Toaster } from "react-hot-toast";
-import { Restore } from "./pages/Restore";
-import { Password } from "./pages/Password";
+import { UpdateProvider } from "./pages/UpdateProvider";
+import { UpdateURLs } from "./pages/UpdateURLs";
 import { Validate } from "./pages/Validate";
+import { Welcome } from "./pages/Welcome";
+import { Withdraw } from "./pages/Withdraw";
 import { useAppStore } from "./store/useAppStore";
-import { useWakeLock } from "./hooks/useWakeLock";
+import { useInactivity } from "./hooks/useInactivity";
 import { useIsMutating } from "@tanstack/react-query";
 import { usePendingActivity } from "./hooks/usePendingActivity";
-import { UpdateURLs } from "./pages/UpdateURLs";
-import { Pack } from "./pages/Pack";
-import { Refill } from "./pages/Refill";
-import { Merge } from "./pages/Merge";
-import { StatusCheck } from "./pages/StatusCheck";
-import { Plan } from "./pages/Plan";
-import { UpdateProvider } from "./pages/UpdateProvider";
+import { useWakeLock } from "./hooks/useWakeLock";
 
 const INACTIVITY_DURATION = 2 * 60 * 1000;
 

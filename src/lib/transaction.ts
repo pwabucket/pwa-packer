@@ -28,3 +28,36 @@ export const GAS_LIMITS_TRANSFER = {
   fast: 65_000n,
   instant: 75_000n,
 };
+
+/** PancakeSwap V2 Router */
+export const PANCAKE_ROUTER_ADDRESS = IS_MAINNET
+  ? "0x10ED43C718714eb63d5aA57B78B54704E256024E"
+  : "0xD99D1c33F9fC3444f8101754aBC46c52416550D1";
+
+/** Wrapped BNB */
+export const WBNB_ADDRESS = IS_MAINNET
+  ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+  : "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
+
+/** PancakeSwap Router ABI (subset for swaps) */
+export const PANCAKE_ROUTER_ABI = [
+  "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)",
+  "function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
+  "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)",
+];
+
+/** ERC-20 approve ABI fragment */
+export const ERC20_APPROVE_ABI = [
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+];
+
+/** Gas limits for swap operations */
+export const GAS_LIMIT_SWAP = 300_000n;
+export const GAS_LIMIT_APPROVE = 60_000n;
+
+/** Default deadline offset: 20 minutes */
+export const DEFAULT_DEADLINE_SECONDS = 20 * 60;
+
+/** Default slippage: 1% (expressed as basis points) */
+export const DEFAULT_SLIPPAGE_BPS = 100;

@@ -1,22 +1,23 @@
-import { Dialog } from "radix-ui";
-import { PopupDialog } from "./PopupDialog";
-import { ActionButton } from "./ActionButton";
 import {
+  MdLink,
   MdOutlineBackup,
+  MdOutlineCalendarMonth,
   MdOutlineCheck,
+  MdOutlineMerge,
   MdOutlinePassword,
   MdOutlineRestore,
-  MdLink,
-  MdWaterDrop,
-  MdOutlineMerge,
   MdRadar,
-  MdOutlineCalendarMonth,
   MdRssFeed,
+  MdWaterDrop,
 } from "react-icons/md";
-import toast from "react-hot-toast";
 import { cn, createAndDownloadBackup } from "../lib/utils";
-import { Link } from "react-router";
+
+import { ActionButton } from "./ActionButton";
+import { Dialog } from "radix-ui";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
+import { Link } from "react-router";
+import { PopupDialog } from "./PopupDialog";
+import toast from "react-hot-toast";
 
 const ExtraUtilsDialog = () => {
   /* Handle Backup Action */
@@ -33,7 +34,7 @@ const ExtraUtilsDialog = () => {
       <Dialog.Title
         className={cn(
           "text-2xl text-center text-yellow-400 grow min-w-0",
-          "font-protest-guerrilla"
+          "font-protest-guerrilla",
         )}
       >
         Extra Tools
