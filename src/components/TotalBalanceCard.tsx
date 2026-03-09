@@ -80,7 +80,7 @@ const TotalBalanceCard = () => {
           </div>
 
           {/* BNB Balance */}
-          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-yellow-400/50">
+          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white/30">
             <img src={BNBIcon} alt="BNB" className="size-4" />
             <span className="text-xs font-medium tabular-nums text-black/70">
               {truncateDecimals(totalBalance.bnb, 8, true)} BNB
