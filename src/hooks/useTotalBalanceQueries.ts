@@ -23,11 +23,12 @@ const useTotalBalanceQueries = () => {
         query: results,
         data: results.map((result) => result.data),
         isPending: results.some((result) => result.isPending),
+        isFetching: results.some((result) => result.isFetching),
         isError: results.some((result) => result.isError),
         isSuccess: results.every((result) => result.isSuccess),
       };
     },
-    []
+    [],
   );
 
   const queries = useQueries({
