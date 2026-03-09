@@ -1,35 +1,35 @@
-import { Link } from "react-router";
-import { useAppStore } from "../store/useAppStore";
-import AppIcon from "../assets/icon.svg";
-import { AppHeader } from "../components/AppHeader";
-import { MainContainer } from "../components/MainContainer";
-import {
-  MdOutlinePushPin,
-  MdPushPin,
-  MdOutlineMenu,
-  MdPersonAdd,
-  MdCallSplit,
-  MdOutlineSearch,
-  MdOutlineClose,
-} from "react-icons/md";
-
 import { HiOutlineArrowDownLeft, HiOutlineArrowUpRight } from "react-icons/hi2";
+import {
+  MdCallSplit,
+  MdOutlineClose,
+  MdOutlineMenu,
+  MdOutlinePushPin,
+  MdOutlineSearch,
+  MdPersonAdd,
+  MdPushPin,
+} from "react-icons/md";
 import { cn, extractTgWebAppData } from "../lib/utils";
-import { AccountItem } from "../components/AccountItem";
-import { Button } from "../components/Button";
-import { TotalBalanceCard } from "../components/TotalBalanceCard";
-import { Reorder } from "motion/react";
-import { Dialog } from "radix-ui";
-import { ActionButton } from "../components/ActionButton";
-import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
-import { NewAccountDialog } from "../components/NewAccountDialog";
-import useLocationToggle from "../hooks/useLocationToggle";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Input } from "../components/Input";
-import { useDebounce } from "react-use";
+
 import type { Account } from "../types";
+import { AccountItem } from "../components/AccountItem";
 import { AccountsContext } from "../contexts/AccountsContext";
+import { ActionButton } from "../components/ActionButton";
 import { AppFooter } from "../components/AppFooter";
+import { AppHeader } from "../components/AppHeader";
+import AppIcon from "../assets/icon.svg";
+import { Button } from "../components/Button";
+import { Dialog } from "radix-ui";
+import { ExtraUtilsDialog } from "../components/ExtraUtilsDialog";
+import { Input } from "../components/Input";
+import { Link } from "react-router";
+import { MainContainer } from "../components/MainContainer";
+import { NewAccountDialog } from "../components/NewAccountDialog";
+import { Reorder } from "motion/react";
+import { TotalBalanceCard } from "../components/TotalBalanceCard";
+import { useAppStore } from "../store/useAppStore";
+import { useDebounce } from "react-use";
+import useLocationToggle from "../hooks/useLocationToggle";
 
 /** Dashboard Page Component */
 const Dashboard = () => {
@@ -79,7 +79,7 @@ const Dashboard = () => {
   /* Accounts for Current Provider */
   const providerAccounts = useMemo(() => {
     return accounts.filter(
-      (account) => (account.provider || "default") === provider
+      (account) => (account.provider || "default") === provider,
     );
   }, [accounts, provider]);
 
@@ -103,12 +103,12 @@ const Dashboard = () => {
     (newOrder: Account[]) => {
       setAccounts([
         ...accounts.filter(
-          (acc) => !newOrder.find((item) => item.id === acc.id)
+          (acc) => !newOrder.find((item) => item.id === acc.id),
         ),
         ...newOrder,
       ]);
     },
-    [accounts, setAccounts]
+    [accounts, setAccounts],
   );
 
   /* Toggle search */
@@ -126,7 +126,7 @@ const Dashboard = () => {
       setSearch(tempSearch);
     },
     300,
-    [tempSearch]
+    [tempSearch],
   );
 
   /* Focus Search Input when shown */
@@ -143,7 +143,7 @@ const Dashboard = () => {
           <AppHeader.Button
             onClick={() =>
               setDashboardStyle(
-                dashboardStyle === "normal" ? "sticky" : "normal"
+                dashboardStyle === "normal" ? "sticky" : "normal",
               )
             }
           >
@@ -169,7 +169,7 @@ const Dashboard = () => {
               className={cn(
                 "grow min-w-0 min-h-0",
                 "font-protest-guerrilla text-2xl",
-                "flex justify-center items-center gap-2"
+                "flex justify-center items-center gap-2",
               )}
             >
               <img src={AppIcon} alt="Packer" className="size-6" />
@@ -191,7 +191,7 @@ const Dashboard = () => {
       <div
         className={cn(
           "bg-neutral-950",
-          dashboardStyle === "sticky" ? "sticky top-12 z-10" : ""
+          dashboardStyle === "sticky" ? "sticky top-12 z-10" : "",
         )}
       >
         <MainContainer className="gap-4">
@@ -261,7 +261,7 @@ const Dashboard = () => {
         </MainContainer>
       </div>
       {/* Main content area */}
-      <MainContainer className="gap-4" wrapperClassName="pt-0">
+      <MainContainer className="gap-4 pt-0">
         {/* Account List */}
         <div className="flex flex-col gap-2">
           {providerAccounts.length === 0 ? (
