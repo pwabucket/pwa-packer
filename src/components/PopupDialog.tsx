@@ -6,12 +6,11 @@ const PopupDialog = (props: Dialog.DialogContentProps) => {
     <Dialog.Portal>
       <Dialog.Overlay
         className={cn(
-          "fixed inset-0 bg-black/50",
-          "grid place-items-center",
+          "flex flex-col fixed inset-0 bg-black/50",
           "overflow-auto z-30",
         )}
       >
-        <div className="max-w-md p-4">
+        <div className="w-full max-w-md p-4 m-auto">
           <Dialog.Content
             onOpenAutoFocus={(ev) => ev.preventDefault()}
             {...props}

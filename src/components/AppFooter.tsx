@@ -27,7 +27,7 @@ const ProviderOption = ({ active, count, ...props }: ProviderOptionProps) => (
         : "bg-neutral-800 hover:bg-neutral-700",
     )}
   >
-    <div className="grow">{props.children}</div> ({count})
+    <div className="grow min-w-0">{props.children}</div> ({count})
   </Dialog.Close>
 );
 

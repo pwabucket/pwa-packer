@@ -1,8 +1,8 @@
-import ParcelIcon from "../assets/parcel-icon.svg";
-import { cn } from "../lib/utils";
-import { PopupDialog } from "./PopupDialog";
 import { Dialog } from "radix-ui";
 import { HiOutlineXMark } from "react-icons/hi2";
+import ParcelIcon from "../assets/parcel-icon.svg";
+import { PopupDialog } from "./PopupDialog";
+import { cn } from "../lib/utils";
 
 /** Parcel URL from Environment Variables */
 const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
@@ -15,7 +15,7 @@ interface ParcelDialogProps extends Dialog.DialogProps {
 const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
   return (
     <Dialog.Root {...props}>
-      <PopupDialog className="p-0 h-full max-h-[768px] overflow-hidden gap-0 max-w-md">
+      <PopupDialog className="p-0 h-full max-h-192 overflow-hidden gap-0 max-w-md">
         {/* Header */}
         <div className="flex gap-2 items-center justify-center shrink-0 p-2">
           <div className="size-10 shrink-0" />
@@ -38,7 +38,7 @@ const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
               title="Close Parcel"
               className={cn(
                 "size-full text-neutral-400 hover:text-yellow-500 cursor-pointer",
-                "flex justify-center items-center"
+                "flex justify-center items-center",
               )}
             >
               <HiOutlineXMark className="size-5" />
@@ -50,7 +50,7 @@ const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
         <iframe
           src={new URL(path, PARCEL_URL).href}
           title="Parcel"
-          className="border-0 grow"
+          className="border-0 grow min-w-0 min-h-0"
         ></iframe>
       </PopupDialog>
     </Dialog.Root>

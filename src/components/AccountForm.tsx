@@ -1,29 +1,31 @@
-import { Button } from "../components/Button";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Input } from "../components/Input";
 import * as yup from "yup";
-import { Label } from "../components/Label";
-import { FormFieldError } from "../components/FormFieldError";
-import { TextArea } from "../components/TextArea";
+
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import {
+  MdAccountBalanceWallet,
+  MdOutlineAutorenew,
+  MdOutlineContentCopy,
+} from "react-icons/md";
 import {
   cn,
   copyToClipboard,
   getWalletAddressFromPrivateKey,
 } from "../lib/utils";
-import { useMutation } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import { ethers } from "ethers";
-import {
-  MdOutlineAutorenew,
-  MdAccountBalanceWallet,
-  MdOutlineContentCopy,
-} from "react-icons/md";
-import { usePackerProvider } from "../hooks/usePackerProvider";
+
+import { Button } from "../components/Button";
+import { FormFieldError } from "../components/FormFieldError";
+import { Input } from "../components/Input";
+import { Label } from "../components/Label";
+import { PROVIDER_NAMES } from "../lib/providers";
 import type { ProviderType } from "../types";
 import { Select } from "./Select";
+import { TextArea } from "../components/TextArea";
+import { ethers } from "ethers";
+import toast from "react-hot-toast";
 import { useAppStore } from "../store/useAppStore";
-import { PROVIDER_NAMES } from "../lib/providers";
+import { useMutation } from "@tanstack/react-query";
+import { usePackerProvider } from "../hooks/usePackerProvider";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 /** Account Form Data */
 interface AccountFormData {
@@ -176,14 +178,14 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                   id="url"
                   autoComplete="off"
                   placeholder="URL"
-                  className="grow"
+                  className="grow min-w-0"
                 />
                 <button
                   type="button"
                   className={cn(
                     "border border-neutral-700 cursor-pointer",
                     "shrink-0 p-2 rounded-full size-10",
-                    "flex items-center justify-center"
+                    "flex items-center justify-center",
                   )}
                   onClick={() => copyToClipboard(field.value)}
                 >
@@ -198,7 +200,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                     onClick={() => fillDepositAddress(field.value)}
                     className={cn(
                       "text-sm text-orange-300 cursor-pointer hover:underline disabled:opacity-50",
-                      "flex items-center gap-1"
+                      "flex items-center gap-1",
                     )}
                   >
                     <MdAccountBalanceWallet className="size-3" />
@@ -233,7 +235,7 @@ const AccountForm = ({ handleFormSubmit, initialValues }: AccountFormProps) => {
                     onClick={generateWalletPrivateKey}
                     className={cn(
                       "text-sm text-lime-300 cursor-pointer hover:underline disabled:opacity-50",
-                      "flex items-center gap-1"
+                      "flex items-center gap-1",
                     )}
                   >
                     <MdOutlineAutorenew className="size-3" />
