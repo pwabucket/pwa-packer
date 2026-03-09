@@ -21,6 +21,7 @@ const Withdraw = () => {
 
   /** Form */
   const { form } = useWithdrawalForm();
+  const token = form.watch("token");
 
   /** Mutation */
   const { mutation, target, progress } = useWithdrawalMutation();
@@ -39,13 +40,14 @@ const Withdraw = () => {
 
     const { successfulSends, totalSentValue } = await mutation.mutateAsync({
       accounts: selectedAccounts,
+      token: data.token,
       amount: data.amount,
       address: data.address,
     });
 
     /* Show Summary Alert */
     toast.success(
-      `Successfully sent $${totalSentValue} from ${successfulSends}/${selectedAccounts.length} accounts.`
+      `Successfully sent $${totalSentValue} from ${successfulSends}/${selectedAccounts.length} accounts.`,
     );
 
     /* Reset Form */
@@ -63,7 +65,8 @@ const Withdraw = () => {
           </p>
           <p className="text-lime-300">
             Total Amount:{" "}
-            {formatCurrency(mutation.data?.totalSentValue || 0, 3)} USDT
+            {formatCurrency(mutation.data?.totalSentValue || 0, 3)}{" "}
+            {token.toUpperCase()}
           </p>
         </div>
       )}
@@ -75,7 +78,7 @@ const Withdraw = () => {
         >
           {/* Withdraw Form Fields */}
           {!mutation.isSuccess && (
-            <WithdrawFormFields disabled={mutation.isPending} />
+            <WithdrawFormFields token={token} disabled={mutation.isPending} />
           )}
 
           {/* Progress Bar */}

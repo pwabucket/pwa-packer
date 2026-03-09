@@ -11,6 +11,7 @@ import type { Account } from "../types";
 const AccountDialogWithdrawTab = ({ account }: { account: Account }) => {
   /** Form */
   const { form } = useWithdrawalForm();
+  const token = form.watch("token");
 
   /** Mutation */
   const { mutation } = useWithdrawalMutation();
@@ -18,6 +19,7 @@ const AccountDialogWithdrawTab = ({ account }: { account: Account }) => {
   const handleFormSubmit = async (data: WithdrawFormData) => {
     const { totalSentValue } = await mutation.mutateAsync({
       accounts: [account],
+      token: data.token,
       amount: data.amount,
       address: data.address,
     });
@@ -41,7 +43,11 @@ const AccountDialogWithdrawTab = ({ account }: { account: Account }) => {
             .
           </p>
 
-          <WithdrawFormFields disabled={mutation.isPending} />
+          <WithdrawFormFields
+            token={token}
+            disabled={mutation.isPending}
+            singleAccount={true}
+          />
         </form>
       </FormProvider>
     </>

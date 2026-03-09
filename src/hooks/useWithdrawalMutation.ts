@@ -1,6 +1,7 @@
 import { useAppStore } from "../store/useAppStore";
 import {
   BASE_GAS_PRICE,
+  GAS_LIMIT_NATIVE,
   GAS_LIMITS_TRANSFER,
   USDT_DECIMALS,
 } from "../lib/transaction";
@@ -14,6 +15,7 @@ import Decimal from "decimal.js";
 
 interface WithdrawMutationParams {
   accounts: Account[];
+  token: "bnb" | "usdt";
   amount?: string;
   address: string;
 }
@@ -23,7 +25,7 @@ interface WithdrawalResult {
   skipped?: boolean;
   account: Account;
   amount?: Decimal.Value;
-  result?: ethers.ContractTransactionReceipt | null;
+  result?: ethers.TransactionReceipt | null;
   error?: unknown;
 }
 
@@ -44,18 +46,35 @@ const useWithdrawalMutation = () => {
    */
   const determineWithdrawalAmount = async (
     account: Account,
-    requestedAmount?: string
+    token: "bnb" | "usdt",
+    requestedAmount?: string,
   ): Promise<{ amount: string; balance: Decimal } | null> => {
     const reader = new WalletReader(account.walletAddress);
-    const balance = await reader.getUSDTBalance();
+    const balance =
+      token === "bnb"
+        ? await reader.getBNBBalance()
+        : await reader.getUSDTBalance();
 
     /* Use entire balance if no amount specified */
     if (!requestedAmount || requestedAmount.trim() === "") {
       console.log(
         `Balance of ${account.title} (${
           account.walletAddress
-        }): ${balance.toString()} USDT`
+        }): ${balance.toString()} ${token.toUpperCase()}`,
       );
+
+      /* For BNB, reserve gas cost when sending all */
+      if (token === "bnb") {
+        const gasCost = new Decimal(
+          ethers.formatEther(BASE_GAS_PRICE * GAS_LIMIT_NATIVE),
+        );
+        const sendable = balance.minus(gasCost);
+        if (sendable.lte(0)) {
+          return null; /* Not enough to cover gas */
+        }
+        return { amount: sendable.toString(), balance };
+      }
+
       return { amount: balance.toString(), balance };
     }
 
@@ -69,43 +88,63 @@ const useWithdrawalMutation = () => {
   };
 
   /**
-   * Execute USDT withdrawal for a single account
+   * Execute withdrawal for a single account (BNB or USDT)
    */
   const executeWithdrawal = async (
     account: Account,
     receiver: string,
-    amount: string
-  ): Promise<ethers.ContractTransactionReceipt | null> => {
+    token: "bnb" | "usdt",
+    amount: string,
+  ): Promise<
+    ethers.ContractTransactionReceipt | ethers.TransactionReceipt | null
+  > => {
     const reader = new WalletReader(account.walletAddress);
     const provider = reader.getProvider();
-    const usdtToken = reader.getUsdtTokenContract();
 
     const privateKey = await getPrivateKey(account.id, password);
     const wallet = new ethers.Wallet(privateKey, provider);
 
     console.log(
-      `Withdrawing ${amount} USDT from ${account.title} (${account.walletAddress}) to ${receiver}`
+      `Withdrawing ${amount} ${token.toUpperCase()} from ${account.title} (${account.walletAddress}) to ${receiver}`,
     );
 
-    /* Transfer USDT */
-    const connectedToken = usdtToken.connect(wallet) as UsdtTokenContract;
-    const tx = await connectedToken.transfer(
-      receiver,
-      ethers.parseUnits(amount, USDT_DECIMALS),
-      {
-        gasLimit: GAS_LIMITS_TRANSFER["fast"],
+    if (token === "bnb") {
+      /* Native BNB Transfer */
+      const tx = await wallet.sendTransaction({
+        to: receiver,
+        value: ethers.parseEther(amount),
         gasPrice: BASE_GAS_PRICE,
-      }
-    );
+        gasLimit: GAS_LIMIT_NATIVE,
+      });
 
-    /* Wait for confirmation */
-    const result = await tx.wait();
-    console.log(
-      `Withdrawal successful for ${account.title} (${account.walletAddress}):`,
-      result
-    );
+      const result = await tx.wait();
+      console.log(
+        `BNB Withdrawal successful for ${account.title} (${account.walletAddress}):`,
+        result,
+      );
 
-    return result;
+      return result;
+    } else {
+      /* USDT Token Transfer */
+      const usdtToken = reader.getUsdtTokenContract();
+      const connectedToken = usdtToken.connect(wallet) as UsdtTokenContract;
+      const tx = await connectedToken.transfer(
+        receiver,
+        ethers.parseUnits(amount, USDT_DECIMALS),
+        {
+          gasLimit: GAS_LIMITS_TRANSFER["fast"],
+          gasPrice: BASE_GAS_PRICE,
+        },
+      );
+
+      const result = await tx.wait();
+      console.log(
+        `USDT Withdrawal successful for ${account.title} (${account.walletAddress}):`,
+        result,
+      );
+
+      return result;
+    }
   };
 
   /**
@@ -114,13 +153,15 @@ const useWithdrawalMutation = () => {
   const processWithdrawal = async (
     account: Account,
     receiver: string,
-    requestedAmount?: string
+    token: "bnb" | "usdt",
+    requestedAmount?: string,
   ): Promise<WithdrawalResult> => {
     try {
       /* Determine amount */
       const withdrawalInfo = await determineWithdrawalAmount(
         account,
-        requestedAmount
+        token,
+        requestedAmount,
       );
 
       /* Skip if insufficient balance */
@@ -136,7 +177,8 @@ const useWithdrawalMutation = () => {
       const result = await executeWithdrawal(
         account,
         receiver,
-        withdrawalInfo.amount
+        token,
+        withdrawalInfo.amount,
       );
 
       return {
@@ -148,7 +190,7 @@ const useWithdrawalMutation = () => {
     } catch (error) {
       console.error(
         `Failed to send from account ${account.title} (${account.walletAddress}):`,
-        error
+        error,
       );
 
       return {
@@ -165,18 +207,24 @@ const useWithdrawalMutation = () => {
   const processWithdrawalsInChunks = async (
     accounts: Account[],
     receiver: string,
+    token: "bnb" | "usdt",
     amount?: string,
-    chunkSize: number = 10
+    chunkSize: number = 10,
   ): Promise<WithdrawalResult[]> => {
     const results: WithdrawalResult[] = [];
 
     for (const chunk of chunkArrayGenerator(accounts, chunkSize)) {
       const chunkResults = await Promise.all(
         chunk.map(async (account) => {
-          const result = await processWithdrawal(account, receiver, amount);
+          const result = await processWithdrawal(
+            account,
+            receiver,
+            token,
+            amount,
+          );
           incrementProgress();
           return result;
-        })
+        }),
       );
 
       results.push(...chunkResults);
@@ -190,7 +238,7 @@ const useWithdrawalMutation = () => {
    */
   const calculateStats = (results: WithdrawalResult[]): WithdrawalStats => {
     const successfulSends = results.filter(
-      (r) => r.status && !r.skipped
+      (r) => r.status && !r.skipped,
     ).length;
     const totalSentValue = results
       .filter((r) => r.status && r.amount)
@@ -213,7 +261,8 @@ const useWithdrawalMutation = () => {
       const results = await processWithdrawalsInChunks(
         data.accounts,
         data.address,
-        data.amount
+        data.token,
+        data.amount,
       );
 
       /* Calculate statistics */
