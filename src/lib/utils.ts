@@ -19,9 +19,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(...inputs));
 }
 
-export function copyToClipboard(content: string) {
+export function copyToClipboard(
+  content: string,
+  message = "Copied to clipboard!",
+) {
   copy(content);
-  toast.success("Copied to clipboard!");
+  toast.success(message);
 }
 
 export function getWalletAddressFromPrivateKey(privateKey: string) {
@@ -41,7 +44,7 @@ export function getLocalStorageKeyForAccountPrivateKey(accountId: string) {
 export async function getPrivateKey(accountId: string, password: string) {
   /* Get encrypted private key from localStorage */
   const encryptedPrivateKeyString = localStorage.getItem(
-    getLocalStorageKeyForAccountPrivateKey(accountId)
+    getLocalStorageKeyForAccountPrivateKey(accountId),
   );
 
   if (!encryptedPrivateKeyString) {
@@ -50,7 +53,7 @@ export async function getPrivateKey(accountId: string, password: string) {
 
   /* Parse encrypted data */
   const encryptedData = JSON.parse(
-    encryptedPrivateKeyString
+    encryptedPrivateKeyString,
   ) as EncryptionResult;
 
   /* Decrypt private key */
@@ -133,7 +136,7 @@ export function getBackupData() {
       privateKeys: accounts.map((account) => ({
         accountId: account.id,
         privateKey: localStorage.getItem(
-          getLocalStorageKeyForAccountPrivateKey(account.id)
+          getLocalStorageKeyForAccountPrivateKey(account.id),
         ),
       })),
     },
@@ -165,7 +168,7 @@ export async function restoreBackupData(data: BackupData["data"]) {
     if (privateKey) {
       localStorage.setItem(
         getLocalStorageKeyForAccountPrivateKey(accountId),
-        privateKey
+        privateKey,
       );
     }
   });
@@ -185,7 +188,7 @@ export function truncateAddress(address: string, length = 6) {
 export function truncateDecimals(
   value: Decimal.Value,
   decimals: number = 8,
-  fixed: boolean = false
+  fixed: boolean = false,
 ): string {
   if (fixed) {
     return new Decimal(value).toFixed(decimals, Decimal.ROUND_DOWN);
@@ -199,7 +202,7 @@ export function truncateDecimals(
 /** Format number as currency string */
 export function formatCurrency(
   value: Decimal.Value,
-  decimals: number = 2
+  decimals: number = 2,
 ): string {
   return Intl.NumberFormat("en-US", {
     style: "currency",
@@ -217,7 +220,7 @@ interface DelayOptions {
 
 export function delay(
   length: number,
-  { precised = false, signal }: DelayOptions = {}
+  { precised = false, signal }: DelayOptions = {},
 ) {
   return new Promise((resolve, reject) => {
     const duration = precised

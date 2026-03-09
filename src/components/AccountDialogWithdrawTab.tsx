@@ -26,6 +26,9 @@ const AccountDialogWithdrawTab = ({ account }: { account: Account }) => {
 
     /* Show Summary Alert */
     toast.success(`Successfully sent $${totalSentValue}.`);
+
+    /* Reset Form */
+    form.reset();
   };
 
   return (

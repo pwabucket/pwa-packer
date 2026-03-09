@@ -48,6 +48,9 @@ const AccountDialogSendTab = ({ account }: { account: Account }) => {
 
     /* Show Summary Alert */
     toast.success("Transfer Submitted Successfully.");
+
+    /* Reset Form */
+    sendForm.form.reset();
   };
 
   return (
