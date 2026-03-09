@@ -197,7 +197,8 @@ const AccountWebview = ({
   return (
     <PopupDialog
       onInteractOutside={(ev) => ev.preventDefault()}
-      className="p-0 h-full max-h-192 overflow-hidden gap-0"
+      containerClassName="h-full max-h-192"
+      className="p-0 h-full overflow-hidden gap-0"
     >
       <AccountHeader
         isOpened={showAside}

@@ -15,7 +15,10 @@ interface ParcelDialogProps extends Dialog.DialogProps {
 const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
   return (
     <Dialog.Root {...props}>
-      <PopupDialog className="p-0 h-full max-h-192 overflow-hidden gap-0 max-w-md">
+      <PopupDialog
+        containerClassName="h-full max-h-192"
+        className="p-0 h-full overflow-hidden gap-0 max-w-md"
+      >
         {/* Header */}
         <div className="flex gap-2 items-center justify-center shrink-0 p-2">
           <div className="size-10 shrink-0" />

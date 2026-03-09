@@ -1,16 +1,31 @@
 import { Dialog } from "radix-ui";
 import { cn } from "../lib/utils";
 
-const PopupDialog = (props: Dialog.DialogContentProps) => {
+interface PopupDialogProps extends Dialog.DialogContentProps {
+  overlayClassName?: string;
+  containerClassName?: string;
+}
+
+const PopupDialog = ({
+  overlayClassName,
+  containerClassName,
+  ...props
+}: PopupDialogProps) => {
   return (
     <Dialog.Portal>
       <Dialog.Overlay
         className={cn(
           "flex flex-col fixed inset-0 bg-black/50",
           "overflow-auto z-30",
+          overlayClassName,
         )}
       >
-        <div className="w-full max-w-md p-4 m-auto">
+        <div
+          className={cn(
+            "w-full max-w-md p-4 m-auto flex flex-col max-h-full",
+            containerClassName,
+          )}
+        >
           <Dialog.Content
             onOpenAutoFocus={(ev) => ev.preventDefault()}
             {...props}
