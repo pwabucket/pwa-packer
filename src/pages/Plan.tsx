@@ -1,13 +1,14 @@
-import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { Tabs } from "radix-ui";
-import { PlanCreator } from "../components/PlanCreator";
-import { TabTrigger } from "../components/TabTrigger";
-import { PlanValidator } from "../components/PlanValidator";
-import { PlanSender } from "../components/PlanSender";
 import { useCallback, useState } from "react";
+
+import { InnerPageLayout } from "../layouts/InnerPageLayout";
+import { PlanCreator } from "../components/PlanCreator";
 import type { PlanFileContent } from "../types";
 import { PlanImport } from "../components/PlanImport";
 import { PlanPacker } from "../components/PlanPacker";
+import { PlanSender } from "../components/PlanSender";
+import { PlanValidator } from "../components/PlanValidator";
+import { TabTrigger } from "../components/TabTrigger";
+import { Tabs } from "radix-ui";
 
 /** Plan Page Component */
 const Plan = () => {
@@ -16,7 +17,7 @@ const Plan = () => {
   const onImport = useCallback((data: PlanFileContent) => setPlan(data), []);
 
   return (
-    <InnerPageLayout title="Plan" className="gap-4" wrapperClassName="pt-0">
+    <InnerPageLayout title="Plan" className="gap-4 pt-0">
       <Tabs.Root defaultValue="create" className="flex flex-col gap-4">
         <Tabs.List className="grid grid-cols-4 shrink-0">
           <TabTrigger value="create" title="Create" />
