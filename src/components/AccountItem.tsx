@@ -1,16 +1,16 @@
-import type { Account } from "../types";
 import { MdEditNote, MdOutlineAccountBalanceWallet } from "react-icons/md";
-
-import { Dialog } from "radix-ui";
-import { AccountDetailsDialog } from "../components/AccountDialog";
-import { cn, truncateAddress } from "../lib/utils";
-import { AccountBalance } from "./AccountBalance";
 import { Reorder, useDragControls } from "motion/react";
-import { useCallback } from "react";
-import { AccountWebview } from "./AccountWebview";
+import { cn, truncateAddress } from "../lib/utils";
+
+import type { Account } from "../types";
 import { AccountAvatar } from "./AccountAvatar";
+import { AccountBalance } from "./AccountBalance";
+import { AccountDetailsDialog } from "../components/AccountDialog";
 import { AccountEditDialog } from "./AccountEditDialog";
+import { AccountWebview } from "./AccountWebview";
+import { Dialog } from "radix-ui";
 import { useAccountsToggle } from "../hooks/useAccountsToggle";
+import { useCallback } from "react";
 
 const AccountActionButton = (props: React.ComponentProps<"button">) => {
   return (
@@ -21,7 +21,7 @@ const AccountActionButton = (props: React.ComponentProps<"button">) => {
         "hover:bg-neutral-700 rounded-full",
         "text-neutral-400 hover:text-yellow-500",
         "transition-colors duration-200",
-        props.className
+        props.className,
       )}
     />
   );
@@ -33,11 +33,11 @@ const AccountItem = ({ account }: { account: Account }) => {
 
   const [showAccountWebview, toggleShowAccountWebview] = useAccountsToggle(
     account,
-    "webview"
+    "webview",
   );
   const [showAccountDetails, toggleShowAccountDetails] = useAccountsToggle(
     account,
-    "details"
+    "details",
   );
 
   const [showEditForm, toggleShowEditForm] = useAccountsToggle(account, "edit");
@@ -68,7 +68,7 @@ const AccountItem = ({ account }: { account: Account }) => {
               "group relative",
               "bg-neutral-900",
               "rounded-4xl overflow-hidden",
-              "transition-all duration-200 ease-in-out"
+              "transition-all duration-200 ease-in-out",
             )}
           >
             {/* Main Content Area */}
@@ -127,7 +127,7 @@ const AccountItem = ({ account }: { account: Account }) => {
               className={cn(
                 "absolute bottom-0 left-0 right-0 h-0.5",
                 "invisible group-hover:visible",
-                "bg-yellow-500/30"
+                "bg-yellow-500/30",
               )}
             />
           </div>

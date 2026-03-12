@@ -16,6 +16,8 @@ import { MdOutlineArrowBackIos } from "react-icons/md";
 import { PopupDialog } from "./PopupDialog";
 import { TabTrigger } from "./TabTrigger";
 import { cn } from "../lib/utils";
+import { useAccountsContext } from "../hooks/useAccountsContext";
+import useLocationIndexUpdater from "../hooks/useLocationIndexUpdater";
 import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface AccountWebviewProps {
@@ -189,10 +191,14 @@ const AccountWebview = ({
   account,
   enableSwitcher = true,
 }: AccountWebviewProps) => {
+  const { group } = useAccountsContext();
   const [showAside, setShowAside] = useState(false);
   const toggleAside = useCallback(() => {
     setShowAside((prev) => !prev);
   }, []);
+
+  /* Set unique location index for this webview to enable proper back navigation */
+  useLocationIndexUpdater(`${group}-webview`);
 
   return (
     <PopupDialog

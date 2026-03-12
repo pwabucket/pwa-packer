@@ -1,32 +1,23 @@
 import { useCallback, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { type NavigateOptions } from "react-router";
+import useLocationState from "./useLocationState";
 
 export default function useLocationToggle(
-  key: string
-): [boolean, (status: boolean) => void] {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const show = location.state?.[key] === true;
+  key: string,
+  indexKey?: string,
+): [boolean, (status: boolean, options?: NavigateOptions) => void] {
+  const [show, setShow] = useLocationState(key, false, indexKey);
 
-  /** Toggle Location State */
+  /** Toggle Location */
   const toggle = useCallback(
-    (status: boolean) => {
+    (status: boolean, options?: NavigateOptions) => {
       if (status) {
-        navigate(location, {
-          state: {
-            ...location.state,
-            [key]: true,
-          },
-        });
+        setShow(true, options);
       } else {
-        if (location.key !== "default") {
-          navigate(-1);
-        } else {
-          navigate("/", { replace: true });
-        }
+        setShow(undefined);
       }
     },
-    [key, navigate, location]
+    [key, setShow],
   );
 
   return useMemo(() => [show, toggle], [show, toggle]);
