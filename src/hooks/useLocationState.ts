@@ -13,7 +13,7 @@ export default function useLocationState<T>(
   const value =
     typeof valueFromState !== "undefined" ? valueFromState : defaultValue;
 
-  /* Ensure location has an index if value is from state */
+  /* Get location index from state */
   const index = useLocationIndex(indexKey);
 
   /** Set value */
