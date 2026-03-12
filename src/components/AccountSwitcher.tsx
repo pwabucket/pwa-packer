@@ -1,5 +1,6 @@
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router";
+
 import type { Account } from "../types";
 import { cn } from "../lib/utils";
 import { useAccountsContext } from "../hooks/useAccountsContext";
@@ -12,7 +13,7 @@ const AccountSwitcherButton = (props: React.ComponentProps<"button">) => {
         "size-10 shrink-0 rounded-full",
         "flex items-center justify-center gap-2",
         "border border-neutral-700 cursor-pointer",
-        "hover:bg-yellow-500 hover:text-black transition-colors"
+        "hover:bg-yellow-500 hover:text-black transition-colors",
       )}
     />
   );
@@ -36,6 +37,8 @@ const AccountSwitcher = ({
         ? (currentIndex + 1) % accounts.length
         : (currentIndex - 1 + accounts.length) % accounts.length;
     const newAccount = accounts[newIndex];
+
+    if (newAccount.id === account.id) return;
 
     const newState = {
       ...location.state,

@@ -22,6 +22,7 @@ import { Withdraw } from "./pages/Withdraw";
 import { useAppStore } from "./store/useAppStore";
 import { useInactivity } from "./hooks/useInactivity";
 import { useIsMutating } from "@tanstack/react-query";
+import { usePWARouting } from "@pwabucket/pwa-router";
 import { usePendingActivity } from "./hooks/usePendingActivity";
 import { useWakeLock } from "./hooks/useWakeLock";
 
@@ -30,6 +31,7 @@ const INACTIVITY_DURATION = 2 * 60 * 1000;
 function App() {
   const isProcessing = useAppStore((state) => state.isProcessing);
   const isMutating = useIsMutating();
+  const { resolvedLocation } = usePWARouting();
 
   /* Wake Lock Hook */
   useWakeLock(isProcessing);
@@ -42,7 +44,7 @@ function App() {
 
   return (
     <>
-      <Routes>
+      <Routes location={resolvedLocation}>
         <Route index element={<Welcome />} />
         <Route path="restore" element={<Restore />} />
 

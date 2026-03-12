@@ -27,8 +27,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@pwabucket/pwa-router':
-        specifier: ^0.0.11
-        version: 0.0.11(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        specifier: ^0.0.14
+        version: 0.0.14(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@scure/base':
         specifier: ^2.0.0
         version: 2.0.0
@@ -1221,8 +1221,8 @@ packages:
     resolution: {integrity: sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw==}
     engines: {node: '>= 20.19.0'}
 
-  '@pwabucket/pwa-router@0.0.11':
-    resolution: {integrity: sha512-wTFboDMJIJC3snkyoWYw97xja8yOhPhHvfTz2bB/xV3kPICBlJKvwQoxhvtORbRYqIpLMkIqkkN/8BDPQpwmvw==}
+  '@pwabucket/pwa-router@0.0.14':
+    resolution: {integrity: sha512-jNi4237OtY8Ph6adUUgIxr7+sRD7+0CXHyxFriiQp9NAsuVTt3mPmocqiK9RHwD6cBAMhZkwzpBZkrYEtTORGQ==}
     peerDependencies:
       react: ^18 || ^19
       react-router: ^7
@@ -5229,7 +5229,7 @@ snapshots:
 
   '@noble/hashes@2.0.1': {}
 
-  '@pwabucket/pwa-router@0.0.11(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
+  '@pwabucket/pwa-router@0.0.14(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     dependencies:
       react: 19.2.4
       react-router: 7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
