@@ -29,7 +29,7 @@ import { Reorder } from "motion/react";
 import { TotalBalanceCard } from "../components/TotalBalanceCard";
 import { useAppStore } from "../store/useAppStore";
 import { useDebounce } from "react-use";
-import useLocationToggle from "../hooks/useLocationToggle";
+import { useLocationToggle } from "@pwabucket/pwa-router";
 
 /** Dashboard Page Component */
 const Dashboard = () => {

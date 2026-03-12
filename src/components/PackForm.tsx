@@ -1,24 +1,24 @@
-import { AccountsChooser } from "../components/AccountsChooser";
-import { Button } from "../components/Button";
-import { Progress } from "../components/Progress";
-import { toast } from "react-hot-toast";
-import { usePackMutation } from "../hooks/usePackMutation";
-import { HiOutlineCurrencyDollar } from "react-icons/hi2";
-import { Dialog } from "radix-ui";
-import { PackResults } from "../components/PackResults";
-import { Label } from "../components/Label";
-import { Slider } from "../components/Slider";
-import { usePendingActivity } from "../hooks/usePendingActivity";
-import { formatCurrency } from "../lib/utils";
-import useLocationToggle from "../hooks/useLocationToggle";
-import type { useAccountsSelector } from "../hooks/useAccountsSelector";
-import { LabelToggle } from "./LabelToggle";
-
 import * as yup from "yup";
+
 import { Controller, FormProvider, useForm } from "react-hook-form";
 
-import { yupResolver } from "@hookform/resolvers/yup";
+import { AccountsChooser } from "../components/AccountsChooser";
+import { Button } from "../components/Button";
+import { Dialog } from "radix-ui";
 import { FormFieldError } from "./FormFieldError";
+import { HiOutlineCurrencyDollar } from "react-icons/hi2";
+import { Label } from "../components/Label";
+import { LabelToggle } from "./LabelToggle";
+import { PackResults } from "../components/PackResults";
+import { Progress } from "../components/Progress";
+import { Slider } from "../components/Slider";
+import { formatCurrency } from "../lib/utils";
+import { toast } from "react-hot-toast";
+import type { useAccountsSelector } from "../hooks/useAccountsSelector";
+import { useLocationToggle } from "@pwabucket/pwa-router";
+import { usePackMutation } from "../hooks/usePackMutation";
+import { usePendingActivity } from "../hooks/usePendingActivity";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 interface PackFormProps {
   selector: ReturnType<typeof useAccountsSelector>;
@@ -42,7 +42,7 @@ const PackFormSchema = yup
 /** Pack Page Component */
 const PackForm = ({ selector }: PackFormProps) => {
   const [showResults, setShowResults] = useLocationToggle(
-    "pack-results-dialog"
+    "pack-results-dialog",
   );
 
   /** Form */
@@ -74,8 +74,8 @@ const PackForm = ({ selector }: PackFormProps) => {
     toast.success(
       `Packing completed! Total withdrawn: ${formatCurrency(
         totalWithdrawn,
-        3
-      )} USDT`
+        3,
+      )} USDT`,
     );
   };
 

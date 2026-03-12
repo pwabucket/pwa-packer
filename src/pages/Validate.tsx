@@ -1,21 +1,21 @@
-import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { AccountsChooser } from "../components/AccountsChooser";
 import { Button } from "../components/Button";
-import { useValidationMutation } from "../hooks/useValidationMutation";
-import { Progress } from "../components/Progress";
-import { toast } from "react-hot-toast";
 import { Dialog } from "radix-ui";
-import { ValidationResults } from "../components/ValidationResults";
+import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { MdSearch } from "react-icons/md";
-import { usePendingActivity } from "../hooks/usePendingActivity";
+import { Progress } from "../components/Progress";
+import { ValidationResults } from "../components/ValidationResults";
 import { formatCurrency } from "../lib/utils";
-import useLocationToggle from "../hooks/useLocationToggle";
+import { toast } from "react-hot-toast";
+import { useLocationToggle } from "@pwabucket/pwa-router";
+import { usePendingActivity } from "../hooks/usePendingActivity";
 import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
+import { useValidationMutation } from "../hooks/useValidationMutation";
 
 /** Validate Page Component */
 const Validate = () => {
   const [showResults, setShowResults] = useLocationToggle(
-    "validate-results-dialog"
+    "validate-results-dialog",
   );
   const selector = useProviderAccountsChooser();
   const { selectedAccounts } = selector;

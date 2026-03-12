@@ -1,29 +1,31 @@
-import BNBIcon from "../assets/bnb-bnb-logo.svg";
-import USDTIcon from "../assets/tether-usdt-logo.svg";
-import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { Button } from "../components/Button";
+import * as yup from "yup";
+
+import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE } from "../lib/transaction";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { getWalletAddressFromPrivateKey, truncateDecimals } from "../lib/utils";
+
+import { AccountsChooser } from "../components/AccountsChooser";
+import BNBIcon from "../assets/bnb-bnb-logo.svg";
+import { Button } from "../components/Button";
+import Decimal from "decimal.js";
+import { FormFieldError } from "../components/FormFieldError";
+import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Input } from "../components/Input";
 import { Label } from "../components/Label";
-import { FormFieldError } from "../components/FormFieldError";
-import { TextArea } from "../components/TextArea";
-import { getWalletAddressFromPrivateKey, truncateDecimals } from "../lib/utils";
-import { BASE_GAS_PRICE, GAS_LIMIT_NATIVE } from "../lib/transaction";
-import { ethers } from "ethers";
-import { useMutation } from "@tanstack/react-query";
-import * as yup from "yup";
-import { AccountsChooser } from "../components/AccountsChooser";
-import toast from "react-hot-toast";
-import { useProgress } from "../hooks/useProgress";
-import { Progress } from "../components/Progress";
 import { ParcelDialog } from "../components/ParcelDialog";
-import { usePendingActivity } from "../hooks/usePendingActivity";
+import { Progress } from "../components/Progress";
+import { TextArea } from "../components/TextArea";
 import { TokenButton } from "../components/TokenButton";
+import USDTIcon from "../assets/tether-usdt-logo.svg";
+import { ethers } from "ethers";
 import { launchParcel } from "../lib/parcel";
-import useLocationToggle from "../hooks/useLocationToggle";
-import Decimal from "decimal.js";
+import toast from "react-hot-toast";
+import { useLocationToggle } from "@pwabucket/pwa-router";
+import { useMutation } from "@tanstack/react-query";
+import { usePendingActivity } from "../hooks/usePendingActivity";
+import { useProgress } from "../hooks/useProgress";
 import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 /** Parse Amount to Smallest Unit */
 const parseToSmallUnit = (amount: Decimal) => {
@@ -40,7 +42,7 @@ const calculateRequiredBNB = (amount: string, accountCount: number) => {
 
     /* Convert to Ether */
     const gasAmountInEther = new Decimal(
-      ethers.formatEther(requiredSplitAmount)
+      ethers.formatEther(requiredSplitAmount),
     );
 
     /* Total Amount */
@@ -118,7 +120,7 @@ const Split = () => {
                 },
                 recipients: selectedAccounts.map((acc) => acc.walletAddress),
               },
-              { targetOrigin: event.origin }
+              { targetOrigin: event.origin },
             );
 
             resolve({ status: true });
@@ -205,7 +207,7 @@ const Split = () => {
                       Total BNB Required:{" "}
                       {calculateRequiredBNB(
                         field.value,
-                        selectedAccounts.length
+                        selectedAccounts.length,
                       )}
                     </p>
 
@@ -215,8 +217,8 @@ const Split = () => {
                       {selectedAccounts.length > 0
                         ? parseToSmallUnit(
                             new Decimal(field.value || 0).div(
-                              selectedAccounts.length
-                            )
+                              selectedAccounts.length,
+                            ),
                           )
                         : 0}{" "}
                       BNB

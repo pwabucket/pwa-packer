@@ -7,7 +7,7 @@ import { PROVIDER_NAMES } from "../lib/providers";
 import { PopupDialog } from "./PopupDialog";
 import { cn } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
-import useLocationToggle from "../hooks/useLocationToggle";
+import { useLocationToggle } from "@pwabucket/pwa-router";
 import { useMemo } from "react";
 
 interface ProviderOptionProps extends Dialog.DialogCloseProps {

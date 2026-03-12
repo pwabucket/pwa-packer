@@ -1,5 +1,6 @@
 import { Dialog, Tabs } from "radix-ui";
 import { useCallback, useState } from "react";
+import { useLocationIndexUpdater } from "@pwabucket/pwa-router";
 
 import type { Account } from "../types";
 import { AccountAddresses } from "./AccountAddresses";
@@ -17,7 +18,6 @@ import { PopupDialog } from "./PopupDialog";
 import { TabTrigger } from "./TabTrigger";
 import { cn } from "../lib/utils";
 import { useAccountsContext } from "../hooks/useAccountsContext";
-import useLocationIndexUpdater from "../hooks/useLocationIndexUpdater";
 import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface AccountWebviewProps {
@@ -187,25 +187,18 @@ const AccountHeader = ({
   );
 };
 
-const AccountWebview = ({
-  account,
-  enableSwitcher = true,
-}: AccountWebviewProps) => {
+const WebviewContent = ({ account }: { account: Account }) => {
   const { group } = useAccountsContext();
   const [showAside, setShowAside] = useState(false);
   const toggleAside = useCallback(() => {
     setShowAside((prev) => !prev);
   }, []);
 
-  /* Set unique location index for this webview to enable proper back navigation */
+  /* Update location index */
   useLocationIndexUpdater(`${group}-webview`);
 
   return (
-    <PopupDialog
-      onInteractOutside={(ev) => ev.preventDefault()}
-      containerClassName="h-full max-h-192"
-      className="p-0 h-full overflow-hidden gap-0"
-    >
+    <>
       <AccountHeader
         isOpened={showAside}
         account={account}
@@ -223,7 +216,21 @@ const AccountWebview = ({
           <WebviewAside account={account} />
         </div>
       </div>
+    </>
+  );
+};
 
+const AccountWebview = ({
+  account,
+  enableSwitcher = true,
+}: AccountWebviewProps) => {
+  return (
+    <PopupDialog
+      onInteractOutside={(ev) => ev.preventDefault()}
+      containerClassName="h-full max-h-192"
+      className="p-0 h-full overflow-hidden gap-0"
+    >
+      <WebviewContent account={account} />
       {enableSwitcher && (
         <AccountSwitcher account={account} switchKey="webview" />
       )}

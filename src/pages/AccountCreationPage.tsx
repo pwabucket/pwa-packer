@@ -1,7 +1,6 @@
 import { InnerPageLayout } from "../layouts/InnerPageLayout";
-
-import { useNavigateBack } from "../hooks/useNavigateBack";
 import { NewAccountForm } from "../components/NewAccountForm";
+import { useNavigateBack } from "@pwabucket/pwa-router";
 
 /** Account Creation Page Component */
 const AccountCreationPage = () => {

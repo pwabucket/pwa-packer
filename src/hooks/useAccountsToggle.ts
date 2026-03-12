@@ -1,6 +1,6 @@
 import type { Account } from "../types";
 import { useAccountsContext } from "./useAccountsContext";
-import useLocationToggle from "./useLocationToggle";
+import { useLocationToggle } from "@pwabucket/pwa-router";
 
 const useAccountsToggle = (account: Account, toggleKey: string) => {
   const { group } = useAccountsContext();

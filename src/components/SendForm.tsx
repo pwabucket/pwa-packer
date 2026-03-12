@@ -1,16 +1,17 @@
-import { FormProvider } from "react-hook-form";
-import type { useAccountsSelector } from "../hooks/useAccountsSelector";
 import type { SendFormData, useSendForm } from "../hooks/useSendForm";
-import type { useSendMutation } from "../hooks/useSendMutation";
-import { Dialog } from "radix-ui";
-import useLocationToggle from "../hooks/useLocationToggle";
+
+import { AccountsChooser } from "./AccountsChooser";
 import { Button } from "./Button";
+import { Dialog } from "radix-ui";
+import { FormProvider } from "react-hook-form";
+import { Progress } from "./Progress";
+import { SendFormFields } from "./SendFormFields";
 import { SendResults } from "../pages/SendResults";
 import { formatCurrency } from "../lib/utils";
-import { SendFormFields } from "./SendFormFields";
-import { Progress } from "./Progress";
-import { AccountsChooser } from "./AccountsChooser";
+import type { useAccountsSelector } from "../hooks/useAccountsSelector";
+import { useLocationToggle } from "@pwabucket/pwa-router";
 import { usePendingActivity } from "../hooks/usePendingActivity";
+import type { useSendMutation } from "../hooks/useSendMutation";
 
 interface SendFormProps {
   handleFormSubmit: (data: SendFormData) => void;
@@ -40,7 +41,7 @@ const SendForm = ({
   showRefill,
 }: SendFormProps) => {
   const [showResults, setShowResults] = useLocationToggle(
-    "send-results-dialog"
+    "send-results-dialog",
   );
 
   /** Prevent auto-logout when viewing results */
@@ -68,7 +69,7 @@ const SendForm = ({
               Total Amount:{" "}
               {formatCurrency(
                 sendMutation.mutation.data?.totalAmountSent || 0,
-                3
+                3,
               )}{" "}
               USDT
             </p>

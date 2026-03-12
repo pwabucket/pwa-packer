@@ -1,24 +1,26 @@
-import { InnerPageLayout } from "../layouts/InnerPageLayout";
-import { Button } from "../components/Button";
+import * as yup from "yup";
+
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { getPrivateKey, getWalletAddressFromPrivateKey } from "../lib/utils";
+
+import { AccountsChooser } from "../components/AccountsChooser";
+import { Button } from "../components/Button";
+import { FormFieldError } from "../components/FormFieldError";
+import { InnerPageLayout } from "../layouts/InnerPageLayout";
 import { Input } from "../components/Input";
 import { Label } from "../components/Label";
-import { FormFieldError } from "../components/FormFieldError";
-import { getPrivateKey, getWalletAddressFromPrivateKey } from "../lib/utils";
-import { useMutation } from "@tanstack/react-query";
-import * as yup from "yup";
-import { AccountsChooser } from "../components/AccountsChooser";
-import toast from "react-hot-toast";
-import { useProgress } from "../hooks/useProgress";
-import { Progress } from "../components/Progress";
 import { ParcelDialog } from "../components/ParcelDialog";
-import { usePendingActivity } from "../hooks/usePendingActivity";
+import { Progress } from "../components/Progress";
 import { TokenButton } from "../components/TokenButton";
-import { usePassword } from "../hooks/usePassword";
 import { launchParcel } from "../lib/parcel";
-import useLocationToggle from "../hooks/useLocationToggle";
+import toast from "react-hot-toast";
+import { useLocationToggle } from "@pwabucket/pwa-router";
+import { useMutation } from "@tanstack/react-query";
+import { usePassword } from "../hooks/usePassword";
+import { usePendingActivity } from "../hooks/usePendingActivity";
+import { useProgress } from "../hooks/useProgress";
 import { useProviderAccountsChooser } from "../hooks/useProviderAccountsChooser";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 /** Merge Form Schema */
 const MergeFormSchema = yup
@@ -91,7 +93,7 @@ const Merge = () => {
             address,
             privateKey,
           };
-        })
+        }),
       );
 
       const result = await new Promise((resolve) => {
@@ -106,7 +108,7 @@ const Merge = () => {
                 receiver: data.address,
                 senders,
               },
-              { targetOrigin: event.origin }
+              { targetOrigin: event.origin },
             );
 
             resolve({ status: true });
