@@ -51,7 +51,10 @@ const Merge = () => {
     useProgress();
   const { selectedAccounts } = accountsChooser;
 
-  const [showIframe, setShowIframe] = useLocationToggle("merge-iframe-dialog");
+  const [showIframe, setShowIframe] = useLocationToggle(
+    "merge-iframe-dialog",
+    "parcel",
+  );
 
   /** Form */
   const form = useForm<MergeFormData>({

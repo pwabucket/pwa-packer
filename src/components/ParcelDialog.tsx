@@ -3,6 +3,7 @@ import { HiOutlineXMark } from "react-icons/hi2";
 import ParcelIcon from "../assets/parcel-icon.svg";
 import { PopupDialog } from "./PopupDialog";
 import { cn } from "../lib/utils";
+import { useLocationIndexUpdater } from "@pwabucket/pwa-router";
 
 /** Parcel URL from Environment Variables */
 const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
@@ -10,6 +11,17 @@ const PARCEL_URL = import.meta.env.VITE_PARCEL_URL;
 interface ParcelDialogProps extends Dialog.DialogProps {
   path: string;
 }
+
+const ParcelApp = ({ path }: { path: string }) => {
+  useLocationIndexUpdater("parcel");
+  return (
+    <iframe
+      src={new URL(path, PARCEL_URL).href}
+      title="Parcel"
+      className="border-0 grow min-w-0 min-h-0"
+    ></iframe>
+  );
+};
 
 /** Parcel Dialog Component */
 const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
@@ -50,11 +62,7 @@ const ParcelDialog = ({ path, ...props }: ParcelDialogProps) => {
         </div>
 
         {/* Iframe */}
-        <iframe
-          src={new URL(path, PARCEL_URL).href}
-          title="Parcel"
-          className="border-0 grow min-w-0 min-h-0"
-        ></iframe>
+        <ParcelApp path={path} />
       </PopupDialog>
     </Dialog.Root>
   );

@@ -77,7 +77,10 @@ const Split = () => {
   const { target, progress, resetProgress } = useProgress();
   const accountsChooser = useProviderAccountsChooser();
   const { selectedAccounts } = accountsChooser;
-  const [showIframe, setShowIframe] = useLocationToggle("split-iframe-dialog");
+  const [showIframe, setShowIframe] = useLocationToggle(
+    "split-iframe-dialog",
+    "parcel",
+  );
 
   /** Form */
   const form = useForm<SplitFormData>({
