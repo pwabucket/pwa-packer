@@ -1,12 +1,12 @@
 import { Dialog, Tabs } from "radix-ui";
 import { useCallback, useState } from "react";
-import { useLocationIndexUpdater } from "@pwabucket/pwa-router";
 
 import type { Account } from "../types";
 import { AccountAddresses } from "./AccountAddresses";
 import { AccountAvatar } from "./AccountAvatar";
 import { AccountBalance } from "./AccountBalance";
 import { AccountDialogHistoryTab } from "./AccountDialogHistoryTab";
+import { AccountDialogRaidTab } from "./AccountDialogRaidTab";
 import { AccountDialogSendTab } from "./AccountDialogSendTab";
 import { AccountDialogSwapTab } from "./AccountDialogSwapTab";
 import { AccountDialogWithdrawTab } from "./AccountDialogWithdrawTab";
@@ -18,6 +18,7 @@ import { PopupDialog } from "./PopupDialog";
 import { TabTrigger } from "./TabTrigger";
 import { cn } from "../lib/utils";
 import { useAccountsContext } from "../hooks/useAccountsContext";
+import { useLocationIndexUpdater } from "@pwabucket/pwa-router";
 import { usePackerProvider } from "../hooks/usePackerProvider";
 
 interface AccountWebviewProps {
@@ -103,10 +104,11 @@ const WebviewAside = ({ account }: { account: Account }) => {
       defaultValue="send"
       className="flex flex-col size-full overflow-hidden"
     >
-      <Tabs.List className="grid grid-cols-4 shrink-0">
+      <Tabs.List className="grid grid-cols-5 shrink-0">
         <WebviewAsideTabTrigger title="Send" value="send" />
         <WebviewAsideTabTrigger title="Withdraw" value="withdraw" />
         <WebviewAsideTabTrigger title="Swap" value="swap" />
+        <WebviewAsideTabTrigger title="Raid" value="raid" />
         <WebviewAsideTabTrigger title="History" value="history" />
       </Tabs.List>
 
@@ -121,6 +123,10 @@ const WebviewAside = ({ account }: { account: Account }) => {
         <Tabs.Content value="swap">
           <AccountDialogSwapTab account={account} />
         </Tabs.Content>
+        <Tabs.Content value="raid">
+          <AccountDialogRaidTab account={account} />
+        </Tabs.Content>
+
         <Tabs.Content value="history">
           <AccountDialogHistoryTab account={account} />
         </Tabs.Content>

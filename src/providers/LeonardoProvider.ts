@@ -5,6 +5,7 @@ import type {
   WithdrawalInfo,
   WithdrawalResult,
 } from "../types";
+
 import { BaseTelegramProvider } from "./BaseTelegramProvider";
 
 class LeonardoProvider
@@ -67,14 +68,15 @@ class LeonardoProvider
 
         /* Find Script Tag with type="module" and src containing "index" */
         const scriptTag = [...doc.scripts].find(
-          (s) => s.type === "module" && s.getAttribute("src")?.includes("index")
+          (s) =>
+            s.type === "module" && s.getAttribute("src")?.includes("index"),
         );
 
         if (scriptTag) {
           /* Construct Script URL */
           const scriptUrl = new URL(
             scriptTag.getAttribute("src") || "",
-            origin
+            origin,
           );
 
           /* Fetch Script Content */
@@ -84,7 +86,7 @@ class LeonardoProvider
 
           /* Extract Custom Header from Script Content */
           const customHeader = scriptContent.match(
-            /headers\.custom\s*=\s*["']([^"']+)["']/
+            /headers\.custom\s*=\s*["']([^"']+)["']/,
           );
 
           /* Set Custom Header if Found */
@@ -153,6 +155,11 @@ class LeonardoProvider
         ["tg_id"]: this.getTgId(),
       })
       .then((res) => res.data.data);
+  }
+
+  /** Raid */
+  raid(): Promise<void> {
+    return this.refreshActivity();
   }
 
   /* Get Activity Wallet */

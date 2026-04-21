@@ -1,4 +1,3 @@
-import Decimal from "decimal.js";
 import type {
   PackerProviderInstance,
   ParticipationResult,
@@ -6,8 +5,10 @@ import type {
   WithdrawalInfo,
   WithdrawalResult,
 } from "../types";
+import { addWeeks, isAfter, setHours, startOfWeek } from "date-fns";
+
 import { BaseTelegramProvider } from "./BaseTelegramProvider";
-import { addWeeks, isAfter, startOfWeek, setHours } from "date-fns";
+import Decimal from "decimal.js";
 
 class DaVinciProvider
   extends BaseTelegramProvider
@@ -156,10 +157,10 @@ class DaVinciProvider
           item.status === "confirmed"
             ? "success"
             : item.status === "pending"
-            ? "pending"
-            : "failed",
+              ? "pending"
+              : "failed",
         hash: item.txHash || null,
-      })
+      }),
     );
   }
 
@@ -183,6 +184,8 @@ class DaVinciProvider
     await this.initiateWithdrawal(address);
     return { status: "success" };
   }
+
+  async raid() {}
 
   static getPageUrl(_page: string, url: string): string {
     return url;

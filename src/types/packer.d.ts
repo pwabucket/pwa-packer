@@ -39,6 +39,7 @@ export interface PackerProviderInstance {
   getAccountInfo(): Promise<Record<string, unknown>>;
   getParticipation(): Promise<ParticipationResult>;
   confirmParticipation(): Promise<ParticipationResult>;
+  raid(): Promise<void>;
 }
 
 export interface PackerProvider {

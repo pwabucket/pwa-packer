@@ -4,6 +4,7 @@ import type {
   WithdrawalInfo,
   WithdrawalResult,
 } from "../types";
+
 import { BaseProvider } from "./BaseProvider";
 
 class DefaultProvider extends BaseProvider implements PackerProviderInstance {
@@ -63,6 +64,8 @@ class DefaultProvider extends BaseProvider implements PackerProviderInstance {
   async processWithdrawal(_address: string): Promise<WithdrawalResult> {
     return { status: "success" };
   }
+
+  async raid() {}
 
   static getPageUrl(_page: string, url: string): string {
     return url;
